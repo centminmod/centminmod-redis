@@ -40,12 +40,16 @@ genredis() {
         if [ ! -f "/usr/lib/systemd/system/redis${REDISPORT}.service" ]; then
           echo "create systemd redis${REDISPORT}.service"
           echo "cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis${REDISPORT}.service"
+        else
+          echo "/usr/lib/systemd/system/redis${REDISPORT}.service already exists"
         fi
         if [ ! -f "/etc/redis${REDISPORT}.conf" ]; then
           echo "create /etc/redis${REDISPORT}.conf config file"
           echo "cp -a /etc/redis.conf /etc/redis${REDISPORT}.conf"
+        else
+          echo "/etc/redis${REDISPORT}.conf already exists"
         fi
-        if [[ -f "/etc/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]] || [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        if [[ -f "/etc/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]] || [[ "$DEBUG_REDISGEN" = [yY] && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]]; then
           echo "sed -i \"s|^port 6379|port $REDISPORT|\" "/etc/redis${REDISPORT}.conf""
           echo "sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}.conf""
           echo "sed -i \"s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|\" "/etc/redis${REDISPORT}.conf""
@@ -64,11 +68,15 @@ genredis() {
           echo "create systemd redis${REDISPORT}.service"
           echo "cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis${REDISPORT}.service"
           cp -a /usr/lib/systemd/system/redis.service "/usr/lib/systemd/system/redis${REDISPORT}.service"
+        else
+          echo "/usr/lib/systemd/system/redis${REDISPORT}.service already exists"
         fi
         if [ ! -f "/etc/redis${REDISPORT}.conf" ]; then
           echo "create /etc/redis${REDISPORT}.conf config file"
           echo "cp -a /etc/redis.conf /etc/redis${REDISPORT}.conf"
           cp -a /etc/redis.conf "/etc/redis${REDISPORT}.conf"
+        else
+          echo "/etc/redis${REDISPORT}.conf already exists"
         fi
         ls -lah "/usr/lib/systemd/system/redis${REDISPORT}.service" "/etc/redis${REDISPORT}.conf"
         if [[ -f "/etc/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]]; then
