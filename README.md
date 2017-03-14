@@ -57,6 +57,7 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
     grep: /etc/redis6479.conf: No such file or directory
     sed -i "s|^port 6379|port 6479|" /etc/redis6479.conf
     sed -i 's|^daemonize no|daemonize yes|' /etc/redis6479.conf
+    sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/tmp\/redis6479.sock|" /etc/redis6479.conf
     sed -i "s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_6479.pid|" /etc/redis6479.conf
     sed -i "s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis6479.log|" /etc/redis6479.conf
     sed -i "s|dbfilename dump.rdb|dbfilename dump6479.rdb|" /etc/redis6479.conf
@@ -78,6 +79,7 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
     grep: /etc/redis6480.conf: No such file or directory
     sed -i "s|^port 6379|port 6480|" /etc/redis6480.conf
     sed -i 's|^daemonize no|daemonize yes|' /etc/redis6480.conf
+    sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/tmp\/redis6480.sock|" /etc/redis6480.conf
     sed -i "s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_6480.pid|" /etc/redis6480.conf
     sed -i "s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis6480.log|" /etc/redis6480.conf
     sed -i "s|dbfilename dump.rdb|dbfilename dump6480.rdb|" /etc/redis6480.conf
@@ -116,13 +118,13 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
     arch_bits:64
     multiplexing_api:epoll
     gcc_version:4.8.5
-    process_id:4451
-    run_id:5f0c5ece6d8fb15394159d78dc70ea1bfc1e5768
+    process_id:5895
+    run_id:babb2d68351d8a0fadfc7c17978eb7c4ce595d5a
     tcp_port:6479
     uptime_in_seconds:0
     uptime_in_days:0
     hz:10
-    lru_clock:13133350
+    lru_clock:13135170
     executable:/usr/bin/redis-server
     config_file:/etc/redis6479.conf
     -------------------------------------------------------
@@ -146,13 +148,13 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
     arch_bits:64
     multiplexing_api:epoll
     gcc_version:4.8.5
-    process_id:4508
-    run_id:15e7fe65af69e91c17f435be475ec46031802d06
+    process_id:5953
+    run_id:7f5d637b6aa679ebed7757def4fe023e69ca9d49
     tcp_port:6480
     uptime_in_seconds:0
     uptime_in_days:0
     hz:10
-    lru_clock:13133350
+    lru_clock:13135170
     executable:/usr/bin/redis-server
     config_file:/etc/redis6480.conf
 

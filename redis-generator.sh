@@ -87,6 +87,7 @@ genredis() {
         if [[ -f "/etc/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]] || [[ "$DEBUG_REDISGEN" = [yY] && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]]; then
           echo "sed -i \"s|^port 6379|port $REDISPORT|\" "/etc/redis${REDISPORT}.conf""
           echo "sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}.conf""
+          echo "sed -i \"s|unixsocket \/tmp\/redis.sock|unixsocket \/tmp\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}.conf""
           echo "sed -i \"s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|\" "/etc/redis${REDISPORT}.conf""
           echo "sed -i \"s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis${REDISPORT}.log|\" "/etc/redis${REDISPORT}.conf""
           echo "sed -i \"s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|\" "/etc/redis${REDISPORT}.conf""
@@ -118,6 +119,7 @@ genredis() {
         if [[ -f "/etc/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]]; then
           sed -i "s|^port 6379|port $REDISPORT|" "/etc/redis${REDISPORT}.conf"
           sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}.conf"
+          sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/tmp\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}.conf"
           sed -i "s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|" "/etc/redis${REDISPORT}.conf"
           sed -i "s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis${REDISPORT}.log|" "/etc/redis${REDISPORT}.conf"
           sed -i "s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|" "/etc/redis${REDISPORT}.conf"
