@@ -54,10 +54,11 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
     create /etc/redis6479.conf config file
     cp -a /etc/redis.conf /etc/redis6479.conf
-    grep: /etc/redis6479.conf: No such file or directory
+    mkdir -p /etc/systemd/system/redis6479.service.d/
+    \cp -af /etc/systemd/system/redis.service.d/limit.conf /etc/systemd/system/redis6479.service.d/limit.conf
     sed -i "s|^port 6379|port 6479|" /etc/redis6479.conf
     sed -i 's|^daemonize no|daemonize yes|' /etc/redis6479.conf
-    sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/tmp\/redis6479.sock|" /etc/redis6479.conf
+    sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis\/redis6479.sock|" /etc/redis6479.conf
     sed -i "s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_6479.pid|" /etc/redis6479.conf
     sed -i "s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis6479.log|" /etc/redis6479.conf
     sed -i "s|dbfilename dump.rdb|dbfilename dump6479.rdb|" /etc/redis6479.conf
@@ -76,10 +77,11 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
     create /etc/redis6480.conf config file
     cp -a /etc/redis.conf /etc/redis6480.conf
-    grep: /etc/redis6480.conf: No such file or directory
+    mkdir -p /etc/systemd/system/redis6480.service.d/
+    \cp -af /etc/systemd/system/redis.service.d/limit.conf /etc/systemd/system/redis6480.service.d/limit.conf
     sed -i "s|^port 6379|port 6480|" /etc/redis6480.conf
     sed -i 's|^daemonize no|daemonize yes|' /etc/redis6480.conf
-    sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/tmp\/redis6480.sock|" /etc/redis6480.conf
+    sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis\/redis6480.sock|" /etc/redis6480.conf
     sed -i "s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_6480.pid|" /etc/redis6480.conf
     sed -i "s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis6480.log|" /etc/redis6480.conf
     sed -i "s|dbfilename dump.rdb|dbfilename dump6480.rdb|" /etc/redis6480.conf
@@ -94,7 +96,7 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
 
 With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 1 meaning create 2x redis servers on starting port `6479` and `6480` (port incremented by 1)
 
-    ./redis-generator.sh 2
+    ./redis-generator.sh 2  
     
     Creating redis servers starting at TCP = 6479...
     -------------------------------------------------------
@@ -118,13 +120,13 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
     arch_bits:64
     multiplexing_api:epoll
     gcc_version:4.8.5
-    process_id:5895
-    run_id:babb2d68351d8a0fadfc7c17978eb7c4ce595d5a
+    process_id:6367
+    run_id:96ca19330907bead33c95ee93cf5f1f2992da599
     tcp_port:6479
     uptime_in_seconds:0
     uptime_in_days:0
     hz:10
-    lru_clock:13135170
+    lru_clock:13136061
     executable:/usr/bin/redis-server
     config_file:/etc/redis6479.conf
     -------------------------------------------------------
@@ -148,13 +150,13 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
     arch_bits:64
     multiplexing_api:epoll
     gcc_version:4.8.5
-    process_id:5953
-    run_id:7f5d637b6aa679ebed7757def4fe023e69ca9d49
+    process_id:6427
+    run_id:bb93c57f40b0039b7a9df35eb73efc0d9d0c5701
     tcp_port:6480
     uptime_in_seconds:0
     uptime_in_days:0
     hz:10
-    lru_clock:13135170
+    lru_clock:13136061
     executable:/usr/bin/redis-server
     config_file:/etc/redis6480.conf
 

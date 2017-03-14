@@ -5,6 +5,7 @@
 ######################################################
 # variables
 #############
+VER=0.1
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -20,6 +21,10 @@ if [ ! -f /usr/lib/systemd/system/redis.service ]; then
   echo "server installed first"
   echo
   exit
+fi
+
+if [[ -f /etc/systemd/system/redis.service.d/limit.conf && ! "$(grep 262144 /etc/systemd/system/redis.service.d/limit.conf)" ]]; then
+  sed -i 's|LimitNOFILE=.*|LimitNOFILE=262144|' /etc/systemd/system/redis.service.d/limit.conf
 fi
 
 genredis_del() {
@@ -84,10 +89,14 @@ genredis() {
         else
           echo "/etc/redis${REDISPORT}.conf already exists"
         fi
-        if [[ -f "/etc/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]] || [[ "$DEBUG_REDISGEN" = [yY] && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]]; then
+        if [ -f /etc/systemd/system/redis.service.d/limit.conf ]; then
+          echo "mkdir -p "/etc/systemd/system/redis${REDISPORT}.service.d/""
+          echo "\cp -af /etc/systemd/system/redis.service.d/limit.conf "/etc/systemd/system/redis${REDISPORT}.service.d/limit.conf""
+        fi
+        if [[ -f "/etc/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]] || [[ "$DEBUG_REDISGEN" = [yY] ]]; then
           echo "sed -i \"s|^port 6379|port $REDISPORT|\" "/etc/redis${REDISPORT}.conf""
           echo "sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}.conf""
-          echo "sed -i \"s|unixsocket \/tmp\/redis.sock|unixsocket \/tmp\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}.conf""
+          echo "sed -i \"s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}.conf""
           echo "sed -i \"s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|\" "/etc/redis${REDISPORT}.conf""
           echo "sed -i \"s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis${REDISPORT}.log|\" "/etc/redis${REDISPORT}.conf""
           echo "sed -i \"s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|\" "/etc/redis${REDISPORT}.conf""
@@ -115,11 +124,15 @@ genredis() {
         else
           echo "/etc/redis${REDISPORT}.conf already exists"
         fi
+        if [ -f /etc/systemd/system/redis.service.d/limit.conf ]; then
+          mkdir -p "/etc/systemd/system/redis${REDISPORT}.service.d/"
+          \cp -af /etc/systemd/system/redis.service.d/limit.conf "/etc/systemd/system/redis${REDISPORT}.service.d/limit.conf"
+        fi
         ls -lah "/usr/lib/systemd/system/redis${REDISPORT}.service" "/etc/redis${REDISPORT}.conf"
         if [[ -f "/etc/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]]; then
           sed -i "s|^port 6379|port $REDISPORT|" "/etc/redis${REDISPORT}.conf"
           sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}.conf"
-          sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/tmp\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}.conf"
+          sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}.conf"
           sed -i "s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|" "/etc/redis${REDISPORT}.conf"
           sed -i "s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis${REDISPORT}.log|" "/etc/redis${REDISPORT}.conf"
           sed -i "s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|" "/etc/redis${REDISPORT}.conf"
