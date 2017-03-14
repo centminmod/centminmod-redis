@@ -22,6 +22,41 @@ if [ ! -f /usr/lib/systemd/system/redis.service ]; then
   exit
 fi
 
+genredis_del() {
+  # increment starts at 0
+  NUMBER=$(($1-1))
+  if [[ "$NUMBER" -le '1' ]]; then
+    NUMBER=1
+  fi
+  echo
+  # echo "Deleting redis servers starting at TCP = $STARTPORT..."
+  for (( p=0; p <= $NUMBER; p++ ))
+    do
+      REDISPORT=$(($STARTPORT+$p))
+    if [ -f "/usr/lib/systemd/system/redis${REDISPORT}.service" ]; then
+      echo "-------------------------------------------------------"
+      echo "Deleting redis${REDISPORT}.service ..."
+      systemctl disable redis${REDISPORT}.service
+      systemctl stop redis${REDISPORT}.service
+      rm -rf "/usr/lib/systemd/system/redis${REDISPORT}.service"
+    fi
+    if [ -f "/etc/redis${REDISPORT}.conf" ]; then
+      rm -rf "/etc/redis${REDISPORT}.conf"
+    fi
+    if [ -f "/var/log/redis/redis${REDISPORT}.log" ]; then
+      rm -rf "/var/log/redis/redis${REDISPORT}.log"
+    fi
+    if [ -f "/var/lib/redis/dump${REDISPORT}.rdb" ]; then
+      rm -rf "/var/lib/redis/dump${REDISPORT}.rdb"
+    fi
+    if [ -f "/var/lib/redis/appendonly${REDISPORT}.aof" ]; then
+      rm -rf "/var/lib/redis/appendonly${REDISPORT}.aof"
+    fi
+  done
+  echo "Deletion completed"
+  exit
+}
+
 genredis() {
   # increment starts at 0
   NUMBER=$(($1-1))
@@ -101,15 +136,19 @@ genredis() {
 
 ######################################################
 NUM=$1
+WIPE=$2
 
-if [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
+if [[ "$WIPE" = 'delete' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
+  genredis_del $NUM
+elif [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
   # NUM is a number
   genredis $NUM
 else
   echo
   echo "Usage where X equal postive integer for number of redis"
   echo "servers to create with incrementing TCP redis ports"
-  echo "starting at STARTPORT=6479"
+  echo "starting at STARTPORT=6479. Append delete flag to remove"
   echo
   echo "$0 X"
+  echo "$0 X delete"
 fi

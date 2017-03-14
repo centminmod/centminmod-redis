@@ -91,7 +91,7 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
 
 With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 1 meaning create 2x redis servers on starting port `6479` and `6480` (port incremented by 1)
 
-    ./redis-generator.sh 1  
+    ./redis-generator.sh 1
     
     Creating redis servers starting at TCP = 6479...
     -------------------------------------------------------
@@ -103,6 +103,7 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
     cp -a /etc/redis.conf /etc/redis6479.conf
     -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6479.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
     ## Redis TCP 6479 Info ##
     # Server
     redis_version:3.2.8
@@ -114,13 +115,13 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
     arch_bits:64
     multiplexing_api:epoll
     gcc_version:4.8.5
-    process_id:3915
-    run_id:369baaef3d64b6f2324586c7f9de19d530e56b69
+    process_id:4451
+    run_id:5f0c5ece6d8fb15394159d78dc70ea1bfc1e5768
     tcp_port:6479
     uptime_in_seconds:0
     uptime_in_days:0
     hz:10
-    lru_clock:13131760
+    lru_clock:13133350
     executable:/usr/bin/redis-server
     config_file:/etc/redis6479.conf
     -------------------------------------------------------
@@ -132,6 +133,7 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
     cp -a /etc/redis.conf /etc/redis6480.conf
     -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6480.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
     ## Redis TCP 6480 Info ##
     # Server
     redis_version:3.2.8
@@ -143,13 +145,13 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
     arch_bits:64
     multiplexing_api:epoll
     gcc_version:4.8.5
-    process_id:3954
-    run_id:9e5b98ca757acfc67e8ea9216943cf3fd3336970
+    process_id:4508
+    run_id:15e7fe65af69e91c17f435be475ec46031802d06
     tcp_port:6480
     uptime_in_seconds:0
     uptime_in_days:0
     hz:10
-    lru_clock:13131760
+    lru_clock:13133350
     executable:/usr/bin/redis-server
     config_file:/etc/redis6480.conf
 
@@ -179,3 +181,16 @@ systemctl status redis6480
 Mar 14 21:26:08 host.domain.com systemd[1]: Started Redis persistent key-value database.
 Mar 14 21:26:08 host.domain.com systemd[1]: Starting Redis persistent key-value database...
 ```
+
+To remove created redis servers, append `delete` flag on end:
+
+    ./redis-generator.sh 1 delete
+    
+    Deleting redis servers starting at TCP = 6479...
+    -------------------------------------------------------
+    Deleting redis6479.service ...
+    Removed symlink /etc/systemd/system/multi-user.target.wants/redis6479.service.
+    -------------------------------------------------------
+    Deleting redis6480.service ...
+    Removed symlink /etc/systemd/system/multi-user.target.wants/redis6480.service.
+    Deletion completed
