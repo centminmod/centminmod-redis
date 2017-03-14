@@ -64,6 +64,7 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
     sed -i "s|\/etc\/redis.conf|\/etc\/redis6479.conf|" /usr/lib/systemd/system/redis6479.service
     systemctl daemon-reload
     systemctl restart redis6479
+    systemctl enable redis6479
     Redis TCP 6479 Info:
     redis-cli -h 127.0.0.1 -p 6479 INFO SERVER
     -------------------------------------------------------
@@ -84,6 +85,7 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
     sed -i "s|\/etc\/redis.conf|\/etc\/redis6480.conf|" /usr/lib/systemd/system/redis6480.service
     systemctl daemon-reload
     systemctl restart redis6480
+    systemctl enable redis6480
     Redis TCP 6480 Info:
     redis-cli -h 127.0.0.1 -p 6480 INFO SERVER
 
@@ -154,7 +156,7 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
 ```
 systemctl status redis6479 
 ● redis6479.service - Redis persistent key-value database
-   Loaded: loaded (/usr/lib/systemd/system/redis6479.service; disabled; vendor preset: disabled)
+   Loaded: loaded (/usr/lib/systemd/system/redis6479.service; enabled; vendor preset: disabled)
    Active: active (running) since Tue 2017-03-14 21:28:37 UTC; 7s ago
   Process: 3985 ExecStop=/usr/libexec/redis-shutdown (code=exited, status=0/SUCCESS)
  Main PID: 4008 (redis-server)
@@ -168,7 +170,7 @@ Mar 14 21:28:37 host.domain.com systemd[1]: Starting Redis persistent key-value 
 ```
 systemctl status redis6480
 ● redis6480.service - Redis persistent key-value database
-   Loaded: loaded (/usr/lib/systemd/system/redis6480.service; disabled; vendor preset: disabled)
+   Loaded: loaded (/usr/lib/systemd/system/redis6480.service; enabled; vendor preset: disabled)
    Active: active (running) since Tue 2017-03-14 21:26:08 UTC; 2min 56s ago
  Main PID: 3954 (redis-server)
    CGroup: /system.slice/redis6480.service

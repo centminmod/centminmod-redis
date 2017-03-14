@@ -60,6 +60,7 @@ genredis() {
           echo "sed -i \"s|\/etc\/redis.conf|\/etc\/redis${REDISPORT}.conf|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
           echo "systemctl daemon-reload"
           echo "systemctl restart redis${REDISPORT}"
+          echo "systemctl enable redis${REDISPORT}"
           echo "Redis TCP $REDISPORT Info:"
           echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER"
         fi
@@ -90,6 +91,7 @@ genredis() {
           sed -i "s|\/etc\/redis.conf|\/etc\/redis${REDISPORT}.conf|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
           systemctl daemon-reload
           systemctl restart redis${REDISPORT}
+          systemctl enable redis${REDISPORT}
           echo "## Redis TCP $REDISPORT Info ##"
           redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER
         fi
