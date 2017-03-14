@@ -44,7 +44,7 @@ Examples:
 
 With `DEBUG_REDISGEN='y'` for dry run debug run checks
 
-    ./redis-generator.sh 1
+    ./redis-generator.sh 2
     
     Creating redis servers starting at TCP = 6479...
     -------------------------------------------------------
@@ -92,7 +92,7 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
 
 With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 1 meaning create 2x redis servers on starting port `6479` and `6480` (port incremented by 1)
 
-    ./redis-generator.sh 1
+    ./redis-generator.sh 2
     
     Creating redis servers starting at TCP = 6479...
     -------------------------------------------------------
@@ -185,7 +185,7 @@ Mar 14 21:26:08 host.domain.com systemd[1]: Starting Redis persistent key-value 
 
 To remove created redis servers, append `delete` flag on end:
 
-    ./redis-generator.sh 1 delete
+    ./redis-generator.sh 2 delete
     
     Deleting redis servers starting at TCP = 6479...
     -------------------------------------------------------
