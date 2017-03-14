@@ -351,3 +351,21 @@ Creating 5 redis servers on ports 6479-6783
     lru_clock:13134468
     executable:/usr/bin/redis-server
     config_file:/etc/redis6483.conf
+
+Running redis servers
+
+    ps aufxw | grep redis-server | grep -v grep
+    redis     5306  0.2  0.1 142896  2296 ?        Ssl  22:11   0:00 /usr/bin/redis-server 127.0.0.1:6479
+    redis     5363  0.2  0.1 142896  2292 ?        Ssl  22:11   0:00 /usr/bin/redis-server 127.0.0.1:6480
+    redis     5420  0.2  0.1 142896  2296 ?        Ssl  22:11   0:00 /usr/bin/redis-server 127.0.0.1:6481
+    redis     5477  0.2  0.1 142896  2296 ?        Ssl  22:11   0:00 /usr/bin/redis-server 127.0.0.1:6482
+    redis     5534  0.2  0.1 142896  2296 ?        Ssl  22:11   0:00 /usr/bin/redis-server 127.0.0.1:6483
+
+and
+
+    netstat -plunt | grep redis
+    tcp        0      0 127.0.0.1:6479          0.0.0.0:*               LISTEN      5306/redis-server 1 
+    tcp        0      0 127.0.0.1:6480          0.0.0.0:*               LISTEN      5363/redis-server 1 
+    tcp        0      0 127.0.0.1:6481          0.0.0.0:*               LISTEN      5420/redis-server 1 
+    tcp        0      0 127.0.0.1:6482          0.0.0.0:*               LISTEN      5477/redis-server 1 
+    tcp        0      0 127.0.0.1:6483          0.0.0.0:*               LISTEN      5534/redis-server 1 
