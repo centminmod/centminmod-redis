@@ -34,9 +34,10 @@ Usage:
     
     Usage where X equal postive integer for number of redis
     servers to create with incrementing TCP redis ports
-    starting at STARTPORT=6479
+    starting at STARTPORT=6479. Append delete flag to remove
     
     ./redis-generator.sh X
+    ./redis-generator.sh X delete
 
 Examples:
 =======
