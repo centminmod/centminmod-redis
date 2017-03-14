@@ -3,6 +3,30 @@ Info:
 
 Redis server generator to create multiple Redis servers locally listening on 127.0.0.1 with starting port `STARTPORT=6479` and incrementally created via integer passed on `redis-generator.sh` command line. Written for CentOS 7 only with [centminmod.com](https://centminmod.com) LEMP stacks specifically.
 
+Requirements:
+=======
+
+* redis 3.2 branch is required and must be installed prior to using `redis-generator.sh`
+
+Redis install:
+=======
+
+For [Centmin Mod LEMP web stacks](https://centminmod.com), installing redis 3.2 branch is simple as using these SSH command steps:
+
+    yum -y install redis --enablerepo=remi --disableplugin=priorities
+    sed -i 's|LimitNOFILE=.*|LimitNOFILE=262144|' /etc/systemd/system/redis.service.d/limit.conf
+    echo "d      /var/run/redis/         0755 redis redis" > /etc/tmpfiles.d/redis.conf
+    mkdir /var/run/redis
+    chown redis:redis /var/run/redis
+    chmod 755 /var/run/redis
+    systemctl daemon-reload
+    systemctl start redis
+    systemctl enable redis
+    echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
+    echo never > /sys/kernel/mm/transparent_hugepage/enabled
+    echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" >> /etc/rc.local
+    sysctl -p
+
 Usage:
 =======
 
