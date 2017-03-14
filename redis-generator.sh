@@ -8,7 +8,7 @@
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
-DEBUG='y'
+DEBUG_REDISGEN='y'
 ######################################################
 # functions
 #############
@@ -21,7 +21,6 @@ if [ ! -f /usr/lib/systemd/system/redis.service ]; then
   echo
   exit
 fi
-
 
 genredis() {
   # increment starts at 0
@@ -37,7 +36,7 @@ genredis() {
       echo "-------------------------------------------------------"
       echo "creating redis server: redis${REDISPORT}.service [increment value: $p]"
       echo "redis TCP port: $REDISPORT"
-      if [[ "$DEBUG" = [yY] ]]; then
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
         if [ ! -f "/usr/lib/systemd/system/redis${REDISPORT}.service" ]; then
           echo "create systemd redis${REDISPORT}.service"
           echo "cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis${REDISPORT}.service"
