@@ -291,13 +291,13 @@ Create 2 redis server master + slave replication on ports 6479 and 6480
     arch_bits:64
     multiplexing_api:epoll
     gcc_version:4.8.5
-    process_id:21660
-    run_id:344020d0cdf418b42cb3b859b461aa5ec4206972
+    process_id:22174
+    run_id:8d4a3beff9fb805e0ce7d11550e45d30791a48a8
     tcp_port:6479
     uptime_in_seconds:0
     uptime_in_days:0
     hz:10
-    lru_clock:13149753
+    lru_clock:13150441
     executable:/etc/redis6479/redis-server
     config_file:/etc/redis6479/redis6479.conf
     # Replication
@@ -330,26 +330,23 @@ Create 2 redis server master + slave replication on ports 6479 and 6480
     arch_bits:64
     multiplexing_api:epoll
     gcc_version:4.8.5
-    process_id:21728
-    run_id:4c1696d87b1cded3b57f3ae4ce4eeb0c746639c8
+    process_id:22243
+    run_id:279e11591a594cbc923b738ddff96b1774e18a51
     tcp_port:6480
     uptime_in_seconds:0
     uptime_in_days:0
     hz:10
-    lru_clock:13149753
+    lru_clock:13150444
     executable:/etc/redis6480/redis-server
     config_file:/etc/redis6480/redis6480.conf
     # Replication
     role:slave
     master_host:127.0.0.1
     master_port:6479
-    master_link_status:down
-    master_last_io_seconds_ago:-1
-    master_sync_in_progress:1
+    master_link_status:up
+    master_last_io_seconds_ago:3
+    master_sync_in_progress:0
     slave_repl_offset:1
-    master_sync_left_bytes:-1
-    master_sync_last_io_seconds_ago:0
-    master_link_down_since_seconds:1489544761
     slave_priority:100
     slave_read_only:1
     connected_slaves:0

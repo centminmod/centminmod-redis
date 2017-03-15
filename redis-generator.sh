@@ -242,6 +242,7 @@ genredis() {
             redis-cli -h 127.0.0.1 -p $REDISPORT INFO CLUSTER
           fi
           if [[ "$CLUSTER" = 'replication' ]]; then
+            sleep 2
             redis-cli -h 127.0.0.1 -p $REDISPORT INFO REPLICATION
           fi
         fi
