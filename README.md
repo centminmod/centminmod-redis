@@ -868,3 +868,53 @@ Example of redis port 6479 master with port 6480 and 6481 redis slaves
     repl_backlog_size:1048576
     repl_backlog_first_byte_offset:0
     repl_backlog_histlen:0
+
+Example of redis port 6482 master with port 6483 and 6484 redis slaves
+
+    redis-cli -h 127.0.0.1 -p 6482 INFO REPLICATION 
+    # Replication
+    role:master
+    connected_slaves:2
+    slave0:ip=127.0.0.1,port=6483,state=online,offset=1498,lag=0
+    slave1:ip=127.0.0.1,port=6484,state=online,offset=1498,lag=0
+    master_repl_offset:1498
+    repl_backlog_active:1
+    repl_backlog_size:1048576
+    repl_backlog_first_byte_offset:2
+    repl_backlog_histlen:1497
+    
+    redis-cli -h 127.0.0.1 -p 6483 INFO REPLICATION 
+    # Replication
+    role:slave
+    master_host:127.0.0.1
+    master_port:6482
+    master_link_status:up
+    master_last_io_seconds_ago:8
+    master_sync_in_progress:0
+    slave_repl_offset:1498
+    slave_priority:100
+    slave_read_only:1
+    connected_slaves:0
+    master_repl_offset:0
+    repl_backlog_active:0
+    repl_backlog_size:1048576
+    repl_backlog_first_byte_offset:0
+    repl_backlog_histlen:0
+    
+    redis-cli -h 127.0.0.1 -p 6484 INFO REPLICATION 
+    # Replication
+    role:slave
+    master_host:127.0.0.1
+    master_port:6482
+    master_link_status:up
+    master_last_io_seconds_ago:1
+    master_sync_in_progress:0
+    slave_repl_offset:1512
+    slave_priority:100
+    slave_read_only:1
+    connected_slaves:0
+    master_repl_offset:0
+    repl_backlog_active:0
+    repl_backlog_size:1048576
+    repl_backlog_first_byte_offset:0
+    repl_backlog_histlen:0
