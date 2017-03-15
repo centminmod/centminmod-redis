@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=0.5
+VER=0.6
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -104,6 +104,7 @@ genredis_del() {
 
 genredis() {
   CLUSTER=$2
+  CLUSTER_CREATE=$3
   # increment starts at 0
   NUMBER=$(($1-1))
   if [[ "$NUMBER" -le '1' ]]; then
@@ -284,12 +285,47 @@ genredis() {
         fi
       fi
   done
+  if [[ "$CLUSTER" = 'cluster' && "$CLUSTER_CREATE" -eq '6' ]]; then
+    echo
+    echo "Join created 6 node cluster enabled redis instances to cluster"
+    echo "using redis-cluster-tool: 3x 1x master + 1x slaves"
+    echo
+    echo "redis-cluster-tool -C \"cluster_create 127.0.0.1:6479[127.0.0.1:6480] 127.0.0.1:6481[127.0.0.1:6482] 127.0.0.1:6483[127.0.0.1:6484]\""
+    if [[ "$DEBUG_REDISGEN" = [nN] ]]; then
+      sleep 2
+      redis-cluster-tool -C "cluster_create 127.0.0.1:6479[127.0.0.1:6480] 127.0.0.1:6481[127.0.0.1:6482] 127.0.0.1:6483[127.0.0.1:6484]"
+    fi
+    echo
+    echo "redis-cluster-tool -a 127.0.0.1:6479 -C cluster_state -r master"
+    if [[ "$DEBUG_REDISGEN" = [nN] ]]; then
+      sleep 3
+      redis-cluster-tool -a 127.0.0.1:6479 -C cluster_state -r master
+    fi
+  fi
+  if [[ "$CLUSTER" = 'cluster' && "$CLUSTER_CREATE" -eq '9' ]]; then
+    echo
+    echo "Join created 9 node cluster enabled redis instances to cluster"
+    echo "using redis-cluster-tool: 3x 1x master + 2x slaves"
+    echo
+    echo "redis-cluster-tool -C \"cluster_create 127.0.0.1:6479[127.0.0.1:6480|127.0.0.1:6481] 127.0.0.1:6482[127.0.0.1:6483|127.0.0.1:6484] 127.0.0.1:6485[127.0.0.1:6486|127.0.0.1:6487]\""
+    if [[ "$DEBUG_REDISGEN" = [nN] ]]; then
+      sleep 2
+      redis-cluster-tool -C "cluster_create 127.0.0.1:6479[127.0.0.1:6480|127.0.0.1:6481] 127.0.0.1:6482[127.0.0.1:6483|127.0.0.1:6484] 127.0.0.1:6485[127.0.0.1:6486|127.0.0.1:6487]"
+    fi
+    echo
+    echo "redis-cluster-tool -a 127.0.0.1:6479 -C cluster_state -r master"
+    if [[ "$DEBUG_REDISGEN" = [nN] ]]; then
+      sleep 3
+      redis-cluster-tool -a 127.0.0.1:6479 -C cluster_state -r master
+    fi
+  fi
 }
 
 ######################################################
 NUM=$1
 WIPE=$2
 CLUSTER=$2
+CLUSTER_CREATE=$3
 
 if [[ "$NUM" = 'prep' && "$WIPE" = 'update' ]]; then
   redis_cluster_install update
@@ -311,6 +347,28 @@ if [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'replication' ]] && [[ ! -z "$NUM" 
   fi
   UNIXSOCKET='n'
   genredis $NUM replication
+elif [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'cluster' && "$CLUSTER_CREATE" -eq '6' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
+  if [ "$NUM" -lt '6' ]; then
+    echo
+    echo "minimum of 3 master nodes are required for redis"
+    echo "cluster configuration so minimum 6 redis servers"
+    echo "i.e. 3x master/slave redis nodes"
+    echo
+    echo "$0 6 cluster 6"
+    exit
+  fi
+  genredis 6 cluster 6
+elif [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'cluster' && "$CLUSTER_CREATE" -eq '9' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
+  if [ "$NUM" -lt '9' ]; then
+    echo
+    echo "minimum of 3 master nodes are required for redis"
+    echo "cluster configuration so minimum 9 redis servers"
+    echo "i.e. 3x master + 2x slave redis nodes"
+    echo
+    echo "$0 9 cluster 9"
+    exit
+  fi
+  genredis 9 cluster 9
 elif [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'cluster' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
   if [ "$NUM" -lt '6' ]; then
     echo
@@ -334,6 +392,8 @@ elif [[ "$PREP" != 'y' ]]; then
   echo "  starting at STARTPORT=6479."
   echo "* Append delete flag to remove"
   echo "* Append cluster flag to enable cluster mode"
+  echo "* Append cluster 6 flag to enable cluster mode + create cluster"
+  echo "* Append cluster 9 flag to enable cluster mode + create cluster"
   echo "* Append replication flag to enable replication mode"
   echo "* standalone prep command installs redis-cluster-tool"
   echo "* standalone prep update command updates redis-cluster-tool"
@@ -341,6 +401,8 @@ elif [[ "$PREP" != 'y' ]]; then
   echo "$0 X"
   echo "$0 X delete"
   echo "$0 X cluster"
+  echo "$0 6 cluster 6"
+  echo "$0 9 cluster 9"
   echo "$0 X replication"
   echo "$0 prep"
   echo "$0 prep update"

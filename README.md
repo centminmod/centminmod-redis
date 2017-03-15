@@ -33,13 +33,15 @@ Usage:
 
 Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='y'` variable to enable using Unix sockets instead
 
-    ./redis-generator.sh                      
+    ./redis-generator.sh
     
     * Usage where X equal postive integer for number of redis
       servers to create with incrementing TCP redis ports
       starting at STARTPORT=6479.
     * Append delete flag to remove
     * Append cluster flag to enable cluster mode
+    * Append cluster 6 flag to enable cluster mode + create cluster
+    * Append cluster 9 flag to enable cluster mode + create cluster
     * Append replication flag to enable replication mode
     * standalone prep command installs redis-cluster-tool
     * standalone prep update command updates redis-cluster-tool
@@ -47,6 +49,8 @@ Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='
     ./redis-generator.sh X
     ./redis-generator.sh X delete
     ./redis-generator.sh X cluster
+    ./redis-generator.sh 6 cluster 6
+    ./redis-generator.sh 9 cluster 9
     ./redis-generator.sh X replication
     ./redis-generator.sh prep
     ./redis-generator.sh prep update
@@ -94,6 +98,8 @@ To update redis-cluster tool
 
 Examples:
 =======
+
+Below are various examples. For specific redis 9 node cluster setup example, check this [example](redis-cluster-9.md)
 
 With `DEBUG_REDISGEN='y'` for dry run debug run checks
 
