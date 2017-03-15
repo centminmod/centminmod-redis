@@ -301,6 +301,12 @@ genredis() {
       sleep 3
       redis-cluster-tool -a 127.0.0.1:6479 -C cluster_state -r master
     fi
+    echo
+    echo "redis-cluster-tool -a 127.0.0.1:6479 -C cluster_state -r slave"
+    if [[ "$DEBUG_REDISGEN" = [nN] ]]; then
+      sleep 3
+      redis-cluster-tool -a 127.0.0.1:6479 -C cluster_state -r slave
+    fi
   fi
   if [[ "$CLUSTER" = 'cluster' && "$CLUSTER_CREATE" -eq '9' ]]; then
     echo
