@@ -1,11 +1,12 @@
 #!/bin/bash
 ######################################################
+# https://github.com/centminmod/centminmod-redis
 # for centos 7 only
 # written by George Liu (eva2000) centminmod.com
 ######################################################
 # variables
 #############
-VER=0.4
+VER=0.5
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -308,6 +309,7 @@ if [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'replication' ]] && [[ ! -z "$NUM" 
     echo "$0 2 replication"
     exit
   fi
+  UNIXSOCKET='n'
   genredis $NUM replication
 elif [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'cluster' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
   if [ "$NUM" -lt '6' ]; then
