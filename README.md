@@ -816,3 +816,55 @@ Delete keys in cluster
     yes
     delete keys job is running...
     delete keys job finished, deleted: 999999 keys, used: 4 s
+
+End result is 9x redis server cluster consisting of 3x sets of Redis master + 2 slaves.
+
+Example of redis port 6479 master with port 6480 and 6481 redis slaves
+
+    redis-cli -h 127.0.0.1 -p 6479 INFO REPLICATION
+    # Replication
+    role:master
+    connected_slaves:2
+    slave0:ip=127.0.0.1,port=6480,state=online,offset=1274,lag=0
+    slave1:ip=127.0.0.1,port=6481,state=online,offset=1274,lag=0
+    master_repl_offset:1274
+    repl_backlog_active:1
+    repl_backlog_size:1048576
+    repl_backlog_first_byte_offset:2
+    repl_backlog_histlen:1273
+    
+    redis-cli -h 127.0.0.1 -p 6480 INFO REPLICATION  
+    # Replication
+    role:slave
+    master_host:127.0.0.1
+    master_port:6479
+    master_link_status:up
+    master_last_io_seconds_ago:2
+    master_sync_in_progress:0
+    slave_repl_offset:1358
+    slave_priority:100
+    slave_read_only:1
+    connected_slaves:0
+    master_repl_offset:0
+    repl_backlog_active:0
+    repl_backlog_size:1048576
+    repl_backlog_first_byte_offset:0
+    repl_backlog_histlen:0
+    
+    redis-cli -h 127.0.0.1 -p 6481 INFO REPLICATION 
+    # Replication
+    role:slave
+    master_host:127.0.0.1
+    master_port:6479
+    master_link_status:up
+    master_last_io_seconds_ago:8
+    master_sync_in_progress:0
+    slave_repl_offset:1358
+    slave_priority:100
+    slave_read_only:1
+    connected_slaves:0
+    master_repl_offset:0
+    repl_backlog_active:0
+    repl_backlog_size:1048576
+    repl_backlog_first_byte_offset:0
+    repl_backlog_histlen:0
