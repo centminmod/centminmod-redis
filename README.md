@@ -46,6 +46,17 @@ Usage:
     ./redis-generator.sh prep
     ./redis-generator.sh prep update
 
+Install & Update redis-cluster-tool:
+=======
+
+To install redis-cluster-tool
+
+    ./redis-generator.sh prep
+
+To update redis-cluster tool
+
+    ./redis-generator.sh prep update
+
 Examples:
 =======
 
