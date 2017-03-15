@@ -429,3 +429,118 @@ redis-benchmark -h 127.0.0.1 -p 19001 -n 1000 -r 1000 -t get,set,lpush,lpop -P 1
 111111.12 requests per second
 
 ```
+
+setup nginx TCP stream Redis proxy listening on port 19001 with `proxy_buffer_size` = 64k
+
+```
+stream {
+  upstream backend {
+    zone     upstream_backend 10m;
+    least_conn;
+
+    server 127.0.0.1:6479;
+    server 127.0.0.1:6481;
+    server 127.0.0.1:6483;
+  }
+
+  server {
+    listen 127.0.0.1:19001 reuseport;
+    #proxy_bind 127.0.0.1:19001;
+    proxy_buffer_size 64k;
+    proxy_connect_timeout 1s;
+    proxy_timeout 3s;
+    proxy_pass backend;
+  }
+}
+```
+
+```
+redis-benchmark -h 127.0.0.1 -p 19001 -n 1000 -r 1000 -t get -P 1000 -c 100
+====== GET ======
+  1000 requests completed in 0.03 seconds
+  100 parallel clients
+  3 bytes payload
+  keep alive: 1
+
+0.10% <= 18 milliseconds
+26.20% <= 19 milliseconds
+100.00% <= 19 milliseconds
+34482.76 requests per second
+```
+
+```
+redis-benchmark -h 127.0.0.1 -p 19001 -n 1000 -r 1000 -t set -P 1000 -c 100 
+====== SET ======
+  1000 requests completed in 0.05 seconds
+  100 parallel clients
+  3 bytes payload
+  keep alive: 1
+
+0.10% <= 27 milliseconds
+72.90% <= 28 milliseconds
+100.00% <= 28 milliseconds
+20000.00 requests per second
+```
+
+```
+redis-benchmark -h 127.0.0.1 -p 19001 -n 1000 -r 1000 -t mset -P 1000 -c 100
+====== MSET (10 keys) ======
+  1000 requests completed in 0.10 seconds
+  100 parallel clients
+  3 bytes payload
+  keep alive: 1
+
+0.10% <= 86 milliseconds
+29.30% <= 87 milliseconds
+41.70% <= 88 milliseconds
+70.90% <= 89 milliseconds
+100.00% <= 89 milliseconds
+9615.38 requests per second
+```
+
+```
+redis-benchmark -h 127.0.0.1 -p 19001 -n 1000 -r 1000 -t get,set,lpush,lpop -P 1000 -c 100
+====== SET ======
+  1000 requests completed in 0.05 seconds
+  100 parallel clients
+  3 bytes payload
+  keep alive: 1
+
+0.10% <= 40 milliseconds
+79.60% <= 41 milliseconds
+100.00% <= 41 milliseconds
+22222.22 requests per second
+
+====== GET ======
+  1000 requests completed in 0.16 seconds
+  100 parallel clients
+  3 bytes payload
+  keep alive: 1
+
+0.10% <= 91 milliseconds
+45.60% <= 92 milliseconds
+100.00% <= 92 milliseconds
+6211.18 requests per second
+
+====== LPUSH ======
+  1000 requests completed in 0.05 seconds
+  100 parallel clients
+  3 bytes payload
+  keep alive: 1
+
+0.10% <= 5 milliseconds
+45.60% <= 10 milliseconds
+100.00% <= 10 milliseconds
+21276.60 requests per second
+
+====== LPOP ======
+  1000 requests completed in 0.02 seconds
+  100 parallel clients
+  3 bytes payload
+  keep alive: 1
+
+0.10% <= 5 milliseconds
+63.10% <= 18 milliseconds
+100.00% <= 18 milliseconds
+43478.26 requests per second
+```
