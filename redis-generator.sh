@@ -5,7 +5,7 @@
 ######################################################
 # variables
 #############
-VER=0.1
+VER=0.2
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -45,8 +45,8 @@ genredis_del() {
       systemctl stop redis${REDISPORT}.service
       rm -rf "/usr/lib/systemd/system/redis${REDISPORT}.service"
     fi
-    if [ -f "/etc/redis${REDISPORT}.conf" ]; then
-      rm -rf "/etc/redis${REDISPORT}.conf"
+    if [ -f "/etc/redis${REDISPORT}/redis${REDISPORT}.conf" ]; then
+      rm -rf "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
     fi
     if [ -f "/var/log/redis/redis${REDISPORT}.log" ]; then
       rm -rf "/var/log/redis/redis${REDISPORT}.log"
@@ -57,12 +57,14 @@ genredis_del() {
     if [ -f "/var/lib/redis/appendonly${REDISPORT}.aof" ]; then
       rm -rf "/var/lib/redis/appendonly${REDISPORT}.aof"
     fi
+    rm -rf "/var/lib/redis${REDISPORT}"
   done
   echo "Deletion completed"
   exit
 }
 
 genredis() {
+  CLUSTER=$2
   # increment starts at 0
   NUMBER=$(($1-1))
   if [[ "$NUMBER" -le '1' ]]; then
@@ -83,32 +85,51 @@ genredis() {
         else
           echo "/usr/lib/systemd/system/redis${REDISPORT}.service already exists"
         fi
-        if [ ! -f "/etc/redis${REDISPORT}.conf" ]; then
-          echo "create /etc/redis${REDISPORT}.conf config file"
-          echo "cp -a /etc/redis.conf /etc/redis${REDISPORT}.conf"
+        if [ ! -f "/etc/redis${REDISPORT}/redis${REDISPORT}.conf" ]; then
+          echo "create /etc/redis${REDISPORT}/redis${REDISPORT}.conf config file"
+          echo "mkdir -p "/etc/redis${REDISPORT}""
+          echo "cp -a /etc/redis.conf /etc/redis${REDISPORT}/redis${REDISPORT}.conf"
         else
-          echo "/etc/redis${REDISPORT}.conf already exists"
+          echo "/etc/redis${REDISPORT}/redis${REDISPORT}.conf already exists"
         fi
         if [ -f /etc/systemd/system/redis.service.d/limit.conf ]; then
           echo "mkdir -p "/etc/systemd/system/redis${REDISPORT}.service.d/""
           echo "\cp -af /etc/systemd/system/redis.service.d/limit.conf "/etc/systemd/system/redis${REDISPORT}.service.d/limit.conf""
         fi
-        if [[ -f "/etc/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]] || [[ "$DEBUG_REDISGEN" = [yY] ]]; then
-          echo "sed -i \"s|^port 6379|port $REDISPORT|\" "/etc/redis${REDISPORT}.conf""
-          echo "sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}.conf""
-          echo "sed -i \"s|cluster-config-file nodes-6379.conf|cluster-config-file nodes-${REDISPORT}.conf|\" "/etc/redis${REDISPORT}.conf""
-          echo "sed -i \"s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}.conf""
-          echo "sed -i \"s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|\" "/etc/redis${REDISPORT}.conf""
-          echo "sed -i \"s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis${REDISPORT}.log|\" "/etc/redis${REDISPORT}.conf""
-          echo "sed -i \"s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|\" "/etc/redis${REDISPORT}.conf""
-          echo "sed -i \"s|appendfilename \"appendonly.aof\"|appendfilename \"appendonly${REDISPORT}.aof\"|\" "/etc/redis${REDISPORT}.conf""
-          echo "echo \"#masterauth abc123\" >> "/etc/redis${REDISPORT}.conf""
-          echo "sed -i \"s|\/etc\/redis.conf|\/etc\/redis${REDISPORT}.conf|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
+        if [[ -f "/etc/redis${REDISPORT}/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}/redis${REDISPORT}.conf)" ]] || [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+          echo "sed -i \"s|^port 6379|port $REDISPORT|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "mkdir -p "/var/lib/redis${REDISPORT}""
+          echo "chown -R redis:redis "/var/lib/redis${REDISPORT}""
+          echo "\cp -af /usr/bin/redis-server "/etc/redis${REDISPORT}/redis-server""
+          echo "sed -i \"s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
+          echo "sed -i \"s|dir \/var\/lib\/redis\/|dir \/var\/lib\/redis${REDISPORT}|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "sed -i \"s|cluster-config-file nodes-6379.conf|cluster-config-file nodes-${REDISPORT}.conf|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "sed -i \"s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "sed -i \"s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "sed -i \"s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis${REDISPORT}.log|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "sed -i \"s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "sed -i \"s|appendfilename \"appendonly.aof\"|appendfilename \"appendonly${REDISPORT}.aof\"|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "echo \"#masterauth abc123\" >> "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "sed -i \"s|\/etc\/redis.conf|\/etc\/redis${REDISPORT}\/redis${REDISPORT}.conf|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
+          # enable redis cluster settings
+          if [[ "$CLUSTER" = 'cluster' ]]; then
+            echo "\cp -af /usr/bin/redis-server "/etc/redis${REDISPORT}/redis-server""
+            echo "sed -i \"s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
+            echo "sed -i 's|^# cluster-enabled yes|cluster-enabled yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+            echo "sed -i \"s|^# cluster-config-file nodes-${REDISPORT}.conf|cluster-config-file nodes-${DT}.conf|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+            echo "sed -i \"s|^# cluster-node-timeout 15000|cluster-node-timeout 5000|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+            echo "sed -i 's|^appendonly no|appendonly yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+            echo "enabled cluster mode with cluster-config-file nodes-${DT}.conf"
+          fi
           echo "systemctl daemon-reload"
           echo "systemctl restart redis${REDISPORT}"
           echo "systemctl enable redis${REDISPORT}"
           echo "Redis TCP $REDISPORT Info:"
           echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER"
+          if [[ "$CLUSTER" = 'cluster' ]]; then
+            echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO CLUSTER"
+          fi
         fi
       else
         if [ ! -f "/usr/lib/systemd/system/redis${REDISPORT}.service" ]; then
@@ -118,34 +139,54 @@ genredis() {
         else
           echo "/usr/lib/systemd/system/redis${REDISPORT}.service already exists"
         fi
-        if [ ! -f "/etc/redis${REDISPORT}.conf" ]; then
-          echo "create /etc/redis${REDISPORT}.conf config file"
-          echo "cp -a /etc/redis.conf /etc/redis${REDISPORT}.conf"
-          cp -a /etc/redis.conf "/etc/redis${REDISPORT}.conf"
+        if [ ! -f "/etc/redis${REDISPORT}/redis${REDISPORT}.conf" ]; then
+          echo "create /etc/redis${REDISPORT}/redis${REDISPORT}.conf config file"
+          echo "mkdir -p "/etc/redis${REDISPORT}""
+          echo "cp -a /etc/redis.conf /etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          mkdir -p "/etc/redis${REDISPORT}"
+          cp -a /etc/redis.conf "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
         else
-          echo "/etc/redis${REDISPORT}.conf already exists"
+          echo "/etc/redis${REDISPORT}/redis${REDISPORT}.conf already exists"
         fi
         if [ -f /etc/systemd/system/redis.service.d/limit.conf ]; then
           mkdir -p "/etc/systemd/system/redis${REDISPORT}.service.d/"
           \cp -af /etc/systemd/system/redis.service.d/limit.conf "/etc/systemd/system/redis${REDISPORT}.service.d/limit.conf"
         fi
-        ls -lah "/usr/lib/systemd/system/redis${REDISPORT}.service" "/etc/redis${REDISPORT}.conf"
-        if [[ -f "/etc/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}.conf)" ]]; then
-          sed -i "s|^port 6379|port $REDISPORT|" "/etc/redis${REDISPORT}.conf"
-          sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}.conf"
-          sed -i "s|cluster-config-file nodes-6379.conf|cluster-config-file nodes-${REDISPORT}.conf|" "/etc/redis${REDISPORT}.conf"
-          sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}.conf"
-          sed -i "s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|" "/etc/redis${REDISPORT}.conf"
-          sed -i "s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis${REDISPORT}.log|" "/etc/redis${REDISPORT}.conf"
-          sed -i "s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|" "/etc/redis${REDISPORT}.conf"
-          sed -i "s|appendfilename \"appendonly.aof\"|appendfilename \"appendonly${REDISPORT}.aof\"|" "/etc/redis${REDISPORT}.conf"
-          echo "#masterauth abc123" >> "/etc/redis${REDISPORT}.conf"
-          sed -i "s|\/etc\/redis.conf|\/etc\/redis${REDISPORT}.conf|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
+        ls -lah "/usr/lib/systemd/system/redis${REDISPORT}.service" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+        if [[ -f "/etc/redis${REDISPORT}/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}/redis${REDISPORT}.conf)" ]]; then
+          sed -i "s|^port 6379|port $REDISPORT|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          mkdir -p "/var/lib/redis${REDISPORT}"
+          chown -R redis:redis "/var/lib/redis${REDISPORT}"
+          \cp -af /usr/bin/redis-server "/etc/redis${REDISPORT}/redis-server"
+          sed -i "s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
+          sed -i "s|dir \/var\/lib\/redis\/|dir \/var\/lib\/redis${REDISPORT}|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          sed -i "s|cluster-config-file nodes-6379.conf|cluster-config-file nodes-${REDISPORT}.conf|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          sed -i "s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          sed -i "s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis${REDISPORT}.log|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          sed -i "s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          sed -i "s|appendfilename \"appendonly.aof\"|appendfilename \"appendonly${REDISPORT}.aof\"|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          echo "#masterauth abc123" >> "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          sed -i "s|\/etc\/redis.conf|\/etc\/redis${REDISPORT}\/redis${REDISPORT}.conf|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
+          # enable redis cluster settings
+          if [[ "$CLUSTER" = 'cluster' ]]; then
+            \cp -af /usr/bin/redis-server "/etc/redis${REDISPORT}/redis-server"
+            sed -i "s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
+            sed -i 's|^# cluster-enabled yes|cluster-enabled yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+            sed -i "s|^# cluster-config-file nodes-${REDISPORT}.conf|cluster-config-file nodes-${DT}.conf|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+            sed -i "s|^# cluster-node-timeout 15000|cluster-node-timeout 5000|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+            sed -i 's|^appendonly no|appendonly yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+            echo "enabled cluster mode with cluster-config-file nodes-${DT}.conf"
+          fi
           systemctl daemon-reload
           systemctl restart redis${REDISPORT}
           systemctl enable redis${REDISPORT}
           echo "## Redis TCP $REDISPORT Info ##"
           redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER
+          if [[ "$CLUSTER" = 'cluster' ]]; then
+            redis-cli -h 127.0.0.1 -p $REDISPORT INFO CLUSTER
+          fi
         fi
       fi
   done
@@ -154,18 +195,33 @@ genredis() {
 ######################################################
 NUM=$1
 WIPE=$2
+CLUSTER=$2
 
-if [[ "$WIPE" = 'delete' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
+if [[ "$CLUSTER" = 'cluster' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
+  if [ "$NUM" -lt '6' ]; then
+    echo
+    echo "minimum of 3 master nodes are required for redis"
+    echo "cluster configuration so minimum 6 redis servers"
+    echo "i.e. 3x master/slave redis nodes"
+    echo
+    echo "$0 6 cluster"
+    exit
+  fi
+  genredis $NUM cluster
+elif [[ "$WIPE" = 'delete' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
   genredis_del $NUM
 elif [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
   # NUM is a number
   genredis $NUM
 else
   echo
-  echo "Usage where X equal postive integer for number of redis"
-  echo "servers to create with incrementing TCP redis ports"
-  echo "starting at STARTPORT=6479. Append delete flag to remove"
+  echo "* Usage where X equal postive integer for number of redis"
+  echo "  servers to create with incrementing TCP redis ports"
+  echo "  starting at STARTPORT=6479."
+  echo "* Append delete flag to remove"
+  echo "* Append cluster flag to enable cluster mode"
   echo
   echo "$0 X"
   echo "$0 X delete"
+  echo "$0 X cluster"
 fi
