@@ -10,9 +10,13 @@ DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
 DEBUG_REDISGEN='y'
+INSTALLDIR='/svr-setup'
 ######################################################
 # functions
 #############
+if [ ! -d "$INSTALLDIR" ]; then
+  mkdir -p "$INSTALLDIR"
+fi
 
 if [ ! -f /usr/lib/systemd/system/redis.service ]; then
   echo
@@ -26,6 +30,39 @@ fi
 if [[ -f /etc/systemd/system/redis.service.d/limit.conf && ! "$(grep 262144 /etc/systemd/system/redis.service.d/limit.conf)" ]]; then
   sed -i 's|LimitNOFILE=.*|LimitNOFILE=262144|' /etc/systemd/system/redis.service.d/limit.conf
 fi
+
+redis_cluster_install() {
+  UPDATE=$1
+  if [[ ! -f /usr/local/bin/redis-cluster-tool || "$UPDATE" = 'update' ]]; then
+    echo
+    echo "install redis-cluster-tool"
+    echo "https://github.com/deep011/redis-cluster-tool"
+    echo
+    echo "hiredis-vip install"
+    cd "$INSTALLDIR"
+    rm -rf hiredis-vip
+    git clone https://github.com/vipshop/hiredis-vip.git
+    cd hiredis-vip
+    make -s clean
+    make -s >/dev/null 2>&1
+    make install
+    ldconfig
+    
+    echo
+    echo "redis-cluster-tool install"
+    cd "$INSTALLDIR"
+    rm -rf redis-cluster-tool
+    git clone https://github.com/deep011/redis-cluster-tool.git
+    cd redis-cluster-tool
+    make -s clean
+    make -s >/dev/null 2>&1
+    make install
+    echo "redis-cluster-tool -h"
+    redis-cluster-tool -h
+  else
+    echo "redis-cluster-tool already installed"
+  fi
+}
 
 genredis_del() {
   # increment starts at 0
@@ -197,7 +234,15 @@ NUM=$1
 WIPE=$2
 CLUSTER=$2
 
-if [[ "$CLUSTER" = 'cluster' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
+if [[ "$NUM" = 'prep' && "$WIPE" = 'update' ]]; then
+  redis_cluster_install update
+  PREP=y
+elif [[ "$NUM" = 'prep' ]]; then
+  redis_cluster_install
+  PREP=y
+fi
+
+if [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'cluster' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
   if [ "$NUM" -lt '6' ]; then
     echo
     echo "minimum of 3 master nodes are required for redis"
@@ -208,20 +253,24 @@ if [[ "$CLUSTER" = 'cluster' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
     exit
   fi
   genredis $NUM cluster
-elif [[ "$WIPE" = 'delete' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
+elif [[ "$NUM" != 'prep' ]] && [[ "$WIPE" = 'delete' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
   genredis_del $NUM
-elif [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
+elif [[ "$NUM" != 'prep' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
   # NUM is a number
   genredis $NUM
-else
+elif [[ "$PREP" != 'y' ]]; then
   echo
   echo "* Usage where X equal postive integer for number of redis"
   echo "  servers to create with incrementing TCP redis ports"
   echo "  starting at STARTPORT=6479."
   echo "* Append delete flag to remove"
   echo "* Append cluster flag to enable cluster mode"
+  echo "* standalone prep command installs redis-cluster-tool"
+  echo "* standalone prep update command updates redis-cluster-tool"
   echo
   echo "$0 X"
   echo "$0 X delete"
   echo "$0 X cluster"
+  echo "$0 prep"
+  echo "$0 prep update"
 fi
