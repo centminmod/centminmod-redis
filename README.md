@@ -1,7 +1,7 @@
 Info:
 =======
 
-Redis server generator to create multiple Redis servers locally listening on 127.0.0.1 with starting port `STARTPORT=6479` and incrementally created via integer passed on `redis-generator.sh` command line. Written for CentOS 7 only with [centminmod.com](https://centminmod.com) LEMP stacks specifically.
+Redis server generator to create multiple Redis servers locally listening on 127.0.0.1 with starting port `STARTPORT=6479` and incrementally created additional redis servers via integer passed on `redis-generator.sh` command line. Written for CentOS 7 only with [centminmod.com](https://centminmod.com) LEMP stacks specifically.
 
 Requirements:
 =======
@@ -45,6 +45,20 @@ Usage:
     ./redis-generator.sh X cluster
     ./redis-generator.sh prep
     ./redis-generator.sh prep update
+
+When you create 2 redis servers via command:
+
+    ./redis-generator.sh 2
+
+You will create:
+
+* 2 redis server starting at `STARTPORT=6479` for redis on 6479 and 6480 TCP ports.
+* systemd files for controlling each redis server at `/usr/lib/systemd/system/redis6479.service` and `/usr/lib/systemd/system/redis6480.service`
+* dedicated redis directories for each redis server instance at `/etc/redis6479` and `/etc/redis6480`
+* dedicated redis config files at `/etc/redis6479/redis6479.conf` and `/etc/redis6479/redis6480.conf` 
+* each config file will have `dbfilename` as `dump6479.rdb` and `dump6480.rdb` with commented out unix sockets at `/var/run/redis/redis6479.sock` and `/var/run/redis/redis6480.sock`
+* dedicated redis data directories at `/var/lib/redis6479` and `/var/lib/redis6480`
+* if `cluster` flag is used, each redis config file will reference a `cluster-config-file` in format of `cluster-config-file nodes-150317-003235.conf` where date/timestamped
 
 Install & Update redis-cluster-tool:
 =======
