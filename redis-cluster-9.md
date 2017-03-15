@@ -337,3 +337,35 @@ Example of using [redis-generator.sh](https://github.com/centminmod/centminmod-r
         slave[127.0.0.1:6487] cluster_state: ok
         
         All nodes "cluster_state" are SAME: ok
+
+Test the redis cluster
+
+    redis-cli -h 127.0.0.1 -p 6479 -c set foo bar
+    OK
+    
+    redis-cli -h 127.0.0.1 -p 6479 -c get foo
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6480 -c get foo  
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6481 -c get foo 
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6482 -c get foo  
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6483 -c get foo 
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6484 -c get foo 
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6485 -c get foo 
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6486 -c get foo 
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6487 -c get foo 
+    "bar"
