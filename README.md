@@ -61,6 +61,13 @@ You will create:
 * dedicated redis data directories at `/var/lib/redis6479` and `/var/lib/redis6480`
 * if `cluster` flag is used, each redis config file will reference a `cluster-config-file` in format of `cluster-config-file nodes-150317-003235.conf` where date/timestamped
 
+If you want to create multiple redis grouped clusters, you could make a copy of `redis-generator.sh` as `redis-generator2.sh` and just edit the `STARTPORT=6479` starting port variable to say `STARTPORT=6579`
+
+    ./redis-generator.sh 2
+    ./redis-generator2.sh 2
+
+This would create 2x2 sets of redis servers where one set uses TCP ports `6479` and `6480` and other set uses TCP ports `6579` and `6580`
+
 Install & Update redis-cluster-tool:
 =======
 
