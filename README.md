@@ -49,6 +49,8 @@ Usage:
 Install & Update redis-cluster-tool:
 =======
 
+[redis-cluster-tool](https://github.com/deep011/redis-cluster-tool) is used to join multiple cluster enabled redis server configs created via `redis-generator.sh` into a redis cluster
+
 To install redis-cluster-tool
 
     ./redis-generator.sh prep
