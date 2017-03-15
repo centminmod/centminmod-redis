@@ -921,3 +921,35 @@ Example of redis port 6482 master with port 6483 and 6484 redis slaves
     repl_backlog_size:1048576
     repl_backlog_first_byte_offset:0
     repl_backlog_histlen:0
+
+Test the redis cluster
+
+    redis-cli -h 127.0.0.1 -p 6479 -c set foo bar
+    OK
+    
+    redis-cli -h 127.0.0.1 -p 6479 -c get foo
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6480 -c get foo  
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6481 -c get foo 
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6482 -c get foo  
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6483 -c get foo 
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6484 -c get foo 
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6485 -c get foo 
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6486 -c get foo 
+    "bar"
+    
+    redis-cli -h 127.0.0.1 -p 6487 -c get foo 
+    "bar"
