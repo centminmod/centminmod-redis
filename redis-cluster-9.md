@@ -3,340 +3,242 @@ Example
 
 Example of using [redis-generator.sh](https://github.com/centminmod/centminmod-redis) to create a 9 node redis cluster consisting of 3x sets of 1x master + 2x slaves + `redis-cluster-tool` joining of the 9 nodes to create a redis cluster.
 
-        ./redis-generator.sh 9 cluster 9
-        
-        Creating redis servers starting at TCP = 6479...
-        -------------------------------------------------------
-        creating redis server: redis6479.service [increment value: 0]
-        redis TCP port: 6479
-        create systemd redis6479.service
-        cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
-        create /etc/redis6479/redis6479.conf config file
-        mkdir -p /etc/redis6479
-        cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
-        -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6479/redis6479.conf
-        -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
-        enabled cluster mode with cluster-config-file nodes-150317-052411.conf
-        Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
-        ## Redis TCP 6479 Info ##
-        # Server
-        redis_version:3.2.8
-        redis_git_sha1:00000000
-        redis_git_dirty:0
-        redis_build_id:dd923e72e9efa6d8
-        redis_mode:cluster
-        os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-        arch_bits:64
-        multiplexing_api:epoll
-        gcc_version:4.8.5
-        process_id:4620
-        run_id:711c1d13ef4aa3cded812f705b9043df05e00cb6
-        tcp_port:6479
-        uptime_in_seconds:0
-        uptime_in_days:0
-        hz:10
-        lru_clock:13160443
-        executable:/etc/redis6479/redis-server
-        config_file:/etc/redis6479/redis6479.conf
-        # Cluster
-        cluster_enabled:1
-        -------------------------------------------------------
-        creating redis server: redis6480.service [increment value: 1]
-        redis TCP port: 6480
-        create systemd redis6480.service
-        cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
-        create /etc/redis6480/redis6480.conf config file
-        mkdir -p /etc/redis6480
-        cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
-        -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6480/redis6480.conf
-        -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
-        enabled cluster mode with cluster-config-file nodes-150317-052411.conf
-        Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
-        ## Redis TCP 6480 Info ##
-        # Server
-        redis_version:3.2.8
-        redis_git_sha1:00000000
-        redis_git_dirty:0
-        redis_build_id:dd923e72e9efa6d8
-        redis_mode:cluster
-        os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-        arch_bits:64
-        multiplexing_api:epoll
-        gcc_version:4.8.5
-        process_id:4694
-        run_id:e8796b169ffbe4916d534abf11c3e857e0a0f828
-        tcp_port:6480
-        uptime_in_seconds:0
-        uptime_in_days:0
-        hz:10
-        lru_clock:13160444
-        executable:/etc/redis6480/redis-server
-        config_file:/etc/redis6480/redis6480.conf
-        # Cluster
-        cluster_enabled:1
-        -------------------------------------------------------
-        creating redis server: redis6481.service [increment value: 2]
-        redis TCP port: 6481
-        create systemd redis6481.service
-        cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6481.service
-        create /etc/redis6481/redis6481.conf config file
-        mkdir -p /etc/redis6481
-        cp -a /etc/redis.conf /etc/redis6481/redis6481.conf
-        -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6481/redis6481.conf
-        -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6481.service
-        enabled cluster mode with cluster-config-file nodes-150317-052411.conf
-        Created symlink from /etc/systemd/system/multi-user.target.wants/redis6481.service to /usr/lib/systemd/system/redis6481.service.
-        ## Redis TCP 6481 Info ##
-        # Server
-        redis_version:3.2.8
-        redis_git_sha1:00000000
-        redis_git_dirty:0
-        redis_build_id:dd923e72e9efa6d8
-        redis_mode:cluster
-        os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-        arch_bits:64
-        multiplexing_api:epoll
-        gcc_version:4.8.5
-        process_id:4768
-        run_id:e540a98d044c5e32b6dd4471415fd27fbba0d9e7
-        tcp_port:6481
-        uptime_in_seconds:0
-        uptime_in_days:0
-        hz:10
-        lru_clock:13160444
-        executable:/etc/redis6481/redis-server
-        config_file:/etc/redis6481/redis6481.conf
-        # Cluster
-        cluster_enabled:1
-        -------------------------------------------------------
-        creating redis server: redis6482.service [increment value: 3]
-        redis TCP port: 6482
-        create systemd redis6482.service
-        cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6482.service
-        create /etc/redis6482/redis6482.conf config file
-        mkdir -p /etc/redis6482
-        cp -a /etc/redis.conf /etc/redis6482/redis6482.conf
-        -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6482/redis6482.conf
-        -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6482.service
-        enabled cluster mode with cluster-config-file nodes-150317-052411.conf
-        Created symlink from /etc/systemd/system/multi-user.target.wants/redis6482.service to /usr/lib/systemd/system/redis6482.service.
-        ## Redis TCP 6482 Info ##
-        # Server
-        redis_version:3.2.8
-        redis_git_sha1:00000000
-        redis_git_dirty:0
-        redis_build_id:dd923e72e9efa6d8
-        redis_mode:cluster
-        os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-        arch_bits:64
-        multiplexing_api:epoll
-        gcc_version:4.8.5
-        process_id:4842
-        run_id:33544f37133df4568e15a57b7033365bad7b2142
-        tcp_port:6482
-        uptime_in_seconds:0
-        uptime_in_days:0
-        hz:10
-        lru_clock:13160444
-        executable:/etc/redis6482/redis-server
-        config_file:/etc/redis6482/redis6482.conf
-        # Cluster
-        cluster_enabled:1
-        -------------------------------------------------------
-        creating redis server: redis6483.service [increment value: 4]
-        redis TCP port: 6483
-        create systemd redis6483.service
-        cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6483.service
-        create /etc/redis6483/redis6483.conf config file
-        mkdir -p /etc/redis6483
-        cp -a /etc/redis.conf /etc/redis6483/redis6483.conf
-        -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6483/redis6483.conf
-        -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6483.service
-        enabled cluster mode with cluster-config-file nodes-150317-052411.conf
-        Created symlink from /etc/systemd/system/multi-user.target.wants/redis6483.service to /usr/lib/systemd/system/redis6483.service.
-        ## Redis TCP 6483 Info ##
-        # Server
-        redis_version:3.2.8
-        redis_git_sha1:00000000
-        redis_git_dirty:0
-        redis_build_id:dd923e72e9efa6d8
-        redis_mode:cluster
-        os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-        arch_bits:64
-        multiplexing_api:epoll
-        gcc_version:4.8.5
-        process_id:4916
-        run_id:306e2c6834e98c132fe21231362059f11f0f63b5
-        tcp_port:6483
-        uptime_in_seconds:0
-        uptime_in_days:0
-        hz:10
-        lru_clock:13160444
-        executable:/etc/redis6483/redis-server
-        config_file:/etc/redis6483/redis6483.conf
-        # Cluster
-        cluster_enabled:1
-        -------------------------------------------------------
-        creating redis server: redis6484.service [increment value: 5]
-        redis TCP port: 6484
-        create systemd redis6484.service
-        cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6484.service
-        create /etc/redis6484/redis6484.conf config file
-        mkdir -p /etc/redis6484
-        cp -a /etc/redis.conf /etc/redis6484/redis6484.conf
-        -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6484/redis6484.conf
-        -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6484.service
-        enabled cluster mode with cluster-config-file nodes-150317-052411.conf
-        Created symlink from /etc/systemd/system/multi-user.target.wants/redis6484.service to /usr/lib/systemd/system/redis6484.service.
-        ## Redis TCP 6484 Info ##
-        # Server
-        redis_version:3.2.8
-        redis_git_sha1:00000000
-        redis_git_dirty:0
-        redis_build_id:dd923e72e9efa6d8
-        redis_mode:cluster
-        os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-        arch_bits:64
-        multiplexing_api:epoll
-        gcc_version:4.8.5
-        process_id:4990
-        run_id:ef70c20b865d4e9c2870841b86d127f06692258c
-        tcp_port:6484
-        uptime_in_seconds:0
-        uptime_in_days:0
-        hz:10
-        lru_clock:13160445
-        executable:/etc/redis6484/redis-server
-        config_file:/etc/redis6484/redis6484.conf
-        # Cluster
-        cluster_enabled:1
-        -------------------------------------------------------
-        creating redis server: redis6485.service [increment value: 6]
-        redis TCP port: 6485
-        create systemd redis6485.service
-        cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6485.service
-        create /etc/redis6485/redis6485.conf config file
-        mkdir -p /etc/redis6485
-        cp -a /etc/redis.conf /etc/redis6485/redis6485.conf
-        -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6485/redis6485.conf
-        -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6485.service
-        enabled cluster mode with cluster-config-file nodes-150317-052411.conf
-        Created symlink from /etc/systemd/system/multi-user.target.wants/redis6485.service to /usr/lib/systemd/system/redis6485.service.
-        ## Redis TCP 6485 Info ##
-        # Server
-        redis_version:3.2.8
-        redis_git_sha1:00000000
-        redis_git_dirty:0
-        redis_build_id:dd923e72e9efa6d8
-        redis_mode:cluster
-        os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-        arch_bits:64
-        multiplexing_api:epoll
-        gcc_version:4.8.5
-        process_id:5064
-        run_id:dad85554d72a62e5cfaca8436078adef9731bfbb
-        tcp_port:6485
-        uptime_in_seconds:0
-        uptime_in_days:0
-        hz:10
-        lru_clock:13160445
-        executable:/etc/redis6485/redis-server
-        config_file:/etc/redis6485/redis6485.conf
-        # Cluster
-        cluster_enabled:1
-        -------------------------------------------------------
-        creating redis server: redis6486.service [increment value: 7]
-        redis TCP port: 6486
-        create systemd redis6486.service
-        cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6486.service
-        create /etc/redis6486/redis6486.conf config file
-        mkdir -p /etc/redis6486
-        cp -a /etc/redis.conf /etc/redis6486/redis6486.conf
-        -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6486/redis6486.conf
-        -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6486.service
-        enabled cluster mode with cluster-config-file nodes-150317-052411.conf
-        Created symlink from /etc/systemd/system/multi-user.target.wants/redis6486.service to /usr/lib/systemd/system/redis6486.service.
-        ## Redis TCP 6486 Info ##
-        # Server
-        redis_version:3.2.8
-        redis_git_sha1:00000000
-        redis_git_dirty:0
-        redis_build_id:dd923e72e9efa6d8
-        redis_mode:cluster
-        os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-        arch_bits:64
-        multiplexing_api:epoll
-        gcc_version:4.8.5
-        process_id:5138
-        run_id:f7f7476ed6b21ce42fb05e7bb4319aac7cb08a2f
-        tcp_port:6486
-        uptime_in_seconds:0
-        uptime_in_days:0
-        hz:10
-        lru_clock:13160445
-        executable:/etc/redis6486/redis-server
-        config_file:/etc/redis6486/redis6486.conf
-        # Cluster
-        cluster_enabled:1
-        -------------------------------------------------------
-        creating redis server: redis6487.service [increment value: 8]
-        redis TCP port: 6487
-        create systemd redis6487.service
-        cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6487.service
-        create /etc/redis6487/redis6487.conf config file
-        mkdir -p /etc/redis6487
-        cp -a /etc/redis.conf /etc/redis6487/redis6487.conf
-        -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6487/redis6487.conf
-        -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6487.service
-        enabled cluster mode with cluster-config-file nodes-150317-052411.conf
-        Created symlink from /etc/systemd/system/multi-user.target.wants/redis6487.service to /usr/lib/systemd/system/redis6487.service.
-        ## Redis TCP 6487 Info ##
-        # Server
-        redis_version:3.2.8
-        redis_git_sha1:00000000
-        redis_git_dirty:0
-        redis_build_id:dd923e72e9efa6d8
-        redis_mode:cluster
-        os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-        arch_bits:64
-        multiplexing_api:epoll
-        gcc_version:4.8.5
-        process_id:5212
-        run_id:9e50dbc35df29f63ab2b04d876bd1695318bf1ff
-        tcp_port:6487
-        uptime_in_seconds:0
-        uptime_in_days:0
-        hz:10
-        lru_clock:13160446
-        executable:/etc/redis6487/redis-server
-        config_file:/etc/redis6487/redis6487.conf
-        # Cluster
-        cluster_enabled:1
-        
-        Join created 9 node cluster enabled redis instances to cluster
-        using redis-cluster-tool: 3x 1x master + 2x slaves
-        
-        redis-cluster-tool -C "cluster_create 127.0.0.1:6479[127.0.0.1:6480|127.0.0.1:6481] 127.0.0.1:6482[127.0.0.1:6483|127.0.0.1:6484] 127.0.0.1:6485[127.0.0.1:6486|127.0.0.1:6487]"
-        Waiting for the nodes to join...
-        All nodes joined!
-        Cluster created success!
-        
-        redis-cluster-tool -a 127.0.0.1:6479 -C cluster_state -r master
-        master[127.0.0.1:6479] cluster_state: ok
-        master[127.0.0.1:6482] cluster_state: ok
-        master[127.0.0.1:6485] cluster_state: ok
-        
-        All nodes "cluster_state" are SAME: ok
-        
-        redis-cluster-tool -a 127.0.0.1:6479 -C cluster_state -r slave
-        slave[127.0.0.1:6480] cluster_state: ok
-        slave[127.0.0.1:6481] cluster_state: ok
-        slave[127.0.0.1:6483] cluster_state: ok
-        slave[127.0.0.1:6484] cluster_state: ok
-        slave[127.0.0.1:6486] cluster_state: ok
-        slave[127.0.0.1:6487] cluster_state: ok
-        
-        All nodes "cluster_state" are SAME: ok
+    ./redis-generator.sh clustermake 9
+    
+    Creating redis servers starting at TCP = 6479...
+    -------------------------------------------------------
+    creating redis server: redis6479.service [increment value: 0]
+    redis TCP port: 6479
+    create systemd redis6479.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
+    create /etc/redis6479/redis6479.conf config file
+    mkdir -p /etc/redis6479
+    cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6479/redis6479.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
+    enabled cluster mode with cluster-config-file nodes-150317-180034.conf
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
+    ## Redis TCP 6479 Info ##
+    redis_version:3.2.8
+    redis_mode:cluster
+    process_id:14068
+    tcp_port:6479
+    uptime_in_seconds:0
+    uptime_in_days:0
+    executable:/etc/redis6479/redis-server
+    config_file:/etc/redis6479/redis6479.conf
+    # Cluster
+    cluster_enabled:1
+    -------------------------------------------------------
+    creating redis server: redis6480.service [increment value: 1]
+    redis TCP port: 6480
+    create systemd redis6480.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
+    create /etc/redis6480/redis6480.conf config file
+    mkdir -p /etc/redis6480
+    cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6480/redis6480.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
+    enabled cluster mode with cluster-config-file nodes-150317-180034.conf
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
+    ## Redis TCP 6480 Info ##
+    redis_version:3.2.8
+    redis_mode:cluster
+    process_id:14143
+    tcp_port:6480
+    uptime_in_seconds:0
+    uptime_in_days:0
+    executable:/etc/redis6480/redis-server
+    config_file:/etc/redis6480/redis6480.conf
+    # Cluster
+    cluster_enabled:1
+    -------------------------------------------------------
+    creating redis server: redis6481.service [increment value: 2]
+    redis TCP port: 6481
+    create systemd redis6481.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6481.service
+    create /etc/redis6481/redis6481.conf config file
+    mkdir -p /etc/redis6481
+    cp -a /etc/redis.conf /etc/redis6481/redis6481.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6481/redis6481.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6481.service
+    enabled cluster mode with cluster-config-file nodes-150317-180034.conf
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6481.service to /usr/lib/systemd/system/redis6481.service.
+    ## Redis TCP 6481 Info ##
+    redis_version:3.2.8
+    redis_mode:cluster
+    process_id:14218
+    tcp_port:6481
+    uptime_in_seconds:0
+    uptime_in_days:0
+    executable:/etc/redis6481/redis-server
+    config_file:/etc/redis6481/redis6481.conf
+    # Cluster
+    cluster_enabled:1
+    -------------------------------------------------------
+    creating redis server: redis6482.service [increment value: 3]
+    redis TCP port: 6482
+    create systemd redis6482.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6482.service
+    create /etc/redis6482/redis6482.conf config file
+    mkdir -p /etc/redis6482
+    cp -a /etc/redis.conf /etc/redis6482/redis6482.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6482/redis6482.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6482.service
+    enabled cluster mode with cluster-config-file nodes-150317-180034.conf
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6482.service to /usr/lib/systemd/system/redis6482.service.
+    ## Redis TCP 6482 Info ##
+    redis_version:3.2.8
+    redis_mode:cluster
+    process_id:14293
+    tcp_port:6482
+    uptime_in_seconds:0
+    uptime_in_days:0
+    executable:/etc/redis6482/redis-server
+    config_file:/etc/redis6482/redis6482.conf
+    # Cluster
+    cluster_enabled:1
+    -------------------------------------------------------
+    creating redis server: redis6483.service [increment value: 4]
+    redis TCP port: 6483
+    create systemd redis6483.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6483.service
+    create /etc/redis6483/redis6483.conf config file
+    mkdir -p /etc/redis6483
+    cp -a /etc/redis.conf /etc/redis6483/redis6483.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6483/redis6483.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6483.service
+    enabled cluster mode with cluster-config-file nodes-150317-180034.conf
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6483.service to /usr/lib/systemd/system/redis6483.service.
+    ## Redis TCP 6483 Info ##
+    redis_version:3.2.8
+    redis_mode:cluster
+    process_id:14368
+    tcp_port:6483
+    uptime_in_seconds:0
+    uptime_in_days:0
+    executable:/etc/redis6483/redis-server
+    config_file:/etc/redis6483/redis6483.conf
+    # Cluster
+    cluster_enabled:1
+    -------------------------------------------------------
+    creating redis server: redis6484.service [increment value: 5]
+    redis TCP port: 6484
+    create systemd redis6484.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6484.service
+    create /etc/redis6484/redis6484.conf config file
+    mkdir -p /etc/redis6484
+    cp -a /etc/redis.conf /etc/redis6484/redis6484.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6484/redis6484.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6484.service
+    enabled cluster mode with cluster-config-file nodes-150317-180034.conf
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6484.service to /usr/lib/systemd/system/redis6484.service.
+    ## Redis TCP 6484 Info ##
+    redis_version:3.2.8
+    redis_mode:cluster
+    process_id:14443
+    tcp_port:6484
+    uptime_in_seconds:0
+    uptime_in_days:0
+    executable:/etc/redis6484/redis-server
+    config_file:/etc/redis6484/redis6484.conf
+    # Cluster
+    cluster_enabled:1
+    -------------------------------------------------------
+    creating redis server: redis6485.service [increment value: 6]
+    redis TCP port: 6485
+    create systemd redis6485.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6485.service
+    create /etc/redis6485/redis6485.conf config file
+    mkdir -p /etc/redis6485
+    cp -a /etc/redis.conf /etc/redis6485/redis6485.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6485/redis6485.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6485.service
+    enabled cluster mode with cluster-config-file nodes-150317-180034.conf
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6485.service to /usr/lib/systemd/system/redis6485.service.
+    ## Redis TCP 6485 Info ##
+    redis_version:3.2.8
+    redis_mode:cluster
+    process_id:14518
+    tcp_port:6485
+    uptime_in_seconds:0
+    uptime_in_days:0
+    executable:/etc/redis6485/redis-server
+    config_file:/etc/redis6485/redis6485.conf
+    # Cluster
+    cluster_enabled:1
+    -------------------------------------------------------
+    creating redis server: redis6486.service [increment value: 7]
+    redis TCP port: 6486
+    create systemd redis6486.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6486.service
+    create /etc/redis6486/redis6486.conf config file
+    mkdir -p /etc/redis6486
+    cp -a /etc/redis.conf /etc/redis6486/redis6486.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6486/redis6486.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6486.service
+    enabled cluster mode with cluster-config-file nodes-150317-180034.conf
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6486.service to /usr/lib/systemd/system/redis6486.service.
+    ## Redis TCP 6486 Info ##
+    redis_version:3.2.8
+    redis_mode:cluster
+    process_id:14593
+    tcp_port:6486
+    uptime_in_seconds:0
+    uptime_in_days:0
+    executable:/etc/redis6486/redis-server
+    config_file:/etc/redis6486/redis6486.conf
+    # Cluster
+    cluster_enabled:1
+    -------------------------------------------------------
+    creating redis server: redis6487.service [increment value: 8]
+    redis TCP port: 6487
+    create systemd redis6487.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6487.service
+    create /etc/redis6487/redis6487.conf config file
+    mkdir -p /etc/redis6487
+    cp -a /etc/redis.conf /etc/redis6487/redis6487.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6487/redis6487.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6487.service
+    enabled cluster mode with cluster-config-file nodes-150317-180034.conf
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6487.service to /usr/lib/systemd/system/redis6487.service.
+    ## Redis TCP 6487 Info ##
+    redis_version:3.2.8
+    redis_mode:cluster
+    process_id:14668
+    tcp_port:6487
+    uptime_in_seconds:0
+    uptime_in_days:0
+    executable:/etc/redis6487/redis-server
+    config_file:/etc/redis6487/redis6487.conf
+    # Cluster
+    cluster_enabled:1
+    
+    Join created 9 node cluster enabled redis instances to cluster
+    using redis-cluster-tool: 3x 1x master + 2x slaves
+    
+    redis-cluster-tool -C "cluster_create 127.0.0.1:6479[127.0.0.1:6480|127.0.0.1:6481] 127.0.0.1:6482[127.0.0.1:6483|127.0.0.1:6484] 127.0.0.1:6485[127.0.0.1:6486|127.0.0.1:6487]"
+    Waiting for the nodes to join...
+    All nodes joined!
+    Cluster created success!
+    
+    redis-cluster-tool -a 127.0.0.1:6479 -C cluster_state -r master
+    master[127.0.0.1:6479] cluster_state: ok
+    master[127.0.0.1:6482] cluster_state: ok
+    master[127.0.0.1:6485] cluster_state: ok
+    
+    All nodes "cluster_state" are SAME: ok
+    
+    redis-cluster-tool -a 127.0.0.1:6479 -C cluster_state -r slave
+    slave[127.0.0.1:6480] cluster_state: ok
+    slave[127.0.0.1:6481] cluster_state: ok
+    slave[127.0.0.1:6483] cluster_state: ok
+    slave[127.0.0.1:6484] cluster_state: ok
+    slave[127.0.0.1:6486] cluster_state: ok
+    slave[127.0.0.1:6487] cluster_state: ok
+    
+    All nodes "cluster_state" are SAME: ok
+
 
 Test the redis cluster
 
@@ -373,12 +275,12 @@ Test the redis cluster
 Cluster node info
 
     redis-cli -h 127.0.0.1 -p 6479 -c cluster nodes | sort -k2
-    473f36f4519c07f9bfd5d20f827012ee94a9c3d9 127.0.0.1:6479 myself,master - 0 0 7 connected 0-5461
-    c7df0b5fd10496cba29697e58d504b8881478cdb 127.0.0.1:6480 slave 473f36f4519c07f9bfd5d20f827012ee94a9c3d9 0 1489556249489 7 connected
-    dd66d05f9edfb7eb6d05db38c957638b9b7d1476 127.0.0.1:6481 slave 473f36f4519c07f9bfd5d20f827012ee94a9c3d9 0 1489556249994 7 connected
-    ddcdb2e769457e8792b13a1737494cd73074a5b3 127.0.0.1:6482 master - 0 1489556249994 2 connected 5462-10922
-    37154eb26e85de36f12d5612e85ebdc93d3e8051 127.0.0.1:6483 slave ddcdb2e769457e8792b13a1737494cd73074a5b3 0 1489556249489 2 connected
-    80c8be99cdeb8dc716ff9c9ac74f086b26296e82 127.0.0.1:6484 slave ddcdb2e769457e8792b13a1737494cd73074a5b3 0 1489556248984 5 connected
-    ebc3ffa447527c0177f6ed3532b75a629aa233d6 127.0.0.1:6485 master - 0 1489556250501 3 connected 10923-16383
-    f844e9678fb58bc2ba9c1667092d549bb371781e 127.0.0.1:6486 slave ebc3ffa447527c0177f6ed3532b75a629aa233d6 0 1489556251006 3 connected
-    2a71df79ce1317690cdbb89cbfbd269f8d23f92a 127.0.0.1:6487 slave ebc3ffa447527c0177f6ed3532b75a629aa233d6 0 1489556248985 5 connected
+    ad19d87ec30f3e6d0e7645916260b11e3cdd8525 127.0.0.1:6479 myself,master - 0 0 3 connected 0-5461
+    6b6dfc86f002c95a2ca9d6e2902d5bb8818acc49 127.0.0.1:6480 slave ad19d87ec30f3e6d0e7645916260b11e3cdd8525 0 1489600881924 4 connected
+    c63fadce5c8923ddd15e2be324f5dfe9f2a219ef 127.0.0.1:6481 slave ad19d87ec30f3e6d0e7645916260b11e3cdd8525 0 1489600880916 3 connected
+    8a9bcabe52f064a1b1acb86191d1693b93863832 127.0.0.1:6482 master - 0 1489600881421 1 connected 5462-10922
+    503bd1f34f875ab5e41397d7ace8e1566fc9b60e 127.0.0.1:6483 slave 8a9bcabe52f064a1b1acb86191d1693b93863832 0 1489600880916 5 connected
+    1a09318cd9d1644bd4ef4c1b9036bc675a93ac9c 127.0.0.1:6484 slave 8a9bcabe52f064a1b1acb86191d1693b93863832 0 1489600881924 6 connected
+    61a67d6075c614e769b7b772da4408d41b9e0f9d 127.0.0.1:6485 master - 0 1489600879905 4 connected 10923-16383
+    8225eb06a4dceafd68b362f90de29f0dc0052dea 127.0.0.1:6486 slave 61a67d6075c614e769b7b772da4408d41b9e0f9d 0 1489600881421 5 connected
+    e73f854c1c7e923599146697949b1da1269b9543 127.0.0.1:6487 slave 61a67d6075c614e769b7b772da4408d41b9e0f9d 0 1489600880916 4 connected

@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=0.6
+VER=0.7
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -179,9 +179,9 @@ genredis() {
           echo "systemctl enable redis${REDISPORT}"
           echo "Redis TCP $REDISPORT Info:"
           if [[ "$UNIXSOCKET" = [Yy] ]]; then
-            echo "redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO SERVER"
+            echo "redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
           else
-            echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER"
+            echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
           fi
           if [[ "$CLUSTER" = 'cluster' ]]; then
             if [[ "$UNIXSOCKET" = [Yy] ]]; then
@@ -263,9 +263,9 @@ genredis() {
           systemctl enable redis${REDISPORT}
           echo "## Redis TCP $REDISPORT Info ##"
           if [[ "$UNIXSOCKET" = [Yy] ]]; then
-            redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO SERVER
+            redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO SERVER| egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'
           else
-            redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER
+            redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER| egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'
           fi
           if [[ "$CLUSTER" = 'cluster' ]]; then
             if [[ "$UNIXSOCKET" = [Yy] ]]; then
@@ -328,88 +328,99 @@ genredis() {
 }
 
 ######################################################
-NUM=$1
-WIPE=$2
-CLUSTER=$2
-CLUSTER_CREATE=$3
 
-if [[ "$NUM" = 'prep' && "$WIPE" = 'update' ]]; then
-  redis_cluster_install update
-  PREP=y
-elif [[ "$NUM" = 'prep' ]]; then
-  redis_cluster_install
-  PREP=y
-fi
+case "$1" in
+  multi )
+    NUM=$2
+    genredis $NUM
+    ;;
+  prep )
+    redis_cluster_install
+    PREP=y
+    ;;
+  prepupdate )
+    redis_cluster_install update
+    PREP=y
+    ;;
+  replication )
+    NUM=$2
+    if [ "$NUM" -lt '2' ]; then
+      echo
+      echo "minimum of 2 nodes are required for redis"
+      echo "replication configuration"
+      echo "i.e. 1x master + 1x slave"
+      echo
+      echo "$0 replication X"
+      exit
+    fi
+    UNIXSOCKET='n'
+    genredis $NUM replication
+    ;;
+  clusterprep )
+    NUM=$2
+    if [ "$NUM" -lt '6' ]; then
+      echo
+      echo "minimum of 3 master nodes are required for redis"
+      echo "cluster configuration so minimum 6 redis servers"
+      echo "i.e. 3x master/slave redis nodes"
+      echo
+      echo "$0 clusterprep 6"
+      exit
+    fi
+    CLUSTER=cluster
+    genredis $NUM cluster
+    ;;
+  clustermake )
+    NUM=$2
+    if [ "$NUM" -lt '6' ]; then
+      echo
+      echo "minimum of 3 master nodes are required for redis"
+      echo "cluster configuration so minimum 6 redis servers"
+      echo "i.e. 3x master/slave redis nodes"
+      echo
+      echo "$0 clustermake 6"
+      echo "or"
+      echo "$0 clustermake 9"
+      exit
+    fi
+    if [ "$NUM" -eq '6' ]; then
+      CLUSTER_CREATE=6
+      CLUSTER=cluster
+      genredis 6 cluster 6
+    fi
+    if [ "$NUM" -eq '9' ]; then
+      CLUSTER_CREATE=9
+      CLUSTER=cluster
+      genredis 9 cluster 9
+    fi
+    ;;
+  delete )
+    NUM=$2
+    genredis_del $NUM
+    ;;
+  * )
+    echo
+    echo "* Usage: where X equal postive integer for number of redis"
+    echo "  servers to create with incrementing TCP redis ports"
+    echo "  starting at STARTPORT=6479."
 
-if [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'replication' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
-  if [ "$NUM" -lt '2' ]; then
+    echo "* prep - standalone prep command installs redis-cluster-tool"
+    echo "* prepupdate - standalone prep update command updates redis-cluster-tool"
+    echo "* multi X - number of standalone redis instances to create"
+    echo "* clusterprep X - number of cluster enabled config instances"
+    echo "* clustermake 6 - to enable cluster mode + create cluster"
+    echo "* clustermake 9 - flag to enable cluster mode + create cluster"
+    echo "* replication X - create enable replication enabled redis"
+    echo "* delete X - number of redis instances to delete"
     echo
-    echo "minimum of 2 nodes are required for redis"
-    echo "replication configuration"
-    echo "i.e. 1x master + 1x slave"
-    echo
-    echo "$0 2 replication"
-    exit
-  fi
-  UNIXSOCKET='n'
-  genredis $NUM replication
-elif [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'cluster' && "$CLUSTER_CREATE" -eq '6' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
-  if [ "$NUM" -lt '6' ]; then
-    echo
-    echo "minimum of 3 master nodes are required for redis"
-    echo "cluster configuration so minimum 6 redis servers"
-    echo "i.e. 3x master/slave redis nodes"
-    echo
-    echo "$0 6 cluster 6"
-    exit
-  fi
-  genredis 6 cluster 6
-elif [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'cluster' && "$CLUSTER_CREATE" -eq '9' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
-  if [ "$NUM" -lt '9' ]; then
-    echo
-    echo "minimum of 3 master nodes are required for redis"
-    echo "cluster configuration so minimum 9 redis servers"
-    echo "i.e. 3x master + 2x slave redis nodes"
-    echo
-    echo "$0 9 cluster 9"
-    exit
-  fi
-  genredis 9 cluster 9
-elif [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'cluster' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
-  if [ "$NUM" -lt '6' ]; then
-    echo
-    echo "minimum of 3 master nodes are required for redis"
-    echo "cluster configuration so minimum 6 redis servers"
-    echo "i.e. 3x master/slave redis nodes"
-    echo
-    echo "$0 6 cluster"
-    exit
-  fi
-  genredis $NUM cluster
-elif [[ "$NUM" != 'prep' ]] && [[ "$WIPE" = 'delete' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
-  genredis_del $NUM
-elif [[ "$NUM" != 'prep' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
-  # NUM is a number
-  genredis $NUM
-elif [[ "$PREP" != 'y' ]]; then
-  echo
-  echo "* Usage where X equal postive integer for number of redis"
-  echo "  servers to create with incrementing TCP redis ports"
-  echo "  starting at STARTPORT=6479."
-  echo "* Append delete flag to remove"
-  echo "* Append cluster flag to enable cluster mode"
-  echo "* Append cluster 6 flag to enable cluster mode + create cluster"
-  echo "* Append cluster 9 flag to enable cluster mode + create cluster"
-  echo "* Append replication flag to enable replication mode"
-  echo "* standalone prep command installs redis-cluster-tool"
-  echo "* standalone prep update command updates redis-cluster-tool"
-  echo
-  echo "$0 X"
-  echo "$0 X delete"
-  echo "$0 X cluster"
-  echo "$0 6 cluster 6"
-  echo "$0 9 cluster 9"
-  echo "$0 X replication"
-  echo "$0 prep"
-  echo "$0 prep update"
-fi
+    echo "$0 prep"
+    echo "$0 prepupdate"
+    echo "$0 multi X"
+    echo "$0 clusterprep X"
+    echo "$0 clustermake 6"
+    echo "$0 clustermake 9"
+    echo "$0 replication X"
+    echo "$0 delete X"
+    ;;
+esac
+exit

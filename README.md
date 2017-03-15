@@ -33,31 +33,36 @@ Usage:
 
 Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='y'` variable to enable using Unix sockets instead
 
-    ./redis-generator.sh
+    ./redis-generator.sh 
     
-    * Usage where X equal postive integer for number of redis
-      servers to create with incrementing TCP redis ports
-      starting at STARTPORT=6479.
-    * Append delete flag to remove
-    * Append cluster flag to enable cluster mode
-    * Append cluster 6 flag to enable cluster mode + create cluster
-    * Append cluster 9 flag to enable cluster mode + create cluster
-    * Append replication flag to enable replication mode
-    * standalone prep command installs redis-cluster-tool
-    * standalone prep update command updates redis-cluster-tool
+    * Usage: where X equal postive integer for number of redis
+    servers to create with incrementing TCP redis ports
+    starting at STARTPORT=6479.
+    * prep - standalone prep command installs redis-cluster-tool
+    * prepupdate - standalone prep update command updates redis-cluster-tool
+    * multi X - number of standalone redis instances to create
+    * clusterprep X - number of cluster enabled config instances
+    * clustermake 6 - to enable cluster mode + create cluster
+    * clustermake 9 - flag to enable cluster mode + create cluster
+    * replication X - create enable replication enabled redis
+    * delete X - number of redis instances to delete
     
-    ./redis-generator.sh X
-    ./redis-generator.sh X delete
-    ./redis-generator.sh X cluster
-    ./redis-generator.sh 6 cluster 6
-    ./redis-generator.sh 9 cluster 9
-    ./redis-generator.sh X replication
     ./redis-generator.sh prep
-    ./redis-generator.sh prep update
+    ./redis-generator.sh prepupdate
+    ./redis-generator.sh multi X
+    ./redis-generator.sh clusterprep X
+    ./redis-generator.sh clustermake 6
+    ./redis-generator.sh clustermake 9
+    ./redis-generator.sh replication X
+    ./redis-generator.sh delete X
+
+For `clustermake` options you need to install [redis-cluster-tool](https://github.com/deep011/redis-cluster-tool)  via `prep` command
+
+    ./redis-generator.sh prep
 
 When you create 2 redis servers via command:
 
-    ./redis-generator.sh 2
+    ./redis-generator.sh multi 2
 
 You will create:
 
@@ -72,8 +77,8 @@ You will create:
 
 If you want to create multiple redis grouped clusters, you could make a copy of `redis-generator.sh` as `redis-generator2.sh` and just edit the `STARTPORT=6479` starting port variable to say `STARTPORT=6579`
 
-    ./redis-generator.sh 2
-    ./redis-generator2.sh 2
+    ./redis-generator.sh multi 2
+    ./redis-generator2.sh multi 2
 
 This would create 2x2 sets of redis servers where one set uses TCP ports `6479` and `6480` and other set uses TCP ports `6579` and `6580`
 
@@ -94,7 +99,7 @@ To install redis-cluster-tool
 
 To update redis-cluster tool
 
-    ./redis-generator.sh prep update
+    ./redis-generator.sh prepupdate
 
 Examples:
 =======
@@ -103,14 +108,17 @@ Below are various examples. For specific redis 9 node cluster setup with auto ru
 
 With `DEBUG_REDISGEN='y'` for dry run debug run checks
 
-    ./redis-generator.sh 2  
+    ./redis-generator.sh multi 2              
     
     Creating redis servers starting at TCP = 6479...
     -------------------------------------------------------
     creating redis server: redis6479.service [increment value: 0]
     redis TCP port: 6479
-    /usr/lib/systemd/system/redis6479.service already exists
-    /etc/redis6479/redis6479.conf already exists
+    create systemd redis6479.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
+    create /etc/redis6479/redis6479.conf config file
+    mkdir -p /etc/redis6479
+    cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
     mkdir -p /etc/systemd/system/redis6479.service.d/
     \cp -af /etc/systemd/system/redis.service.d/limit.conf /etc/systemd/system/redis6479.service.d/limit.conf
     sed -i "s|^port 6379|port 6479|" /etc/redis6479/redis6479.conf
@@ -132,12 +140,15 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
     systemctl restart redis6479
     systemctl enable redis6479
     Redis TCP 6479 Info:
-    redis-cli -h 127.0.0.1 -p 6479 INFO SERVER
+    redis-cli -h 127.0.0.1 -p 6479 INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'
     -------------------------------------------------------
     creating redis server: redis6480.service [increment value: 1]
     redis TCP port: 6480
-    /usr/lib/systemd/system/redis6480.service already exists
-    /etc/redis6480/redis6480.conf already exists
+    create systemd redis6480.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
+    create /etc/redis6480/redis6480.conf config file
+    mkdir -p /etc/redis6480
+    cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
     mkdir -p /etc/systemd/system/redis6480.service.d/
     \cp -af /etc/systemd/system/redis.service.d/limit.conf /etc/systemd/system/redis6480.service.d/limit.conf
     sed -i "s|^port 6379|port 6480|" /etc/redis6480/redis6480.conf
@@ -159,11 +170,11 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
     systemctl restart redis6480
     systemctl enable redis6480
     Redis TCP 6480 Info:
-    redis-cli -h 127.0.0.1 -p 6480 INFO SERVER
+    redis-cli -h 127.0.0.1 -p 6480 INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'
 
 With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 1 meaning create 2x redis servers on starting port `6479` and `6480` (port incremented by 1)
 
-    ./redis-generator.sh 2
+    ./redis-generator.sh multi 2
     
     Creating redis servers starting at TCP = 6479...
     -------------------------------------------------------
@@ -174,27 +185,16 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
     create /etc/redis6479/redis6479.conf config file
     mkdir -p /etc/redis6479
     cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6479/redis6479.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6479/redis6479.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
     ## Redis TCP 6479 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:standalone
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:13850
-    run_id:43c228b846803ed9c86723fe9e07bbd02e86190b
+    process_id:11670
     tcp_port:6479
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13142005
     executable:/etc/redis6479/redis-server
     config_file:/etc/redis6479/redis6479.conf
     -------------------------------------------------------
@@ -205,27 +205,16 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
     create /etc/redis6480/redis6480.conf config file
     mkdir -p /etc/redis6480
     cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6480/redis6480.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6480/redis6480.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
     ## Redis TCP 6480 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:standalone
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:13917
-    run_id:ce770689b40c7df2e64505e0212cb108f6fecc42
+    process_id:11738
     tcp_port:6480
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13142005
     executable:/etc/redis6480/redis-server
     config_file:/etc/redis6480/redis6480.conf
 
@@ -235,13 +224,13 @@ systemctl status redis6479
    Loaded: loaded (/usr/lib/systemd/system/redis6479.service; enabled; vendor preset: disabled)
   Drop-In: /etc/systemd/system/redis6479.service.d
            └─limit.conf
-   Active: active (running) since Wed 2017-03-15 00:16:53 UTC; 1min 9s ago
- Main PID: 13850 (redis-server)
+   Active: active (running) since Wed 2017-03-15 17:43:50 UTC; 25s ago
+ Main PID: 11670 (redis-server)
    CGroup: /system.slice/redis6479.service
-           └─13850 /etc/redis6479/redis-server 127.0.0.1:6479
+           └─11670 /etc/redis6479/redis-server 127.0.0.1:6479
 
-Mar 15 00:16:53 centos7.localdomain systemd[1]: Started Redis persistent key-value database.
-Mar 15 00:16:53 centos7.localdomain systemd[1]: Starting Redis persistent key-value database...
+Mar 15 17:43:50 centos7.localdomain systemd[1]: Started Redis persistent key-value database.
+Mar 15 17:43:50 centos7.localdomain systemd[1]: Starting Redis persistent key-value database...
 ```
 
 ```
@@ -250,20 +239,19 @@ systemctl status redis6480
    Loaded: loaded (/usr/lib/systemd/system/redis6480.service; enabled; vendor preset: disabled)
   Drop-In: /etc/systemd/system/redis6480.service.d
            └─limit.conf
-   Active: active (running) since Wed 2017-03-15 00:16:53 UTC; 1min 12s ago
- Main PID: 13917 (redis-server)
+   Active: active (running) since Wed 2017-03-15 17:43:50 UTC; 27s ago
+ Main PID: 11738 (redis-server)
    CGroup: /system.slice/redis6480.service
-           └─13917 /etc/redis6480/redis-server 127.0.0.1:6480
+           └─11738 /etc/redis6480/redis-server 127.0.0.1:6480
 
-Mar 15 00:16:53 centos7.localdomain systemd[1]: Started Redis persistent key-value database.
-Mar 15 00:16:53 centos7.localdomain systemd[1]: Starting Redis persistent key-value database...
+Mar 15 17:43:50 centos7.localdomain systemd[1]: Started Redis persistent key-value database.
+Mar 15 17:43:50 centos7.localdomain systemd[1]: Starting Redis persistent key-value database...
 ```
 
 To remove created redis servers, append `delete` flag on end:
 
-    ./redis-generator.sh 2 delete
+    ./redis-generator.sh delete 2
     
-    Deleting redis servers starting at TCP = 6479...
     -------------------------------------------------------
     Deleting redis6479.service ...
     Removed symlink /etc/systemd/system/multi-user.target.wants/redis6479.service.
@@ -276,7 +264,7 @@ To remove created redis servers, append `delete` flag on end:
 Create 2 redis servers with `UNIXSOCKET='y'` enabled for redis Unix socket usage instead of TCP ports
 =========
 
-    ./redis-generator.sh 2  
+    ./redis-generator.sh multi 2 
     
     Creating redis servers starting at TCP = 6479...
     -------------------------------------------------------
@@ -287,27 +275,16 @@ Create 2 redis servers with `UNIXSOCKET='y'` enabled for redis Unix socket usage
     create /etc/redis6479/redis6479.conf config file
     mkdir -p /etc/redis6479
     cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6479/redis6479.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6479/redis6479.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
     ## Redis TCP 6479 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:standalone
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:23089
-    run_id:c6b56ff0b4d152eb104f26c094bf53874f1c1515
+    process_id:11919
     tcp_port:0
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13151998
     executable:/etc/redis6479/redis-server
     config_file:/etc/redis6479/redis6479.conf
     -------------------------------------------------------
@@ -318,33 +295,22 @@ Create 2 redis servers with `UNIXSOCKET='y'` enabled for redis Unix socket usage
     create /etc/redis6480/redis6480.conf config file
     mkdir -p /etc/redis6480
     cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6480/redis6480.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6480/redis6480.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
     ## Redis TCP 6480 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:standalone
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:23159
-    run_id:b6cfbf965ded712900a4e07d6492c04f5ccde3f9
+    process_id:11990
     tcp_port:0
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13151998
     executable:/etc/redis6480/redis-server
     config_file:/etc/redis6480/redis6480.conf
 
 redis server via Unix socket `/var/run/redis/redis6479.sock`
 
-    redis-cli -s /var/run/redis/redis6479.sock INFO SERVER  
+    redis-cli -s /var/run/redis/redis6479.sock INFO SERVER
     # Server
     redis_version:3.2.8
     redis_git_sha1:00000000
@@ -355,20 +321,20 @@ redis server via Unix socket `/var/run/redis/redis6479.sock`
     arch_bits:64
     multiplexing_api:epoll
     gcc_version:4.8.5
-    process_id:23089
-    run_id:c6b56ff0b4d152eb104f26c094bf53874f1c1515
+    process_id:11919
+    run_id:2f72840fbe18342fdf57a24ff681997f9f08c26c
     tcp_port:0
-    uptime_in_seconds:146
+    uptime_in_seconds:27
     uptime_in_days:0
     hz:10
-    lru_clock:13152144
+    lru_clock:13204966
     executable:/etc/redis6479/redis-server
     config_file:/etc/redis6479/redis6479.conf
 
 Create 2 redis server master + slave replication on ports 6479 and 6480
 =========
 
-    ./redis-generator.sh 2 replication
+    ./redis-generator.sh replication 2
     
     Creating redis servers starting at TCP = 6479...
     -------------------------------------------------------
@@ -379,27 +345,16 @@ Create 2 redis server master + slave replication on ports 6479 and 6480
     create /etc/redis6479/redis6479.conf config file
     mkdir -p /etc/redis6479
     cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6479/redis6479.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6479/redis6479.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
     ## Redis TCP 6479 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:standalone
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:22174
-    run_id:8d4a3beff9fb805e0ce7d11550e45d30791a48a8
+    process_id:12724
     tcp_port:6479
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13150441
     executable:/etc/redis6479/redis-server
     config_file:/etc/redis6479/redis6479.conf
     # Replication
@@ -418,27 +373,16 @@ Create 2 redis server master + slave replication on ports 6479 and 6480
     create /etc/redis6480/redis6480.conf config file
     mkdir -p /etc/redis6480
     cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6480/redis6480.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6480/redis6480.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
     ## Redis TCP 6480 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:standalone
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:22243
-    run_id:279e11591a594cbc923b738ddff96b1774e18a51
+    process_id:12794
     tcp_port:6480
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13150444
     executable:/etc/redis6480/redis-server
     config_file:/etc/redis6480/redis6480.conf
     # Replication
@@ -446,7 +390,7 @@ Create 2 redis server master + slave replication on ports 6479 and 6480
     master_host:127.0.0.1
     master_port:6479
     master_link_status:up
-    master_last_io_seconds_ago:3
+    master_last_io_seconds_ago:2
     master_sync_in_progress:0
     slave_repl_offset:1
     slave_priority:100
@@ -458,225 +402,13 @@ Create 2 redis server master + slave replication on ports 6479 and 6480
     repl_backlog_first_byte_offset:0
     repl_backlog_histlen:0
 
-Creating 6 redis servers on ports 6479-6784
-=========
-
-    ./redis-generator.sh 6  
-    
-    Creating redis servers starting at TCP = 6479...
-    -------------------------------------------------------
-    creating redis server: redis6479.service [increment value: 0]
-    redis TCP port: 6479
-    create systemd redis6479.service
-    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
-    create /etc/redis6479/redis6479.conf config file
-    mkdir -p /etc/redis6479
-    cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6479/redis6479.conf
-    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
-    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
-    ## Redis TCP 6479 Info ##
-    # Server
-    redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
-    redis_mode:standalone
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:14097
-    run_id:e01c747a8897cfb24f514e79678d363d05b4b189
-    tcp_port:6479
-    uptime_in_seconds:0
-    uptime_in_days:0
-    hz:10
-    lru_clock:13142142
-    executable:/etc/redis6479/redis-server
-    config_file:/etc/redis6479/redis6479.conf
-    -------------------------------------------------------
-    creating redis server: redis6480.service [increment value: 1]
-    redis TCP port: 6480
-    create systemd redis6480.service
-    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
-    create /etc/redis6480/redis6480.conf config file
-    mkdir -p /etc/redis6480
-    cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6480/redis6480.conf
-    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
-    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
-    ## Redis TCP 6480 Info ##
-    # Server
-    redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
-    redis_mode:standalone
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:14164
-    run_id:b0ad4ae2f504bc8b27ade9b06b4a79844260056d
-    tcp_port:6480
-    uptime_in_seconds:0
-    uptime_in_days:0
-    hz:10
-    lru_clock:13142142
-    executable:/etc/redis6480/redis-server
-    config_file:/etc/redis6480/redis6480.conf
-    -------------------------------------------------------
-    creating redis server: redis6481.service [increment value: 2]
-    redis TCP port: 6481
-    create systemd redis6481.service
-    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6481.service
-    create /etc/redis6481/redis6481.conf config file
-    mkdir -p /etc/redis6481
-    cp -a /etc/redis.conf /etc/redis6481/redis6481.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6481/redis6481.conf
-    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6481.service
-    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6481.service to /usr/lib/systemd/system/redis6481.service.
-    ## Redis TCP 6481 Info ##
-    # Server
-    redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
-    redis_mode:standalone
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:14231
-    run_id:c5f9323e50529bbfbe4aea7e2f8c9ad7ff642eb8
-    tcp_port:6481
-    uptime_in_seconds:0
-    uptime_in_days:0
-    hz:10
-    lru_clock:13142142
-    executable:/etc/redis6481/redis-server
-    config_file:/etc/redis6481/redis6481.conf
-    -------------------------------------------------------
-    creating redis server: redis6482.service [increment value: 3]
-    redis TCP port: 6482
-    create systemd redis6482.service
-    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6482.service
-    create /etc/redis6482/redis6482.conf config file
-    mkdir -p /etc/redis6482
-    cp -a /etc/redis.conf /etc/redis6482/redis6482.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6482/redis6482.conf
-    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6482.service
-    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6482.service to /usr/lib/systemd/system/redis6482.service.
-    ## Redis TCP 6482 Info ##
-    # Server
-    redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
-    redis_mode:standalone
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:14298
-    run_id:ae17526363116d82bb18f57f791983a6b87f07d5
-    tcp_port:6482
-    uptime_in_seconds:0
-    uptime_in_days:0
-    hz:10
-    lru_clock:13142143
-    executable:/etc/redis6482/redis-server
-    config_file:/etc/redis6482/redis6482.conf
-    -------------------------------------------------------
-    creating redis server: redis6483.service [increment value: 4]
-    redis TCP port: 6483
-    create systemd redis6483.service
-    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6483.service
-    create /etc/redis6483/redis6483.conf config file
-    mkdir -p /etc/redis6483
-    cp -a /etc/redis.conf /etc/redis6483/redis6483.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6483/redis6483.conf
-    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6483.service
-    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6483.service to /usr/lib/systemd/system/redis6483.service.
-    ## Redis TCP 6483 Info ##
-    # Server
-    redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
-    redis_mode:standalone
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:14365
-    run_id:81fd364c4d59539620e0b10c159db485f09e8b17
-    tcp_port:6483
-    uptime_in_seconds:0
-    uptime_in_days:0
-    hz:10
-    lru_clock:13142143
-    executable:/etc/redis6483/redis-server
-    config_file:/etc/redis6483/redis6483.conf
-    -------------------------------------------------------
-    creating redis server: redis6484.service [increment value: 5]
-    redis TCP port: 6484
-    create systemd redis6484.service
-    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6484.service
-    create /etc/redis6484/redis6484.conf config file
-    mkdir -p /etc/redis6484
-    cp -a /etc/redis.conf /etc/redis6484/redis6484.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6484/redis6484.conf
-    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6484.service
-    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6484.service to /usr/lib/systemd/system/redis6484.service.
-    ## Redis TCP 6484 Info ##
-    # Server
-    redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
-    redis_mode:standalone
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:14432
-    run_id:6d5caaa8068e2ba7013c7b8fc9851e8ec1492837
-    tcp_port:6484
-    uptime_in_seconds:0
-    uptime_in_days:0
-    hz:10
-    lru_clock:13142143
-    executable:/etc/redis6484/redis-server
-    config_file:/etc/redis6484/redis6484.conf
-
-Running redis servers
-
-    ps aufxw | grep redis-server | grep -v grep
-    redis    14097  0.1  0.1 142896  2476 ?        Ssl  00:19   0:00 /etc/redis6479/redis-server 127.0.0.1:6479
-    redis    14164  0.1  0.1 142896  2480 ?        Ssl  00:19   0:00 /etc/redis6480/redis-server 127.0.0.1:6480
-    redis    14231  0.1  0.1 142896  2480 ?        Ssl  00:19   0:00 /etc/redis6481/redis-server 127.0.0.1:6481
-    redis    14298  0.1  0.1 142896  2480 ?        Ssl  00:19   0:00 /etc/redis6482/redis-server 127.0.0.1:6482
-    redis    14365  0.1  0.1 142896  2480 ?        Ssl  00:19   0:00 /etc/redis6483/redis-server 127.0.0.1:6483
-    redis    14432  0.1  0.1 142896  2476 ?        Ssl  00:19   0:00 /etc/redis6484/redis-server 127.0.0.1:6484
-
-and
-
-    netstat -plunt | grep redis
-    tcp        0      0 127.0.0.1:6479          0.0.0.0:*               LISTEN      14097/redis-server  
-    tcp        0      0 127.0.0.1:6480          0.0.0.0:*               LISTEN      14164/redis-server  
-    tcp        0      0 127.0.0.1:6481          0.0.0.0:*               LISTEN      14231/redis-server  
-    tcp        0      0 127.0.0.1:6482          0.0.0.0:*               LISTEN      14298/redis-server  
-    tcp        0      0 127.0.0.1:6483          0.0.0.0:*               LISTEN      14365/redis-server  
-    tcp        0      0 127.0.0.1:6484          0.0.0.0:*               LISTEN      14432/redis-server  
-
 9 Redis server cluster
 =========
 
 9x Redis server cluster mode with `cluster` flag appended for TCP ports 6479-6487 with manual run of `redis-cluster-tool` to join cluster. Or for specific redis 9 node cluster setup with auto run of `redis-cluster-tool` example, check this [example](redis-cluster-9.md).
 
-    ./redis-generator.sh 9 cluster                  
+
+    ./redis-generator.sh clusterprep 9
     
     Creating redis servers starting at TCP = 6479...
     -------------------------------------------------------
@@ -687,28 +419,17 @@ and
     create /etc/redis6479/redis6479.conf config file
     mkdir -p /etc/redis6479
     cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6479/redis6479.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6479/redis6479.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
-    enabled cluster mode with cluster-config-file nodes-150317-003235.conf
+    enabled cluster mode with cluster-config-file nodes-150317-175739.conf
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
     ## Redis TCP 6479 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:cluster
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:17685
-    run_id:9fd22a21dd9c3e7176a428b8335f0b5c6a4c3ab8
+    process_id:12972
     tcp_port:6479
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13142947
     executable:/etc/redis6479/redis-server
     config_file:/etc/redis6479/redis6479.conf
     # Cluster
@@ -721,28 +442,17 @@ and
     create /etc/redis6480/redis6480.conf config file
     mkdir -p /etc/redis6480
     cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6480/redis6480.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6480/redis6480.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
-    enabled cluster mode with cluster-config-file nodes-150317-003235.conf
+    enabled cluster mode with cluster-config-file nodes-150317-175739.conf
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
     ## Redis TCP 6480 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:cluster
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:17759
-    run_id:d5ee420b828fb2eaa33ce3eddab22919c14449e8
+    process_id:13047
     tcp_port:6480
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13142948
     executable:/etc/redis6480/redis-server
     config_file:/etc/redis6480/redis6480.conf
     # Cluster
@@ -755,28 +465,17 @@ and
     create /etc/redis6481/redis6481.conf config file
     mkdir -p /etc/redis6481
     cp -a /etc/redis.conf /etc/redis6481/redis6481.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6481/redis6481.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6481/redis6481.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6481.service
-    enabled cluster mode with cluster-config-file nodes-150317-003235.conf
+    enabled cluster mode with cluster-config-file nodes-150317-175739.conf
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6481.service to /usr/lib/systemd/system/redis6481.service.
     ## Redis TCP 6481 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:cluster
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:17833
-    run_id:1daa2a90aca2ba9efa7374c6fa8703e6d981d95c
+    process_id:13122
     tcp_port:6481
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13142948
     executable:/etc/redis6481/redis-server
     config_file:/etc/redis6481/redis6481.conf
     # Cluster
@@ -789,28 +488,17 @@ and
     create /etc/redis6482/redis6482.conf config file
     mkdir -p /etc/redis6482
     cp -a /etc/redis.conf /etc/redis6482/redis6482.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6482/redis6482.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6482/redis6482.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6482.service
-    enabled cluster mode with cluster-config-file nodes-150317-003235.conf
+    enabled cluster mode with cluster-config-file nodes-150317-175739.conf
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6482.service to /usr/lib/systemd/system/redis6482.service.
     ## Redis TCP 6482 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:cluster
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:17907
-    run_id:77e9a0cc3c227de62eebe31142e65443945c3eda
+    process_id:13197
     tcp_port:6482
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13142948
     executable:/etc/redis6482/redis-server
     config_file:/etc/redis6482/redis6482.conf
     # Cluster
@@ -823,28 +511,17 @@ and
     create /etc/redis6483/redis6483.conf config file
     mkdir -p /etc/redis6483
     cp -a /etc/redis.conf /etc/redis6483/redis6483.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6483/redis6483.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6483/redis6483.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6483.service
-    enabled cluster mode with cluster-config-file nodes-150317-003235.conf
+    enabled cluster mode with cluster-config-file nodes-150317-175739.conf
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6483.service to /usr/lib/systemd/system/redis6483.service.
     ## Redis TCP 6483 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:cluster
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:17981
-    run_id:3bba3cc0766276c17050ae4d0620bd14867765a2
+    process_id:13272
     tcp_port:6483
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13142948
     executable:/etc/redis6483/redis-server
     config_file:/etc/redis6483/redis6483.conf
     # Cluster
@@ -857,28 +534,17 @@ and
     create /etc/redis6484/redis6484.conf config file
     mkdir -p /etc/redis6484
     cp -a /etc/redis.conf /etc/redis6484/redis6484.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6484/redis6484.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6484/redis6484.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6484.service
-    enabled cluster mode with cluster-config-file nodes-150317-003235.conf
+    enabled cluster mode with cluster-config-file nodes-150317-175739.conf
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6484.service to /usr/lib/systemd/system/redis6484.service.
     ## Redis TCP 6484 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:cluster
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:18055
-    run_id:09749a28921f0f0c0000e9cfe3dcdbf0fd14de2e
+    process_id:13347
     tcp_port:6484
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13142949
     executable:/etc/redis6484/redis-server
     config_file:/etc/redis6484/redis6484.conf
     # Cluster
@@ -891,28 +557,17 @@ and
     create /etc/redis6485/redis6485.conf config file
     mkdir -p /etc/redis6485
     cp -a /etc/redis.conf /etc/redis6485/redis6485.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6485/redis6485.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6485/redis6485.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6485.service
-    enabled cluster mode with cluster-config-file nodes-150317-003235.conf
+    enabled cluster mode with cluster-config-file nodes-150317-175739.conf
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6485.service to /usr/lib/systemd/system/redis6485.service.
     ## Redis TCP 6485 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:cluster
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:18129
-    run_id:c4f69d9c60e11de88dd75696d52676cebbf987c0
+    process_id:13422
     tcp_port:6485
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13142949
     executable:/etc/redis6485/redis-server
     config_file:/etc/redis6485/redis6485.conf
     # Cluster
@@ -925,28 +580,17 @@ and
     create /etc/redis6486/redis6486.conf config file
     mkdir -p /etc/redis6486
     cp -a /etc/redis.conf /etc/redis6486/redis6486.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6486/redis6486.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6486/redis6486.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6486.service
-    enabled cluster mode with cluster-config-file nodes-150317-003235.conf
+    enabled cluster mode with cluster-config-file nodes-150317-175739.conf
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6486.service to /usr/lib/systemd/system/redis6486.service.
     ## Redis TCP 6486 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:cluster
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:18203
-    run_id:810260f62c808a5d5d4834d719f82eae4c19c3c3
+    process_id:13497
     tcp_port:6486
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13142949
     executable:/etc/redis6486/redis-server
     config_file:/etc/redis6486/redis6486.conf
     # Cluster
@@ -959,28 +603,17 @@ and
     create /etc/redis6487/redis6487.conf config file
     mkdir -p /etc/redis6487
     cp -a /etc/redis.conf /etc/redis6487/redis6487.conf
-    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6487/redis6487.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6487/redis6487.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6487.service
-    enabled cluster mode with cluster-config-file nodes-150317-003235.conf
+    enabled cluster mode with cluster-config-file nodes-150317-175739.conf
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6487.service to /usr/lib/systemd/system/redis6487.service.
     ## Redis TCP 6487 Info ##
-    # Server
     redis_version:3.2.8
-    redis_git_sha1:00000000
-    redis_git_dirty:0
-    redis_build_id:dd923e72e9efa6d8
     redis_mode:cluster
-    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
-    arch_bits:64
-    multiplexing_api:epoll
-    gcc_version:4.8.5
-    process_id:18277
-    run_id:e7893e492aac45d8af86e13f5fabbe6e3350eefd
+    process_id:13572
     tcp_port:6487
     uptime_in_seconds:0
     uptime_in_days:0
-    hz:10
-    lru_clock:13142949
     executable:/etc/redis6487/redis-server
     config_file:/etc/redis6487/redis6487.conf
     # Cluster
@@ -1167,15 +800,15 @@ Example of redis port 6482 master with port 6483 and 6484 redis slaves
 Cluster node info
 
     redis-cli -h 127.0.0.1 -p 6479 -c cluster nodes | sort -k2
-    78e393072733286fc5abb8987792a8a26276a7f6 127.0.0.1:6479 myself,master - 0 0 3 connected 0-5461
-    b783de980feb3ae6d903f95a887178ad45771572 127.0.0.1:6480 slave 78e393072733286fc5abb8987792a8a26276a7f6 0 1489552333828 3 connected
-    392cd154e96399cf0f0583c08b3a324811cb8273 127.0.0.1:6481 slave 78e393072733286fc5abb8987792a8a26276a7f6 0 1489552334332 6 connected
-    2dd28ff7173871456635d154935a4a6a6f8f72ff 127.0.0.1:6482 master - 0 1489552333828 4 connected 5462-10922
-    74be7acf107b3e873e50065f5d5096c74beb4c05 127.0.0.1:6483 slave 2dd28ff7173871456635d154935a4a6a6f8f72ff 0 1489552334836 4 connected
-    975733d99cc17add7a99481f403369d2430d34ff 127.0.0.1:6484 slave 2dd28ff7173871456635d154935a4a6a6f8f72ff 0 1489552335840 4 connected
-    990c135239e1f8eabd5e05cb0d5b3016de06256b 127.0.0.1:6485 master - 0 1489552335840 6 connected 10923-16383
-    64f7fdc45606b62ff09fb5699d2b54dde3655676 127.0.0.1:6486 slave 990c135239e1f8eabd5e05cb0d5b3016de06256b 0 1489552335339 6 connected
-    127786e577725d972f94636e9bb9a5c0ae5df532 127.0.0.1:6487 slave 990c135239e1f8eabd5e05cb0d5b3016de06256b 0 1489552334332 6 connected
+    3d96c3b1a9413ddbe86b76fe647d978c59667fd9 127.0.0.1:6479 myself,master - 0 0 1 connected 0-5461
+    f85f542abf5428a7733a8a61aa2f3d3e3753245a 127.0.0.1:6480 slave 3d96c3b1a9413ddbe86b76fe647d978c59667fd9 0 1489600758505 1 connected
+    49f574a996f0cf54c7925b87c87aa6d9b8bcde1c 127.0.0.1:6481 slave 3d96c3b1a9413ddbe86b76fe647d978c59667fd9 0 1489600758505 5 connected
+    a902dd4f58687378950cd7dcb054c4813cca1f69 127.0.0.1:6482 master - 0 1489600757500 6 connected 5462-10922
+    1b9b164150e679c71abdad31d2e0c3529290f5b8 127.0.0.1:6483 slave a902dd4f58687378950cd7dcb054c4813cca1f69 0 1489600759009 7 connected
+    d24ebd19b8c509401c6b14e126d88ac208235c12 127.0.0.1:6484 slave a902dd4f58687378950cd7dcb054c4813cca1f69 0 1489600759009 6 connected
+    1e9a870450fb67fe96e78e5c1e28fe7a0ffcfbae 127.0.0.1:6485 master - 0 1489600757500 8 connected 10923-16383
+    a0ff921249b308dabea33eba5449ebdea0acafed 127.0.0.1:6486 slave 1e9a870450fb67fe96e78e5c1e28fe7a0ffcfbae 0 1489600756994 8 connected
+    4070795b598a586827d170b341dbd685b19e0ed0 127.0.0.1:6487 slave 1e9a870450fb67fe96e78e5c1e28fe7a0ffcfbae 0 1489600758505 8 connected
 
 Test the redis cluster
 
