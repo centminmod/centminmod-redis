@@ -1,7 +1,7 @@
 Example
 =========
 
-Example of using [redis-generator.sh](https://github.com/centminmod/centminmod-redis) to create a 6 node redis cluster consisting of 3x sets of 1x master + 1x slaves + `redis-cluster-tool` joining of the 9 nodes to create a redis cluster.
+Example of using [redis-generator.sh](https://github.com/centminmod/centminmod-redis) to create a 6 node redis cluster consisting of 3x sets of 1x master + 1x slaves + `redis-cluster-tool` joining of the 6 nodes to create a redis cluster.
 
     ./redis-generator.sh clustermake 6
     
