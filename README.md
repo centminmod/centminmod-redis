@@ -99,7 +99,7 @@ To update redis-cluster tool
 Examples:
 =======
 
-Below are various examples. For specific redis 9 node cluster setup example, check this [example](redis-cluster-9.md)
+Below are various examples. For specific redis 9 node cluster setup with auto run of `redis-cluster-tool` example, check this [example](redis-cluster-9.md).
 
 With `DEBUG_REDISGEN='y'` for dry run debug run checks
 
@@ -674,7 +674,7 @@ and
 9 Redis server cluster
 =========
 
-9x Redis server cluster mode with `cluster` flag appended for TCP ports 6479-6487
+9x Redis server cluster mode with `cluster` flag appended for TCP ports 6479-6487 with manual run of `redis-cluster-tool` to join cluster. Or for specific redis 9 node cluster setup with auto run of `redis-cluster-tool` example, check this [example](redis-cluster-9.md).
 
     ./redis-generator.sh 9 cluster                  
     
