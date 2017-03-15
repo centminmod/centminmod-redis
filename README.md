@@ -798,6 +798,16 @@ Set config value on every node in cluster
     
     All nodes "config" are OK
 
+Recheck new value
+
+    redis-cluster-tool -a 127.0.0.1:6479 -C "cluster_config_get maxmemory" -r master
+    master[127.0.0.1:6479] maxmemory: 10000000 (9 MB)
+    master[127.0.0.1:6482] maxmemory: 10000000 (9 MB)
+    master[127.0.0.1:6485] maxmemory: 10000000 (9 MB)
+    
+    All nodes "maxmemory" are SAME: 10000000 (9 MB)
+    Cluster total maxmemory: 30000000 (28 MB)
+
 Delete keys in cluster
 
     redis-cluster-tool -a 127.0.0.1:6479 -C "del_keys 1*"
