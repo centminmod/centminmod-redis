@@ -330,7 +330,8 @@ stream {
   }
 
   server {
-    listen 19001 reuseport;
+    listen 127.0.0.1:19001 reuseport;
+    #proxy_bind 127.0.0.1:19001;
     proxy_connect_timeout 1s;
     proxy_timeout 3s;
     proxy_pass backend;
