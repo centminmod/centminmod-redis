@@ -1,7 +1,7 @@
 Info:
 =======
 
-Redis server generator to create multiple Redis servers locally listening on 127.0.0.1 with starting port `STARTPORT=6479` and incrementally created additional redis servers via integer passed on `redis-generator.sh` command line. Written for CentOS 7 only with [centminmod.com](https://centminmod.com) LEMP stacks specifically though should work on any CentOS 7 or RHEL 7 based system.
+Redis server generator to create multiple Redis servers in standalone, replication and cluster enabled configurations on local listener `127.0.0.1` with starting port `STARTPORT=6479` and incrementally created additional redis servers via integer passed on `redis-generator.sh` command line. Written for CentOS 7 only with [centminmod.com](https://centminmod.com) LEMP stacks specifically though should work on any CentOS 7 or RHEL 7 based system.
 
 Requirements:
 =======
@@ -37,12 +37,14 @@ Usage:
       starting at STARTPORT=6479.
     * Append delete flag to remove
     * Append cluster flag to enable cluster mode
+    * Append replication flag to enable replication mode
     * standalone prep command installs redis-cluster-tool
     * standalone prep update command updates redis-cluster-tool
     
     ./redis-generator.sh X
     ./redis-generator.sh X delete
     ./redis-generator.sh X cluster
+    ./redis-generator.sh X replication
     ./redis-generator.sh prep
     ./redis-generator.sh prep update
 
@@ -260,6 +262,102 @@ To remove created redis servers, append `delete` flag on end:
     Deleting redis6480.service ...
     Removed symlink /etc/systemd/system/multi-user.target.wants/redis6480.service.
     Deletion completed
+
+Create 2 redis server master + slave replication on ports 6479 and 6480
+=========
+
+    ./redis-generator.sh 2 replication
+    
+    Creating redis servers starting at TCP = 6479...
+    -------------------------------------------------------
+    creating redis server: redis6479.service [increment value: 0]
+    redis TCP port: 6479
+    create systemd redis6479.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
+    create /etc/redis6479/redis6479.conf config file
+    mkdir -p /etc/redis6479
+    cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
+    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6479/redis6479.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
+    ## Redis TCP 6479 Info ##
+    # Server
+    redis_version:3.2.8
+    redis_git_sha1:00000000
+    redis_git_dirty:0
+    redis_build_id:dd923e72e9efa6d8
+    redis_mode:standalone
+    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
+    arch_bits:64
+    multiplexing_api:epoll
+    gcc_version:4.8.5
+    process_id:21660
+    run_id:344020d0cdf418b42cb3b859b461aa5ec4206972
+    tcp_port:6479
+    uptime_in_seconds:0
+    uptime_in_days:0
+    hz:10
+    lru_clock:13149753
+    executable:/etc/redis6479/redis-server
+    config_file:/etc/redis6479/redis6479.conf
+    # Replication
+    role:master
+    connected_slaves:0
+    master_repl_offset:0
+    repl_backlog_active:0
+    repl_backlog_size:1048576
+    repl_backlog_first_byte_offset:0
+    repl_backlog_histlen:0
+    -------------------------------------------------------
+    creating redis server: redis6480.service [increment value: 1]
+    redis TCP port: 6480
+    create systemd redis6480.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
+    create /etc/redis6480/redis6480.conf config file
+    mkdir -p /etc/redis6480
+    cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
+    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6480/redis6480.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
+    ## Redis TCP 6480 Info ##
+    # Server
+    redis_version:3.2.8
+    redis_git_sha1:00000000
+    redis_git_dirty:0
+    redis_build_id:dd923e72e9efa6d8
+    redis_mode:standalone
+    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
+    arch_bits:64
+    multiplexing_api:epoll
+    gcc_version:4.8.5
+    process_id:21728
+    run_id:4c1696d87b1cded3b57f3ae4ce4eeb0c746639c8
+    tcp_port:6480
+    uptime_in_seconds:0
+    uptime_in_days:0
+    hz:10
+    lru_clock:13149753
+    executable:/etc/redis6480/redis-server
+    config_file:/etc/redis6480/redis6480.conf
+    # Replication
+    role:slave
+    master_host:127.0.0.1
+    master_port:6479
+    master_link_status:down
+    master_last_io_seconds_ago:-1
+    master_sync_in_progress:1
+    slave_repl_offset:1
+    master_sync_left_bytes:-1
+    master_sync_last_io_seconds_ago:0
+    master_link_down_since_seconds:1489544761
+    slave_priority:100
+    slave_read_only:1
+    connected_slaves:0
+    master_repl_offset:0
+    repl_backlog_active:0
+    repl_backlog_size:1048576
+    repl_backlog_first_byte_offset:0
+    repl_backlog_histlen:0
 
 Creating 6 redis servers on ports 6479-6784
 =========

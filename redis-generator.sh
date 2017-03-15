@@ -5,7 +5,7 @@
 ######################################################
 # variables
 #############
-VER=0.2
+VER=0.3
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -159,6 +159,13 @@ genredis() {
             echo "sed -i 's|^appendonly no|appendonly yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
             echo "enabled cluster mode with cluster-config-file nodes-${DT}.conf"
           fi
+          if [[ "$CLUSTER" = 'replication' ]]; then
+            # only add slaveof parameter when increment
+            # value not equal to 0 as 0 is master
+            if [[ "$p" != '0' ]]; then
+              echo "echo \"slaveof 127.0.0.1 $STARTPORT\" >> "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+            fi
+          fi
           echo "systemctl daemon-reload"
           echo "systemctl restart redis${REDISPORT}"
           echo "systemctl enable redis${REDISPORT}"
@@ -166,6 +173,9 @@ genredis() {
           echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER"
           if [[ "$CLUSTER" = 'cluster' ]]; then
             echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO CLUSTER"
+          fi
+          if [[ "$CLUSTER" = 'replication' ]]; then
+            echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO REPLICATION"
           fi
         fi
       else
@@ -216,6 +226,13 @@ genredis() {
             sed -i 's|^appendonly no|appendonly yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
             echo "enabled cluster mode with cluster-config-file nodes-${DT}.conf"
           fi
+          if [[ "$CLUSTER" = 'replication' ]]; then
+            # only add slaveof parameter when increment
+            # value not equal to 0 as 0 is master
+            if [[ "$p" != '0' ]]; then
+              echo "slaveof 127.0.0.1 $STARTPORT" >> "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+            fi
+          fi
           systemctl daemon-reload
           systemctl restart redis${REDISPORT}
           systemctl enable redis${REDISPORT}
@@ -223,6 +240,9 @@ genredis() {
           redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER
           if [[ "$CLUSTER" = 'cluster' ]]; then
             redis-cli -h 127.0.0.1 -p $REDISPORT INFO CLUSTER
+          fi
+          if [[ "$CLUSTER" = 'replication' ]]; then
+            redis-cli -h 127.0.0.1 -p $REDISPORT INFO REPLICATION
           fi
         fi
       fi
@@ -242,7 +262,18 @@ elif [[ "$NUM" = 'prep' ]]; then
   PREP=y
 fi
 
-if [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'cluster' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
+if [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'replication' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
+  if [ "$NUM" -lt '2' ]; then
+    echo
+    echo "minimum of 2 nodes are required for redis"
+    echo "replication configuration"
+    echo "i.e. 1x master + 1x slave"
+    echo
+    echo "$0 2 replication"
+    exit
+  fi
+  genredis $NUM replication
+elif [[ "$NUM" != 'prep' ]] && [[ "$CLUSTER" = 'cluster' ]] && [[ ! -z "$NUM" && "$NUM" -eq "$NUM" ]]; then
   if [ "$NUM" -lt '6' ]; then
     echo
     echo "minimum of 3 master nodes are required for redis"
@@ -265,12 +296,14 @@ elif [[ "$PREP" != 'y' ]]; then
   echo "  starting at STARTPORT=6479."
   echo "* Append delete flag to remove"
   echo "* Append cluster flag to enable cluster mode"
+  echo "* Append replication flag to enable replication mode"
   echo "* standalone prep command installs redis-cluster-tool"
   echo "* standalone prep update command updates redis-cluster-tool"
   echo
   echo "$0 X"
   echo "$0 X delete"
   echo "$0 X cluster"
+  echo "$0 X replication"
   echo "$0 prep"
   echo "$0 prep update"
 fi
