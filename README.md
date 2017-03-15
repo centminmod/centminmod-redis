@@ -217,7 +217,7 @@ To remove created redis servers, append `delete` flag on end:
     Deletion completed
 
 Creating 6 redis servers on ports 6479-6784
-
+=========
 
     ./redis-generator.sh 6  
     
