@@ -68,6 +68,12 @@ If you want to create multiple redis grouped clusters, you could make a copy of 
 
 This would create 2x2 sets of redis servers where one set uses TCP ports `6479` and `6480` and other set uses TCP ports `6579` and `6580`
 
+    ps aufxw | grep redis-server | grep -v grep
+    redis    20835  0.1  0.1 142896  2476 ?        Ssl  02:09   0:00 /etc/redis6479/redis-server 127.0.0.1:6479
+    redis    20902  0.2  0.1 142896  2476 ?        Ssl  02:09   0:00 /etc/redis6480/redis-server 127.0.0.1:6480
+    redis    20989  0.1  0.1 142896  2476 ?        Ssl  02:09   0:00 /etc/redis6579/redis-server 127.0.0.1:6579
+    redis    21056  0.1  0.1 142896  2476 ?        Ssl  02:09   0:00 /etc/redis6580/redis-server 127.0.0.1:6580
+
 Install & Update redis-cluster-tool:
 =======
 
