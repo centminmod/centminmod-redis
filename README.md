@@ -7,6 +7,7 @@ Requirements:
 =======
 
 * redis 3.2 branch is required and must be installed prior to using `redis-generator.sh`
+* [Remi YUM repository](https://blog.remirepo.net/pages/Config-en) if you want to install redis server via Remi YUM repo for latest redis 3.2 branch. [centminmod.com](https://centminmod.com) auto installer already installs Remi YUM repo.
 
 Redis install:
 =======
