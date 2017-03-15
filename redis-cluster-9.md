@@ -1,7 +1,7 @@
 Example
 =========
 
-Creating a 9 node redis cluster consisting of 3x sets of 1x master + 2x slaves + `redis-cluster-toool` joining of the 9 nodes to create a redis cluster
+Creating a 9 node redis cluster consisting of 3x sets of 1x master + 2x slaves + `redis-cluster-tool` joining of the 9 nodes to create a redis cluster
 
     ./redis-generator.sh 9 cluster 9                                            
     
