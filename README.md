@@ -52,7 +52,7 @@ When you create 2 redis servers via command:
 
 You will create:
 
-* 2 redis server starting at `STARTPORT=6479` for redis on 6479 and 6480 TCP ports.
+* 2 redis server starting at `STARTPORT=6479` for redis on `6479` and `6480` TCP ports.
 * systemd files for controlling each redis server at `/usr/lib/systemd/system/redis6479.service` and `/usr/lib/systemd/system/redis6480.service`
 * dedicated redis directories for each redis server instance at `/etc/redis6479` and `/etc/redis6480`
 * main `/usr/bin/redis-server` binary gets copied to dedicated redis directories at `/etc/redis6479/redis-server` and `/etc/redis6480/redis-server`
