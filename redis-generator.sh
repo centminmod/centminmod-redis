@@ -5,11 +5,12 @@
 ######################################################
 # variables
 #############
-VER=0.3
+VER=0.4
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
 DEBUG_REDISGEN='y'
+UNIXSOCKET='n'
 INSTALLDIR='/svr-setup'
 ######################################################
 # functions
@@ -166,16 +167,33 @@ genredis() {
               echo "echo \"slaveof 127.0.0.1 $STARTPORT\" >> "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
             fi
           fi
+          if [[ "$UNIXSOCKET" = [Yy] ]]; then
+            echo "sed -i \"s|port $REDISPORT|port 0|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+            echo "sed -i \"s|^# unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+            echo "sed -i 's|^# unixsocketperm 700|unixsocketperm 700|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          fi
           echo "systemctl daemon-reload"
           echo "systemctl restart redis${REDISPORT}"
           echo "systemctl enable redis${REDISPORT}"
           echo "Redis TCP $REDISPORT Info:"
-          echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER"
+          if [[ "$UNIXSOCKET" = [Yy] ]]; then
+            echo "redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO SERVER"
+          else
+            echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER"
+          fi
           if [[ "$CLUSTER" = 'cluster' ]]; then
-            echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO CLUSTER"
+            if [[ "$UNIXSOCKET" = [Yy] ]]; then
+              echo "redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO CLUSTER"
+            else
+              echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO CLUSTER"
+            fi
           fi
           if [[ "$CLUSTER" = 'replication' ]]; then
-            echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO REPLICATION"
+            if [[ "$UNIXSOCKET" = [Yy] ]]; then
+              echo "redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO REPLICATION"
+            else
+              echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO REPLICATION"
+            fi
           fi
         fi
       else
@@ -233,17 +251,34 @@ genredis() {
               echo "slaveof 127.0.0.1 $STARTPORT" >> "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
             fi
           fi
+          if [[ "$UNIXSOCKET" = [Yy] ]]; then
+            sed -i "s|port $REDISPORT|port 0|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+            sed -i "s|^# unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+            sed -i 's|^# unixsocketperm 700|unixsocketperm 700|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          fi
           systemctl daemon-reload
           systemctl restart redis${REDISPORT}
           systemctl enable redis${REDISPORT}
           echo "## Redis TCP $REDISPORT Info ##"
-          redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER
+          if [[ "$UNIXSOCKET" = [Yy] ]]; then
+            redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO SERVER
+          else
+            redis-cli -h 127.0.0.1 -p $REDISPORT INFO SERVER
+          fi
           if [[ "$CLUSTER" = 'cluster' ]]; then
-            redis-cli -h 127.0.0.1 -p $REDISPORT INFO CLUSTER
+            if [[ "$UNIXSOCKET" = [Yy] ]]; then
+              redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO CLUSTER
+            else
+              redis-cli -h 127.0.0.1 -p $REDISPORT INFO CLUSTER
+            fi
           fi
           if [[ "$CLUSTER" = 'replication' ]]; then
             sleep 2
-            redis-cli -h 127.0.0.1 -p $REDISPORT INFO REPLICATION
+            if [[ "$UNIXSOCKET" = [Yy] ]]; then
+              redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO REPLICATION
+            else
+              redis-cli -h 127.0.0.1 -p $REDISPORT INFO REPLICATION
+            fi
           fi
         fi
       fi

@@ -31,6 +31,8 @@ For [Centmin Mod LEMP web stacks](https://centminmod.com), installing redis 3.2 
 Usage:
 =======
 
+Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='y'` variable to enable using Unix sockets instead
+
     ./redis-generator.sh                      
     
     * Usage where X equal postive integer for number of redis
@@ -263,6 +265,99 @@ To remove created redis servers, append `delete` flag on end:
     Deleting redis6480.service ...
     Removed symlink /etc/systemd/system/multi-user.target.wants/redis6480.service.
     Deletion completed
+
+
+Create 2 redis servers with `UNIXSOCKET='y'` enabled for redis Unix socket usage instead of TCP ports
+=========
+
+    ./redis-generator.sh 2  
+    
+    Creating redis servers starting at TCP = 6479...
+    -------------------------------------------------------
+    creating redis server: redis6479.service [increment value: 0]
+    redis TCP port: 6479
+    create systemd redis6479.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
+    create /etc/redis6479/redis6479.conf config file
+    mkdir -p /etc/redis6479
+    cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
+    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6479/redis6479.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
+    ## Redis TCP 6479 Info ##
+    # Server
+    redis_version:3.2.8
+    redis_git_sha1:00000000
+    redis_git_dirty:0
+    redis_build_id:dd923e72e9efa6d8
+    redis_mode:standalone
+    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
+    arch_bits:64
+    multiplexing_api:epoll
+    gcc_version:4.8.5
+    process_id:23089
+    run_id:c6b56ff0b4d152eb104f26c094bf53874f1c1515
+    tcp_port:0
+    uptime_in_seconds:0
+    uptime_in_days:0
+    hz:10
+    lru_clock:13151998
+    executable:/etc/redis6479/redis-server
+    config_file:/etc/redis6479/redis6479.conf
+    -------------------------------------------------------
+    creating redis server: redis6480.service [increment value: 1]
+    redis TCP port: 6480
+    create systemd redis6480.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
+    create /etc/redis6480/redis6480.conf config file
+    mkdir -p /etc/redis6480
+    cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
+    -rw-r----- 1 redis root 46K Mar 13 21:22 /etc/redis6480/redis6480.conf
+    -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
+    ## Redis TCP 6480 Info ##
+    # Server
+    redis_version:3.2.8
+    redis_git_sha1:00000000
+    redis_git_dirty:0
+    redis_build_id:dd923e72e9efa6d8
+    redis_mode:standalone
+    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
+    arch_bits:64
+    multiplexing_api:epoll
+    gcc_version:4.8.5
+    process_id:23159
+    run_id:b6cfbf965ded712900a4e07d6492c04f5ccde3f9
+    tcp_port:0
+    uptime_in_seconds:0
+    uptime_in_days:0
+    hz:10
+    lru_clock:13151998
+    executable:/etc/redis6480/redis-server
+    config_file:/etc/redis6480/redis6480.conf
+
+redis server via Unix socket `/var/run/redis/redis6479.sock`
+
+    redis-cli -s /var/run/redis/redis6479.sock INFO SERVER  
+    # Server
+    redis_version:3.2.8
+    redis_git_sha1:00000000
+    redis_git_dirty:0
+    redis_build_id:dd923e72e9efa6d8
+    redis_mode:standalone
+    os:Linux 3.10.0-514.10.2.el7.x86_64 x86_64
+    arch_bits:64
+    multiplexing_api:epoll
+    gcc_version:4.8.5
+    process_id:23089
+    run_id:c6b56ff0b4d152eb104f26c094bf53874f1c1515
+    tcp_port:0
+    uptime_in_seconds:146
+    uptime_in_days:0
+    hz:10
+    lru_clock:13152144
+    executable:/etc/redis6479/redis-server
+    config_file:/etc/redis6479/redis6479.conf
 
 Create 2 redis server master + slave replication on ports 6479 and 6480
 =========
