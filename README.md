@@ -32,12 +32,15 @@ Usage:
 
     ./redis-generator.sh
     
-    Usage where X equal postive integer for number of redis
-    servers to create with incrementing TCP redis ports
-    starting at STARTPORT=6479. Append delete flag to remove
+    * Usage where X equal postive integer for number of redis
+      servers to create with incrementing TCP redis ports
+      starting at STARTPORT=6479.
+    * Append delete flag to remove
+    * Append cluster flag to enable cluster mode
     
     ./redis-generator.sh X
     ./redis-generator.sh X delete
+    ./redis-generator.sh X cluster
 
 Examples:
 =======
