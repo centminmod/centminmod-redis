@@ -1,4 +1,4 @@
-Comparing various Redis proxy solutions for Redis Cluster - 6x node setup with 3x masters + 3 slaves created with [redis-generator.sh](https://github.com/centminmod/centminmod-redis)
+Comparing various Redis proxy solutions for Redis Cluster - 6x node setup with 3x masters + 3 slaves created with [redis-generator.sh](https://github.com/centminmod/centminmod-redis) as well as 3x sets of 1x redis master + 1x redis slaves.
 
 Redis Cluster & Proxy Configs
 =====
@@ -9,6 +9,12 @@ Redis Cluster & Proxy Configs
 * Netflix's Dynomite https://github.com/Netflix/dynomite on port 8102
 * Corvus https://github.com/eleme/corvus/ on port 12345
 
+**Config 1:** Redis 6x node Cluster created via [redis-generator.sh](https://github.com/centminmod/centminmod-redis)
+
+```
+./redis-generator.sh clustermake 6
+```
+
 ```
 redis-cli -h 127.0.0.1 -p 6479 -c cluster nodes | sort -k2
 2f9616bc82b44ea1f64a8e9c9f6bcb348bf3217d 127.0.0.1:6479 myself,master - 0 0 5 connected 0-5461
@@ -18,6 +24,56 @@ c9d717149d630fecf05d0f313e2a1e74e6a831d3 127.0.0.1:6481 master - 0 1489628341623
 5a7df83da1fa245ab913fc361c6d2847c070c09d 127.0.0.1:6483 master - 0 1489628341120 4 connected 10923-16383
 9016a024d692cb4674afcb673dcd598a83082af8 127.0.0.1:6484 slave 5a7df83da1fa245ab913fc361c6d2847c070c09d 0 1489628342627 4 connected
 ```
+
+**Config 2:** Redis 3x sets of 1x redis master + 1x redis slave created via [redis-generator.sh](https://github.com/centminmod/centminmod-redis) using 3 copies of the script with `STARTPORT` set to 6479, 6579 and 6679 respectively for Redis masters
+
+* Note Corvus doesn't work in this config as it needs to be running on a Redis cluster
+
+```
+./redis-generator.sh replication 2
+./redis-generator2.sh replication 2
+./redis-generator3.sh replication 2
+```
+
+```
+redis-cli -h 127.0.0.1 -p 6479 INFO REPLICATION            
+# Replication
+role:master
+connected_slaves:1
+slave0:ip=127.0.0.1,port=6480,state=online,offset=477,lag=1
+master_repl_offset:477
+repl_backlog_active:1
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:2
+repl_backlog_histlen:476
+```
+
+```
+redis-cli -h 127.0.0.1 -p 6579 INFO REPLICATION 
+# Replication
+role:master
+connected_slaves:1
+slave0:ip=127.0.0.1,port=6580,state=online,offset=211,lag=1
+master_repl_offset:211
+repl_backlog_active:1
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:2
+repl_backlog_histlen:210
+```
+
+```
+redis-cli -h 127.0.0.1 -p 6679 INFO REPLICATION 
+# Replication
+role:master
+connected_slaves:1
+slave0:ip=127.0.0.1,port=6680,state=online,offset=211,lag=1
+master_repl_offset:211
+repl_backlog_active:1
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:2
+repl_backlog_histlen:210
+```
+
 
 **System Config**
 
@@ -41,6 +97,8 @@ Benchmark Results
 =====
 
 
+6x Redis Cluster Config
+
 | Redis Proxy Solution | set | get | mset |
 | --- | --- | --- | --- |
 | Direct Redis Cluster | 6250.00 | 6060.61 | 13888.89 |
@@ -48,6 +106,17 @@ Benchmark Results
 | Twitter Twemproxy | 2272.73 | 1736.11 | 564.97 |
 | Netflix Dynomite | 564.97 | 640.20 | [not supported](https://github.com/Netflix/dynomite/blob/master/notes/redis.md) |
 | Corvus | 35.08 | 26.54 | 6.26 |
+
+
+3x Redis Master + Slave Config
+
+| Redis Proxy Solution | set | get | mset |
+| --- | --- | --- | --- |
+| Direct Redis Master 6479 | 4273.50 | 5263.16 | 778.82 |
+| Centmin Mod Nginx TCP Proxy 6479,6579,6679 | 16666.67 | 19230.77 | 3267.97 |
+| Twitter Twemproxy  6479,6579,6679| 1824.82 | 1457.73 | 337.84 |
+| Netflix Dynomite 6479 | 558.97 | 594.53 | [not supported](https://github.com/Netflix/dynomite/blob/master/notes/redis.md) |
+| Corvus | NA | NA | NA |
 
 
 Nginx TCP Stream config
@@ -62,6 +131,28 @@ stream {
     server 127.0.0.1:6479;
     server 127.0.0.1:6481;
     server 127.0.0.1:6483;
+  }
+
+  server {
+    listen 127.0.0.1:19001 reuseport;
+    #proxy_bind 127.0.0.1:19001;
+    proxy_connect_timeout 1s;
+    proxy_timeout 3s;
+    proxy_pass backend;
+  }
+}
+```
+
+
+```
+stream {
+  upstream backend {
+    zone     upstream_backend 10m;
+    least_conn;
+
+    server 127.0.0.1:6479;
+    server 127.0.0.1:6579;
+    server 127.0.0.1:6679;
   }
 
   server {
@@ -95,6 +186,24 @@ crm:
    - 127.0.0.1:6479:1
    - 127.0.0.1:6481:1
    - 127.0.0.1:6483:1
+```
+
+```
+crm:
+  listen: 127.0.0.1:22224
+  hash: fnv1a_64
+  distribution: ketama
+  timeout: 400
+  backlog: 8192
+  auto_eject_hosts: true
+  server_retry_timeout: 2000
+  server_failure_limit: 1
+  redis: true
+  #redis_auth: PASS
+  servers:
+   - 127.0.0.1:6479:1
+   - 127.0.0.1:6579:1
+   - 127.0.0.1:6679:1
 ```
 
 Netflix's Dynomite config
