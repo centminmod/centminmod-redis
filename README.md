@@ -33,7 +33,7 @@ Usage:
 
 Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='y'` variable to enable using Unix sockets instead
 
-    ./redis-generator.sh 
+    ./redis-generator.sh
     
     * Usage: where X equal postive integer for number of redis
     servers to create with incrementing TCP redis ports
@@ -44,7 +44,8 @@ Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='
     * clusterprep X - number of cluster enabled config instances
     * clustermake 6 - to enable cluster mode + create cluster
     * clustermake 9 - flag to enable cluster mode + create cluster
-    * replication X - create enable replication enabled redis
+    * replication X - create redis replication
+    * replication X 6579 - create replication with custom start port 6579
     * delete X - number of redis instances to delete
     
     ./redis-generator.sh prep
@@ -54,6 +55,7 @@ Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='
     ./redis-generator.sh clustermake 6
     ./redis-generator.sh clustermake 9
     ./redis-generator.sh replication X
+    ./redis-generator.sh replication X 6579
     ./redis-generator.sh delete X
 
 For `clustermake` options you need to install [redis-cluster-tool](https://github.com/deep011/redis-cluster-tool)  via `prep` command
@@ -401,6 +403,16 @@ Create 2 redis server master + slave replication on ports 6479 and 6480
     repl_backlog_size:1048576
     repl_backlog_first_byte_offset:0
     repl_backlog_histlen:0
+
+Latest version of `redis-generator.sh` also supports specifying the custom `STARTPORT` for redis replication commands. So to create 2x redis master + slave replication starting on TCP port `6579` instead of default `6479`:
+
+    ./redis-generator.sh replication 2 6579
+
+If TCP port 6579 already in use, you'll get an error
+
+    ./redis-generator.sh replication 2 6579
+    
+    Error: TCP port 6579 in use, try another port
 
 9 Redis server cluster
 =========

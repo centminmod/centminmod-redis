@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=0.7
+VER=0.8
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -350,6 +350,23 @@ case "$1" in
     ;;
   replication )
     NUM=$2
+    CUSTOM_STARTPORT=$3
+    # allow users to create redis replication with custom STARTPORTs
+    # i.e. ./redis-generator.sh replication 2 6579
+    # would create master + slave 2x redis replication starting on TCP
+    # port 6579 if available, or it will provide the next available TCP
+    # port in the sequence starting at 6579
+    if [[ ! -z "$CUSTOM_STARTPORT" ]]; then
+      CHECK_PORT=$(netstat -nt | grep -q $CUSTOM_STARTPORT; echo $?)
+      if [[ "$CHECK_PORT" -ne '0' ]]; then
+        STARTPORT=$CUSTOM_STARTPORT
+      else
+        echo
+        echo "Error: TCP port $CUSTOM_STARTPORT in use, try another port"
+        echo
+        exit
+      fi
+    fi
     if [ "$NUM" -lt '2' ]; then
       echo
       echo "minimum of 2 nodes are required for redis"
@@ -416,7 +433,8 @@ case "$1" in
     echo "* clusterprep X - number of cluster enabled config instances"
     echo "* clustermake 6 - to enable cluster mode + create cluster"
     echo "* clustermake 9 - flag to enable cluster mode + create cluster"
-    echo "* replication X - create enable replication enabled redis"
+    echo "* replication X - create redis replication"
+    echo "* replication X 6579 - create replication with custom start port 6579"
     echo "* delete X - number of redis instances to delete"
     echo
     echo "$0 prep"
@@ -426,6 +444,7 @@ case "$1" in
     echo "$0 clustermake 6"
     echo "$0 clustermake 9"
     echo "$0 replication X"
+    echo "$0 replication X 6579"
     echo "$0 delete X"
     ;;
 esac
