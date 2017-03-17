@@ -1,7 +1,7 @@
 Info:
 =======
 
-Redis server generator to create multiple Redis servers in standalone, replication and cluster enabled configurations on local listener `127.0.0.1` with starting port `STARTPORT=6479` and incrementally created additional redis servers via integer passed on `redis-generator.sh` command line. Written for CentOS 7 only with [centminmod.com](https://centminmod.com) LEMP stacks specifically though should work on any CentOS 7 or RHEL 7 based system.
+Redis server generator to create multiple Redis servers in standalone, replication (+ optional sentinel setup) and cluster enabled configurations on local listener `127.0.0.1` with starting port `STARTPORT=6479` and incrementally created additional redis servers via integer passed on `redis-generator.sh` command line. Written for CentOS 7 only with [centminmod.com](https://centminmod.com) LEMP stacks specifically though should work on any CentOS 7 or RHEL 7 based system.
 
 Requirements:
 =======
@@ -54,13 +54,14 @@ Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='
     starting at STARTPORT=6479.
     * prep - standalone prep command installs redis-cluster-tool
     * prepupdate - standalone prep update command updates redis-cluster-tool
-    * multi X - number of standalone redis instances to create
-    * clusterprep X - number of cluster enabled config instances
+    * multi X - no. of standalone redis instances to create
+    * clusterprep X - no. of cluster enabled config instances
     * clustermake 6 - to enable cluster mode + create cluster
     * clustermake 9 - flag to enable cluster mode + create cluster
     * replication X - create redis replication
     * replication X 6579 - create replication with custom start port 6579
-    * delete X - number of redis instances to delete
+    * delete X - no. of redis instances to delete
+    * delete X 6579 - no. of redis instances to delete + custom start port 6579
     
     ./redis-generator.sh prep
     ./redis-generator.sh prepupdate
@@ -71,6 +72,7 @@ Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='
     ./redis-generator.sh replication X
     ./redis-generator.sh replication X 6579
     ./redis-generator.sh delete X
+    ./redis-generator.sh delete X 6579
 
 For `clustermake` options you need to install [redis-cluster-tool](https://github.com/deep011/redis-cluster-tool)  via `prep` command
 
@@ -427,6 +429,138 @@ If TCP port 6579 already in use, you'll get an error
     ./redis-generator.sh replication 2 6579
     
     Error: TCP port 6579 in use, try another port
+
+Optionally, you can enable auto sentinel setup which is tied to the redis master instance on `STARTPORT` by enabling `SENTINEL_SETUP='y'` prior to running replication command.
+
+Example would create
+
+* sentinel config file `/root/tools/redis-sentinel/sentinel-6479.conf` where `STARTPORT` is 6479
+* sentinel port is `STARTPORT` + 10000 = 6479 + 10000 = `16479`
+* sentinel init.d startup script is at `/etc/init.d/sentinel_16479` 
+* sentinel directory /var/lib/redis/sentinel_6479
+* sentinel log /var/log/redis/sentinel-6479.log
+* sentinel pid file /var/run/redis/redis-sentinel-6479.pid
+* quorum is set to 1 as each replication run only creates one master redis instanced paired to redis slaves.
+
+Output
+
+    ./redis-generator.sh replication 2
+    
+    Creating redis servers starting at TCP = 6479...
+    -------------------------------------------------------
+    creating redis server: redis6479.service [increment value: 0]
+    redis TCP port: 6479
+    create systemd redis6479.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
+    create /etc/redis6479/redis6479.conf config file
+    mkdir -p /etc/redis6479
+    cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6479/redis6479.conf
+    -rw-r--r-- 1 root  root 249 Sep 14  2016 /usr/lib/systemd/system/redis6479.service
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
+    ## Redis TCP 6479 Info ##
+    redis_version:3.2.8
+    redis_mode:standalone
+    process_id:28968
+    tcp_port:6479
+    uptime_in_seconds:0
+    uptime_in_days:0
+    executable:/etc/redis6479/redis-server
+    config_file:/etc/redis6479/redis6479.conf
+    # Replication
+    role:master
+    connected_slaves:0
+    master_repl_offset:0
+    repl_backlog_active:0
+    repl_backlog_size:1048576
+    repl_backlog_first_byte_offset:0
+    repl_backlog_histlen:0
+    
+    -----------------
+    creating /root/tools/redis-sentinel/sentinel-6479.conf ...
+    
+    sentinel sentinel-6479.conf contents
+    
+    port 16479
+    daemonize yes
+    dir /var/lib/redis/sentinel_6479
+    pidfile /var/run/redis/redis-sentinel-6479.pid
+    sentinel monitor master-6479 127.0.0.1 6479 1
+    sentinel down-after-milliseconds master-6479 3000
+    sentinel failover-timeout master-6479 6000
+    sentinel parallel-syncs master-6479 1
+    logfile /var/log/redis/sentinel-6479.log
+    starting Redis sentinel (sentinel-6479.conf)
+    Starting sentinel_16479 ...
+                `-.__.-'                                               
+    
+    29035:X 17 Mar 23:03:24.758 # Sentinel ID is 6a0509340d3d75262f1ff123f3734bf37f4ec3ff
+    29035:X 17 Mar 23:03:24.758 # +monitor master master-6479 127.0.0.1 6479 quorum 1
+    -------------------------------------------------------
+    creating redis server: redis6480.service [increment value: 1]
+    redis TCP port: 6480
+    create systemd redis6480.service
+    cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
+    create /etc/redis6480/redis6480.conf config file
+    mkdir -p /etc/redis6480
+    cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
+    -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6480/redis6480.conf
+    -rw-r--r-- 1 root  root 249 Sep 14  2016 /usr/lib/systemd/system/redis6480.service
+    Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
+    ## Redis TCP 6480 Info ##
+    redis_version:3.2.8
+    redis_mode:standalone
+    process_id:29085
+    tcp_port:6480
+    uptime_in_seconds:1
+    uptime_in_days:0
+    executable:/etc/redis6480/redis-server
+    config_file:/etc/redis6480/redis6480.conf
+    # Replication
+    role:slave
+    master_host:127.0.0.1
+    master_port:6479
+    master_link_status:up
+    master_last_io_seconds_ago:1
+    master_sync_in_progress:0
+    slave_repl_offset:160
+    slave_priority:100
+    slave_read_only:1
+    connected_slaves:0
+    master_repl_offset:0
+    repl_backlog_active:0
+    repl_backlog_size:1048576
+    repl_backlog_first_byte_offset:0
+    repl_backlog_histlen:0
+
+Sentinel log
+
+    tail -30 /var/log/redis/sentinel-6479.log
+                    _._                                                  
+            _.-``__ ''-._                                             
+        _.-``    `.  `_.  ''-._           Redis 3.2.8 (00000000/0) 64 bit
+    .-`` .-```.  ```\/    _.,_ ''-._                                   
+    (    '      ,       .-`  | `,    )     Running in sentinel mode
+    |`-._`-...-` __...-.``-._|'` _.-'|     Port: 16479
+    |    `-._   `._    /     _.-'    |     PID: 29035
+    `-._    `-._  `-./  _.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |           http://redis.io        
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |                                  
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+        `-._    `-.__.-'    _.-'                                       
+            `-._        _.-'                                           
+                `-.__.-'                                               
+    
+    29035:X 17 Mar 23:03:24.758 # Sentinel ID is 6a0509340d3d75262f1ff123f3734bf37f4ec3ff
+    29035:X 17 Mar 23:03:24.758 # +monitor master master-6479 127.0.0.1 6479 quorum 1
+    29035:X 17 Mar 23:03:34.816 * +slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+
+When you run delete command it will wipe the redis instances including sentinel setups
+
+    ./redis-generator.sh delete 2
 
 9 Redis server cluster
 =========

@@ -19,13 +19,14 @@ Script Usage
     starting at STARTPORT=6479.
     * prep - standalone prep command installs redis-cluster-tool
     * prepupdate - standalone prep update command updates redis-cluster-tool
-    * multi X - number of standalone redis instances to create
-    * clusterprep X - number of cluster enabled config instances
+    * multi X - no. of standalone redis instances to create
+    * clusterprep X - no. of cluster enabled config instances
     * clustermake 6 - to enable cluster mode + create cluster
     * clustermake 9 - flag to enable cluster mode + create cluster
     * replication X - create redis replication
     * replication X 6579 - create replication with custom start port 6579
-    * delete X - number of redis instances to delete
+    * delete X - no. of redis instances to delete
+    * delete X 6579 - no. of redis instances to delete + custom start port 6579
     
     ./redis-generator.sh prep
     ./redis-generator.sh prepupdate
@@ -36,6 +37,7 @@ Script Usage
     ./redis-generator.sh replication X
     ./redis-generator.sh replication X 6579
     ./redis-generator.sh delete X
+    ./redis-generator.sh delete X 6579
 
 **Config 1:** Redis 6x node Cluster created via [redis-generator.sh](https://github.com/centminmod/centminmod-redis)
 
