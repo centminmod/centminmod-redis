@@ -28,6 +28,14 @@ For [Centmin Mod LEMP web stacks](https://centminmod.com), installing redis 3.2 
     echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" >> /etc/rc.local
     sysctl -p
 
+If redis isn't installed `redis-generator.sh` will alert you
+
+    ./redis-generator.sh 
+    
+    /usr/lib/systemd/system/redis.service not found
+    Script is for CentOS 7 only and requires redis
+    server installed first
+
 Usage:
 =======
 
