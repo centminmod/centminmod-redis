@@ -25,14 +25,14 @@ c9d717149d630fecf05d0f313e2a1e74e6a831d3 127.0.0.1:6481 master - 0 1489628341623
 9016a024d692cb4674afcb673dcd598a83082af8 127.0.0.1:6484 slave 5a7df83da1fa245ab913fc361c6d2847c070c09d 0 1489628342627 4 connected
 ```
 
-**Config 2:** Redis 3x sets of 1x redis master + 1x redis slave created via [redis-generator.sh](https://github.com/centminmod/centminmod-redis) using 3 copies of the script with `STARTPORT` set to 6479, 6579 and 6679 respectively for Redis masters
+**Config 2:** Redis 3x sets of 1x redis master + 1x redis slave created via [redis-generator.sh](https://github.com/centminmod/centminmod-redis) using the script's custom replication command to chnage the `STARTPORT` set to 6479 (default), 6579 and 6679 respectively for Redis masters
 
 * Note Corvus doesn't work in this config as it needs to be running on a Redis cluster
 
 ```
 ./redis-generator.sh replication 2
-./redis-generator2.sh replication 2
-./redis-generator3.sh replication 2
+./redis-generator.sh replication 2 6579
+./redis-generator.sh replication 2 6679
 ```
 
 ```
