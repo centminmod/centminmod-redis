@@ -277,6 +277,8 @@ genredis() {
             echo "-----------------"
             echo "creating ${SENTDIR}/sentinel-${SPORT}.conf ..."
             echo "mkdir -p "/var/lib/redis/sentinel_${SPORT}""
+            echo "touch "/var/log/redis/sentinel-${REDISPORT}.log""
+            echo "chown redis:redis "/var/log/redis/sentinel-${REDISPORT}.log""
             echo "create sentinel config: ${SENTDIR}/sentinel-${SPORT}.conf"
             echo
             echo "------------------------------------------"
@@ -291,7 +293,7 @@ genredis() {
             echo "logfile /var/log/redis/sentinel-${SPORT}.log"
             echo "------------------------------------------"
             echo
-            echo "create startup scrip: "/etc/init.d/sentinel_$SENTPORT""
+            echo "create startup script: "/etc/init.d/sentinel_$SENTPORT""
             echo
 echo "
 #!/bin/bash
@@ -328,7 +330,7 @@ esac
             echo
             echo "chmod +x "/etc/init.d/sentinel_$SENTPORT""
             echo "chkconfig "sentinel_$SENTPORT on""
-            echo "systemctl start "sentinel_$SENTPORT""
+            echo "service "sentinel_$SENTPORT" start"
             echo "tail -3 "/var/log/redis/sentinel-${SPORT}.log""
           fi
         fi
@@ -424,6 +426,8 @@ esac
             echo "-----------------"
             echo "creating ${SENTDIR}/sentinel-${SPORT}.conf ..."
             mkdir -p "/var/lib/redis/sentinel_${SPORT}"
+            touch "/var/log/redis/sentinel-${REDISPORT}.log"
+            chown redis:redis "/var/log/redis/sentinel-${REDISPORT}.log"
 cat > "${SENTDIR}/sentinel-${SPORT}.conf" <<JJJ
 port $SENTPORT
 daemonize yes
@@ -479,7 +483,7 @@ esac
 TTT
             chmod +x "/etc/init.d/sentinel_$SENTPORT"
             chkconfig "sentinel_$SENTPORT" on
-            systemctl start "sentinel_$SENTPORT"
+            service "sentinel_$SENTPORT" start
             tail -3 "/var/log/redis/sentinel-${SPORT}.log"
 
             fi
