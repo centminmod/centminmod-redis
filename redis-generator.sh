@@ -10,9 +10,9 @@ VER=0.9
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
-DEBUG_REDISGEN='y'
+DEBUG_REDISGEN='n'
 UNIXSOCKET='n'
-SENTINEL_SETUP='n'
+SENTINEL_SETUP='y'
 INSTALLDIR='/svr-setup'
 SENTDIR='/root/tools/redis-sentinel'
 ######################################################
@@ -277,8 +277,8 @@ genredis() {
             echo "-----------------"
             echo "creating ${SENTDIR}/sentinel-${SPORT}.conf ..."
             echo "mkdir -p "/var/lib/redis/sentinel_${SPORT}""
-            echo "touch "/var/log/redis/sentinel-${REDISPORT}.log""
-            echo "chown redis:redis "/var/log/redis/sentinel-${REDISPORT}.log""
+            echo "touch "/var/log/redis/sentinel-${SPORT}.log""
+            echo "chown redis:redis "/var/log/redis/sentinel-${SPORT}.log""
             echo "create sentinel config: ${SENTDIR}/sentinel-${SPORT}.conf"
             echo
             echo "------------------------------------------"
@@ -331,7 +331,8 @@ esac
             echo "chmod +x "/etc/init.d/sentinel_$SENTPORT""
             echo "chkconfig "sentinel_$SENTPORT on""
             echo "service "sentinel_$SENTPORT" start"
-            echo "tail -3 "/var/log/redis/sentinel-${SPORT}.log""
+            echo "sleep 2"
+            echo "tail -4 "/var/log/redis/sentinel-${SPORT}.log""
           fi
         fi
       else
@@ -426,8 +427,8 @@ esac
             echo "-----------------"
             echo "creating ${SENTDIR}/sentinel-${SPORT}.conf ..."
             mkdir -p "/var/lib/redis/sentinel_${SPORT}"
-            touch "/var/log/redis/sentinel-${REDISPORT}.log"
-            chown redis:redis "/var/log/redis/sentinel-${REDISPORT}.log"
+            touch "/var/log/redis/sentinel-${SPORT}.log"
+            chown redis:redis "/var/log/redis/sentinel-${SPORT}.log"
 cat > "${SENTDIR}/sentinel-${SPORT}.conf" <<JJJ
 port $SENTPORT
 daemonize yes
@@ -484,7 +485,8 @@ TTT
             chmod +x "/etc/init.d/sentinel_$SENTPORT"
             chkconfig "sentinel_$SENTPORT" on
             service "sentinel_$SENTPORT" start
-            tail -3 "/var/log/redis/sentinel-${SPORT}.log"
+            sleep 2
+            tail -4 "/var/log/redis/sentinel-${SPORT}.log"
 
             fi
           fi
