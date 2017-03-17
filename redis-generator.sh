@@ -6,18 +6,24 @@
 ######################################################
 # variables
 #############
-VER=0.8
+VER=0.9
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
 DEBUG_REDISGEN='y'
 UNIXSOCKET='n'
+SENTINEL_SETUP='n'
 INSTALLDIR='/svr-setup'
+SENTDIR='/root/tools/redis-sentinel'
 ######################################################
 # functions
 #############
 if [ ! -d "$INSTALLDIR" ]; then
   mkdir -p "$INSTALLDIR"
+fi
+
+if [ ! -d ${SENTDIR} ]; then
+  mkdir -p ${SENTDIR}
 fi
 
 if [ ! -f /usr/lib/systemd/system/redis.service ]; then
@@ -77,26 +83,92 @@ genredis_del() {
   for (( p=0; p <= $NUMBER; p++ ))
     do
       REDISPORT=$(($STARTPORT+$p))
+      SENTPORT=$(($REDISPORT+10000))
     if [ -f "/usr/lib/systemd/system/redis${REDISPORT}.service" ]; then
       echo "-------------------------------------------------------"
       echo "Deleting redis${REDISPORT}.service ..."
-      systemctl disable redis${REDISPORT}.service
-      systemctl stop redis${REDISPORT}.service
-      rm -rf "/usr/lib/systemd/system/redis${REDISPORT}.service"
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        echo "systemctl disable redis${REDISPORT}.service"
+        echo "systemctl stop redis${REDISPORT}.service"
+        echo "rm -rf "/usr/lib/systemd/system/redis${REDISPORT}.service""
+      else
+        systemctl disable redis${REDISPORT}.service
+        systemctl stop redis${REDISPORT}.service
+        rm -rf "/usr/lib/systemd/system/redis${REDISPORT}.service"
+      fi
     fi
     if [ -f "/etc/redis${REDISPORT}/redis${REDISPORT}.conf" ]; then
-      rm -rf "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        echo "rm -rf "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+      else
+        rm -rf "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+      fi
     fi
     if [ -f "/var/log/redis/redis${REDISPORT}.log" ]; then
-      rm -rf "/var/log/redis/redis${REDISPORT}.log"
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        echo "rm -rf "/var/log/redis/redis${REDISPORT}.log""
+      else
+        rm -rf "/var/log/redis/redis${REDISPORT}.log"
+      fi
     fi
     if [ -f "/var/lib/redis/dump${REDISPORT}.rdb" ]; then
-      rm -rf "/var/lib/redis/dump${REDISPORT}.rdb"
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        echo "rm -rf "/var/lib/redis/dump${REDISPORT}.rdb""
+      else
+        rm -rf "/var/lib/redis/dump${REDISPORT}.rdb"
+      fi
     fi
     if [ -f "/var/lib/redis/appendonly${REDISPORT}.aof" ]; then
-      rm -rf "/var/lib/redis/appendonly${REDISPORT}.aof"
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        echo "rm -rf "/var/lib/redis/appendonly${REDISPORT}.aof""
+      else
+        rm -rf "/var/lib/redis/appendonly${REDISPORT}.aof"
+      fi
     fi
-    rm -rf "/var/lib/redis${REDISPORT}"
+    if [ -f "${SENTDIR}/sentinel-${REDISPORT}.conf" ]; then
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        echo "rm -rf "${SENTDIR}/sentinel-${REDISPORT}.conf""
+      else
+        rm -rf "${SENTDIR}/sentinel-${REDISPORT}.conf"
+      fi
+    fi
+    if [ -d "/var/lib/redis/sentinel_${REDISPORT}" ]; then
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        echo "rm -rf "/var/lib/redis/sentinel_${REDISPORT}""
+      else
+        rm -rf "/var/lib/redis/sentinel_${REDISPORT}"
+      fi
+    fi
+    if [ -f "/var/log/redis/sentinel-${REDISPORT}.log" ]; then
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        echo "rm -rf "/var/log/redis/sentinel-${REDISPORT}.log""
+      else
+        rm -rf "/var/log/redis/sentinel-${REDISPORT}.log"
+      fi
+    fi
+    if [ -f "/var/run/redis/redis-sentinel-${REDISPORT}.pid" ]; then
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        echo "kill -9 $(cat "/var/run/redis/redis-sentinel-${REDISPORT}.pid")"
+        echo "rm -rf "/var/run/redis/redis-sentinel-${REDISPORT}.pid""
+      else
+        kill -9 $(cat "/var/run/redis/redis-sentinel-${REDISPORT}.pid")
+        rm -rf "/var/run/redis/redis-sentinel-${REDISPORT}.pid"
+      fi
+    fi
+    if [ -f "/etc/init.d/sentinel_${SENTPORT}" ]; then
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        echo "rm -rf "/etc/init.d/sentinel_${SENTPORT}""
+      else
+        rm -rf "/etc/init.d/sentinel_${SENTPORT}"
+      fi
+    fi
+    if [ -d "/var/lib/redis${REDISPORT}" ]; then
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        echo "rm -rf "/var/lib/redis${REDISPORT}""
+      else
+        rm -rf "/var/lib/redis${REDISPORT}"
+      fi
+    fi
   done
   echo "Deletion completed"
   exit
@@ -197,6 +269,71 @@ genredis() {
               echo "redis-cli -h 127.0.0.1 -p $REDISPORT INFO REPLICATION"
             fi
           fi
+          # sentinel setup for redis replication
+          if [[ "$SENTINEL_SETUP" = [yY] && "$CLUSTER" = 'replication' && "$REDISPORT" = "$STARTPORT" ]]; then
+            SPORT="$STARTPORT"
+            SENTPORT=$(($SPORT+10000))
+            echo
+            echo "-----------------"
+            echo "creating ${SENTDIR}/sentinel-${SPORT}.conf ..."
+            echo "mkdir -p "/var/lib/redis/sentinel_${SPORT}""
+            echo "touch "/var/log/redis/sentinel-${SPORT}.log""
+            echo "chown redis:redis "/var/log/redis/sentinel-${SPORT}.log""
+            echo "create sentinel config: ${SENTDIR}/sentinel-${SPORT}.conf"
+            echo
+            echo "------------------------------------------"
+            echo "port $SENTPORT"
+            echo "daemonize yes"
+            echo "dir /var/lib/redis/sentinel_${SPORT}"
+            echo "pidfile /var/run/redis/redis-sentinel-${SPORT}.pid"
+            echo "sentinel monitor master-${SPORT} 127.0.0.1 ${SPORT} 1"
+            echo "sentinel down-after-milliseconds master-${SPORT} 3000"
+            echo "sentinel failover-timeout master-${SPORT} 6000"
+            echo "sentinel parallel-syncs master-${SPORT} 1"
+            echo "logfile /var/log/redis/sentinel-${SPORT}.log"
+            echo "------------------------------------------"
+            echo
+            echo "create startup script: "/etc/init.d/sentinel_$SENTPORT""
+            echo
+echo "
+#!/bin/bash
+# chkconfig: - 55 45
+# Start/Stop/restart script for Redis Sentinel
+
+NAME=\$(basename \${0})
+EXEC=/etc/redis${SPORT}/redis-server
+PIDFILE=/var/run/redis/redis-sentinel-${SPORT}.pid
+CONF=${SENTDIR}/sentinel-${SPORT}.conf
+
+PID=\$(cat \$PIDFILE 2> /dev/null)
+case "\$1" in
+     start)
+         echo \"Starting \$NAME ...\"
+         touch \$PIDFILE
+         exec \$EXEC \$CONF --sentinel --pidfile \$PIDFILE
+         ;;
+     stop)
+         echo \"Stopping \$NAME PID: \$PID ...\"
+         kill \$PID
+         ;;
+     restart)
+         echo \"Restarting \$NAME ...\"
+         \$0 stop
+         sleep 2
+         \$0 start
+         ;;
+     *)
+         echo \"Usage \$0 {start|stop|restart}\"
+         ;;
+esac
+"
+            echo
+            echo "chmod +x "/etc/init.d/sentinel_$SENTPORT""
+            echo "chkconfig "sentinel_$SENTPORT on""
+            echo "service "sentinel_$SENTPORT" start"
+            echo "sleep 2"
+            echo "tail -4 "/var/log/redis/sentinel-${SPORT}.log""
+          fi
         fi
       else
         if [ ! -f "/usr/lib/systemd/system/redis${REDISPORT}.service" ]; then
@@ -280,6 +417,77 @@ genredis() {
               redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO REPLICATION
             else
               redis-cli -h 127.0.0.1 -p $REDISPORT INFO REPLICATION
+            fi
+          fi
+          # sentinel setup for redis replication
+          if [[ "$SENTINEL_SETUP" = [yY] && "$CLUSTER" = 'replication' && "$REDISPORT" = "$STARTPORT" ]]; then
+            SPORT="$STARTPORT"
+            SENTPORT=$(($SPORT+10000))
+            echo
+            echo "-----------------"
+            echo "creating ${SENTDIR}/sentinel-${SPORT}.conf ..."
+            mkdir -p "/var/lib/redis/sentinel_${SPORT}"
+            touch "/var/log/redis/sentinel-${SPORT}.log"
+            chown redis:redis "/var/log/redis/sentinel-${SPORT}.log"
+cat > "${SENTDIR}/sentinel-${SPORT}.conf" <<JJJ
+port $SENTPORT
+daemonize yes
+dir /var/lib/redis/sentinel_${SPORT}
+pidfile /var/run/redis/redis-sentinel-${SPORT}.pid
+sentinel monitor master-${SPORT} 127.0.0.1 ${SPORT} 1
+sentinel down-after-milliseconds master-${SPORT} 3000
+sentinel failover-timeout master-${SPORT} 6000
+sentinel parallel-syncs master-${SPORT} 1
+logfile /var/log/redis/sentinel-${SPORT}.log
+JJJ
+          echo
+
+            if [ -f "${SENTDIR}/sentinel-${SPORT}.conf" ]; then
+              echo "sentinel sentinel-${SPORT}.conf contents"
+              echo
+              cat "${SENTDIR}/sentinel-${SPORT}.conf"
+            
+              echo "starting Redis sentinel (sentinel-${SPORT}.conf)"
+              # /etc/redis${SPORT}/redis-server "${SENTDIR}/sentinel-${SPORT}.conf" --sentinel
+
+cat > "/etc/init.d/sentinel_$SENTPORT" <<TTT
+#!/bin/bash
+# chkconfig: - 55 45
+# Start/Stop/restart script for Redis Sentinel
+
+NAME=\$(basename \${0})
+EXEC=/etc/redis${SPORT}/redis-server
+PIDFILE=/var/run/redis/redis-sentinel-${SPORT}.pid
+CONF=${SENTDIR}/sentinel-${SPORT}.conf
+
+PID=\$(cat \$PIDFILE 2> /dev/null)
+case "\$1" in
+     start)
+         echo "Starting \$NAME ..."
+         touch \$PIDFILE
+         exec \$EXEC \$CONF --sentinel --pidfile \$PIDFILE
+         ;;
+     stop)
+         echo "Stopping \$NAME PID: \$PID ..."
+         kill \$PID
+         ;;
+     restart)
+         echo "Restarting \$NAME ..."
+         \$0 stop
+         sleep 2
+         \$0 start
+         ;;
+     *)
+         echo "Usage \$0 {start|stop|restart}"
+         ;;
+esac
+TTT
+            chmod +x "/etc/init.d/sentinel_$SENTPORT"
+            chkconfig "sentinel_$SENTPORT" on
+            service "sentinel_$SENTPORT" start
+            sleep 2
+            tail -4 "/var/log/redis/sentinel-${SPORT}.log"
+
             fi
           fi
         fi
@@ -419,6 +627,10 @@ case "$1" in
     ;;
   delete )
     NUM=$2
+    CUSTOM_STARTPORT=$3
+    if [[ ! -z "$CUSTOM_STARTPORT" ]]; then
+      STARTPORT=$CUSTOM_STARTPORT
+    fi
     genredis_del $NUM
     ;;
   * )
@@ -429,13 +641,14 @@ case "$1" in
 
     echo "* prep - standalone prep command installs redis-cluster-tool"
     echo "* prepupdate - standalone prep update command updates redis-cluster-tool"
-    echo "* multi X - number of standalone redis instances to create"
-    echo "* clusterprep X - number of cluster enabled config instances"
+    echo "* multi X - no. of standalone redis instances to create"
+    echo "* clusterprep X - no. of cluster enabled config instances"
     echo "* clustermake 6 - to enable cluster mode + create cluster"
     echo "* clustermake 9 - flag to enable cluster mode + create cluster"
     echo "* replication X - create redis replication"
     echo "* replication X 6579 - create replication with custom start port 6579"
-    echo "* delete X - number of redis instances to delete"
+    echo "* delete X - no. of redis instances to delete"
+    echo "* delete X 6579 - no. of redis instances to delete + custom start port 6579"
     echo
     echo "$0 prep"
     echo "$0 prepupdate"
@@ -446,6 +659,7 @@ case "$1" in
     echo "$0 replication X"
     echo "$0 replication X 6579"
     echo "$0 delete X"
+    echo "$0 delete X 6579"
     ;;
 esac
 exit
