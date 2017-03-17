@@ -6,12 +6,13 @@
 ######################################################
 # variables
 #############
-VER=0.8
+VER=0.9
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
 DEBUG_REDISGEN='y'
 UNIXSOCKET='n'
+SENTINEL_SETUP='n'
 INSTALLDIR='/svr-setup'
 ######################################################
 # functions
@@ -95,6 +96,12 @@ genredis_del() {
     fi
     if [ -f "/var/lib/redis/appendonly${REDISPORT}.aof" ]; then
       rm -rf "/var/lib/redis/appendonly${REDISPORT}.aof"
+    fi
+    if [ -f "/root/tools/rediscluster/sentinel-${REDISPORT}.conf" ]; then
+      rm -rf "/root/tools/rediscluster/sentinel-${REDISPORT}.conf"
+    fi
+    if [ -d "/var/lib/redis/sentinel_${REDISPORT}" ]; then
+      rm -rf "/var/lib/redis/sentinel_${REDISPORT}"
     fi
     rm -rf "/var/lib/redis${REDISPORT}"
   done
@@ -280,6 +287,32 @@ genredis() {
               redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO REPLICATION
             else
               redis-cli -h 127.0.0.1 -p $REDISPORT INFO REPLICATION
+            fi
+          fi
+          # sentinel setup for redis replication
+          if [[ "$SENTINEL_SETUP" && "$CLUSTER" = 'replication' ]]; then
+            SPORT="$STARTPORT"
+            SENTPORT=$((SPORT+10000))
+            echo "creating /root/tools/rediscluster/sentinel-${SPORT}.conf ..."
+            mkdir -p "/var/lib/redis/sentinel_${SPORT}"
+cat > "/root/tools/rediscluster/sentinel-${SPORT}.conf" <<JJJ
+#port $SENTPORT
+daemonize yes
+dir /var/lib/redis/sentinel_${SPORT}
+pidfile /var/run/redis/redis-sentinel-${SPORT}.pid
+sentinel monitor master-${PORT} 127.0.0.1 ${SPORT} 1
+sentinel down-after-milliseconds master-${SPORT} 3000
+sentinel failover-timeout master-${SPORT} 6000
+sentinel parallel-syncs master-${SPORT} 1
+logfile /var/log/redis/sentinel-${SPORT}.log
+JJJ
+
+            if [ -f "/root/tools/rediscluster/sentinel-${SPORT}.conf" ]; then
+              echo "sentinel (sentinel-${SPORT}.conf)"
+              cat "/root/tools/rediscluster/sentinel-${SPORT}.conf"
+            
+              echo "starting Redis sentinel (sentinel-${SPORT}.conf)"
+              /etc/redis${SPORT}/redis-server "/root/tools/rediscluster/sentinel-${SPORT}.conf" --sentinel
             fi
           fi
         fi
