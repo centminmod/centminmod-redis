@@ -146,11 +146,13 @@ genredis_del() {
         rm -rf "/var/log/redis/sentinel-${REDISPORT}.log"
       fi
     fi
-    if [ -f "/var/run/redis/redis-sentinel-${SENTPORT}.pid" ]; then
+    if [ -f "/var/run/redis/redis-sentinel-${REDISPORT}.pid" ]; then
       if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
-        echo "kill -9 $(cat "/var/run/redis/redis-sentinel-${SENTPORT}.pid")"
+        echo "kill -9 $(cat "/var/run/redis/redis-sentinel-${REDISPORT}.pid")"
+        echo "rm -rf "/var/run/redis/redis-sentinel-${REDISPORT}.pid""
       else
-        kill -9 $(cat "/var/run/redis/redis-sentinel-${SENTPORT}.pid")
+        kill -9 $(cat "/var/run/redis/redis-sentinel-${REDISPORT}.pid")
+        rm -rf "/var/run/redis/redis-sentinel-${REDISPORT}.pid"
       fi
     fi
     if [ -f "/etc/init.d/sentinel_${SENTPORT}" ]; then
@@ -433,6 +435,7 @@ sentinel failover-timeout master-${SPORT} 6000
 sentinel parallel-syncs master-${SPORT} 1
 logfile /var/log/redis/sentinel-${SPORT}.log
 JJJ
+          echo
 
             if [ -f "${SENTDIR}/sentinel-${SPORT}.conf" ]; then
               echo "sentinel sentinel-${SPORT}.conf contents"
@@ -475,7 +478,7 @@ case "\$1" in
 esac
 TTT
             chmod +x "/etc/init.d/sentinel_$SENTPORT"
-            chkconfig "sentinel_$SENTPOR" on
+            chkconfig "sentinel_$SENTPORT" on
             systemctl start "sentinel_$SENTPORT"
             tail -3 "/var/log/redis/sentinel-${SPORT}.log"
 
