@@ -325,7 +325,7 @@ esac
 "
             echo
             echo "chmod +x "/etc/init.d/sentinel_$SENTPORT""
-            echo "systemctl enable "sentinel_$SENTPORT""
+            echo "chkconfig "sentinel_$SENTPORT on""
             echo "systemctl start "sentinel_$SENTPORT""
             echo "tail -3 "/var/log/redis/sentinel-${SPORT}.log""
           fi
@@ -475,7 +475,7 @@ case "\$1" in
 esac
 TTT
             chmod +x "/etc/init.d/sentinel_$SENTPORT"
-            systemctl enable "sentinel_$SENTPORT"
+            chkconfig "sentinel_$SENTPOR" on
             systemctl start "sentinel_$SENTPORT"
             tail -3 "/var/log/redis/sentinel-${SPORT}.log"
 
