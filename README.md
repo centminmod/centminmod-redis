@@ -12,12 +12,18 @@ Requirements:
 Redis Server Install:
 =======
 
-For [Centmin Mod LEMP web stacks](https://centminmod.com), installing redis 3.2 branch is simple as using these SSH command steps:
+For [Centmin Mod LEMP web stacks](https://centminmod.com), installing redis 3.2 branch is simple as using these SSH command steps or using `redis-install.sh` script:
+
+`redis-install.sh` script
+
+    ./redis-install.sh install
+
+Manual install steps
 
     yum -y install redis --enablerepo=remi --disableplugin=priorities
     sed -i 's|LimitNOFILE=.*|LimitNOFILE=262144|' /etc/systemd/system/redis.service.d/limit.conf
     echo "d      /var/run/redis/         0755 redis redis" > /etc/tmpfiles.d/redis.conf
-    mkdir /var/run/redis
+    mkdir -p /var/run/redis
     chown redis:redis /var/run/redis
     chmod 755 /var/run/redis
     systemctl daemon-reload
