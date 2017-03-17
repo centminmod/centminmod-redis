@@ -627,6 +627,36 @@ Checking sentinel log
     29677:X 17 Mar 23:45:54.858 * +slave slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
     29677:X 17 Mar 23:45:57.868 # +sdown slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
 
+Restart Redis 6479 port instance will currently be set to redis slave
+
+    systemctl start redis6479
+
+redis 6479 replication info
+
+    redis-cli -h 127.0.0.1 -p 6479 INFO REPLICATION
+    # Replication
+    role:slave
+    master_host:127.0.0.1
+    master_port:6480
+    master_link_status:up
+    master_last_io_seconds_ago:1
+    master_sync_in_progress:0
+    slave_repl_offset:296
+    slave_priority:100
+    slave_read_only:1
+    connected_slaves:0
+    master_repl_offset:0
+    repl_backlog_active:0
+    repl_backlog_size:1048576
+    repl_backlog_first_byte_offset:0
+    repl_backlog_histlen:0
+
+Two additional entries in sentinel log at `/var/log/redis/sentinel-6479.log `
+
+    tail -2 /var/log/redis/sentinel-6479.log 
+    29677:X 17 Mar 23:51:21.109 # -sdown slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
+    29677:X 17 Mar 23:51:31.132 * +convert-to-slave slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
+
 When you run delete command it will wipe the redis instances including sentinel setups
 
     ./redis-generator.sh delete 2
