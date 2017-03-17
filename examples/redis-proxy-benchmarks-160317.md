@@ -9,6 +9,34 @@ Redis Cluster & Proxy Configs
 * Netflix's Dynomite https://github.com/Netflix/dynomite on port 8102
 * Corvus https://github.com/eleme/corvus/ on port 12345
 
+Script Usage
+======
+
+    ./redis-generator.sh
+    
+    * Usage: where X equal postive integer for number of redis
+    servers to create with incrementing TCP redis ports
+    starting at STARTPORT=6479.
+    * prep - standalone prep command installs redis-cluster-tool
+    * prepupdate - standalone prep update command updates redis-cluster-tool
+    * multi X - number of standalone redis instances to create
+    * clusterprep X - number of cluster enabled config instances
+    * clustermake 6 - to enable cluster mode + create cluster
+    * clustermake 9 - flag to enable cluster mode + create cluster
+    * replication X - create redis replication
+    * replication X 6579 - create replication with custom start port 6579
+    * delete X - number of redis instances to delete
+    
+    ./redis-generator.sh prep
+    ./redis-generator.sh prepupdate
+    ./redis-generator.sh multi X
+    ./redis-generator.sh clusterprep X
+    ./redis-generator.sh clustermake 6
+    ./redis-generator.sh clustermake 9
+    ./redis-generator.sh replication X
+    ./redis-generator.sh replication X 6579
+    ./redis-generator.sh delete X
+
 **Config 1:** Redis 6x node Cluster created via [redis-generator.sh](https://github.com/centminmod/centminmod-redis)
 
 ```
