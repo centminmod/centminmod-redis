@@ -558,6 +558,75 @@ Sentinel log
     29035:X 17 Mar 23:03:24.758 # +monitor master master-6479 127.0.0.1 6479 quorum 1
     29035:X 17 Mar 23:03:34.816 * +slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
 
+Processes
+
+    ps aufxw | grep redis | grep -v grep
+    redis    29610  0.2  0.1 142896  2608 ?        Ssl  23:42   0:00 /etc/redis6479/redis-server 127.0.0.1:6479
+    root     29677  0.3  0.1  39308  2084 ?        Ssl  23:42   0:00 /etc/redis6479/redis-server *:16479 [sentinel]
+    redis    29727  0.2  0.1 142896  2552 ?        Ssl  23:42   0:00 /etc/redis6480/redis-server 127.0.0.1:6480
+
+Simulate Redis master on port 6479 failure
+
+    kill -9 $(cat /var/run/redis/redis_6479.pid)
+
+Check replication info for failed redis master
+
+    redis-cli -h 127.0.0.1 -p 6479 INFO REPLICATION
+    Could not connect to Redis at 127.0.0.1:6479: Connection refused
+
+Check replication info for promoted redis slave 6480 to master
+
+    redis-cli -h 127.0.0.1 -p 6480 INFO REPLICATION  
+    # Replication
+    role:master
+    connected_slaves:0
+    master_repl_offset:0
+    repl_backlog_active:0
+    repl_backlog_size:1048576
+    repl_backlog_first_byte_offset:0
+    repl_backlog_histlen:0
+
+Checking sentinel log
+
+    tail -50 /var/log/redis/sentinel-6479.log 
+                    _._                                                  
+            _.-``__ ''-._                                             
+        _.-``    `.  `_.  ''-._           Redis 3.2.8 (00000000/0) 64 bit
+    .-`` .-```.  ```\/    _.,_ ''-._                                   
+    (    '      ,       .-`  | `,    )     Running in sentinel mode
+    |`-._`-...-` __...-.``-._|'` _.-'|     Port: 16479
+    |    `-._   `._    /     _.-'    |     PID: 29677
+    `-._    `-._  `-./  _.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |           http://redis.io        
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |                                  
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+        `-._    `-.__.-'    _.-'                                       
+            `-._        _.-'                                           
+                `-.__.-'                                               
+    
+    29677:X 17 Mar 23:42:24.224 # Sentinel ID is e4a06cca515c15bc1fa002c2ce4959105000163a
+    29677:X 17 Mar 23:42:24.224 # +monitor master master-6479 127.0.0.1 6479 quorum 1
+    29677:X 17 Mar 23:42:34.265 * +slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    29677:X 17 Mar 23:45:53.734 # +sdown master master-6479 127.0.0.1 6479
+    29677:X 17 Mar 23:45:53.734 # +odown master master-6479 127.0.0.1 6479 #quorum 1/1
+    29677:X 17 Mar 23:45:53.734 # +new-epoch 1
+    29677:X 17 Mar 23:45:53.734 # +try-failover master master-6479 127.0.0.1 6479
+    29677:X 17 Mar 23:45:53.737 # +vote-for-leader e4a06cca515c15bc1fa002c2ce4959105000163a 1
+    29677:X 17 Mar 23:45:53.737 # +elected-leader master master-6479 127.0.0.1 6479
+    29677:X 17 Mar 23:45:53.737 # +failover-state-select-slave master master-6479 127.0.0.1 6479
+    29677:X 17 Mar 23:45:53.796 # +selected-slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    29677:X 17 Mar 23:45:53.796 * +failover-state-send-slaveof-noone slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    29677:X 17 Mar 23:45:53.872 * +failover-state-wait-promotion slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    29677:X 17 Mar 23:45:54.805 # +promoted-slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    29677:X 17 Mar 23:45:54.805 # +failover-state-reconf-slaves master master-6479 127.0.0.1 6479
+    29677:X 17 Mar 23:45:54.858 # +failover-end master master-6479 127.0.0.1 6479
+    29677:X 17 Mar 23:45:54.858 # +switch-master master-6479 127.0.0.1 6479 127.0.0.1 6480
+    29677:X 17 Mar 23:45:54.858 * +slave slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
+    29677:X 17 Mar 23:45:57.868 # +sdown slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
+
 When you run delete command it will wipe the redis instances including sentinel setups
 
     ./redis-generator.sh delete 2
