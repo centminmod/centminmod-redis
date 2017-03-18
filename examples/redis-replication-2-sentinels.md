@@ -307,3 +307,48 @@ Two additional entries in sentinel log at `/var/log/redis/sentinel-6479.log `
 When you run delete command it will wipe the redis instances including sentinel setups
 
     ./redis-generator.sh delete 2
+
+Monitoring Sentinels
+======
+
+Sentinels monitor the health of redis master and slaves but you may need to monitor the status of Sentinel itself. You can setup [Monit](https://mmonit.com/monit/) to monitor your sentinel instances and auto restart sentinel if down.
+
+Example Monit config at `/etc/monit.d/sentinel_16479`
+
+    check process sentinel_16479 with pidfile /var/run/redis/redis-sentinel-6479.pid
+      start program = "/etc/init.d/sentinel_16479 start"
+      stop program  = "/etc/init.d/sentinel_16479 stop"
+      if 2 restarts within 3 cycles then timeout
+      if failed host 127.0.0.1 port 16479 then restart
+
+simulate sentinel downtime
+
+```
+kill -9 $(cat /var/run/redis/redis-sentinel-6479.pid)
+```
+
+```
+tail -10 /var/log/monit.log
+
+[UTC Mar 18 02:32:59] info     : Starting Monit 5.21.0 daemon with http interface at [127.0.0.1]:2812
+[UTC Mar 18 02:32:59] info     : Monit start delay set to 60s
+[UTC Mar 18 02:33:59] info     : 'centos7.localdomain' Monit 5.21.0 started
+[UTC Mar 18 02:33:59] error    : 'sentinel_16479' process is not running
+[UTC Mar 18 02:33:59] info     : 'sentinel_16479' trying to restart
+[UTC Mar 18 02:33:59] info     : 'sentinel_16479' start: '/etc/init.d/sentinel_16479 start'
+[UTC Mar 18 02:34:09] info     : 'sentinel_16479' process is running with pid 12316
+```
+
+```
+tail -10 /var/log/redis/sentinel-6479.log
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |                                  
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+      `-._    `-.__.-'    _.-'                                       
+          `-._        _.-'                                           
+              `-.__.-'                                               
+
+12316:X 18 Mar 02:33:59.071 # Sentinel ID is e38082c87193130f5ce0e6417735b62aca3c68ed
+12316:X 18 Mar 02:33:59.071 # +monitor master master-6479 127.0.0.1 6479 quorum 1
+```
