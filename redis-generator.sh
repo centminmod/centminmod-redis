@@ -10,9 +10,9 @@ VER=1.0
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
-DEBUG_REDISGEN='y'
+DEBUG_REDISGEN='n'
 UNIXSOCKET='n'
-SENTINEL_SETUP='y'
+SENTINEL_SETUP='n'
 INSTALLDIR='/svr-setup'
 SENTDIR='/root/tools/redis-sentinel'
 ######################################################
