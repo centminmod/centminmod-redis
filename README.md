@@ -86,6 +86,7 @@ You will create:
 
 * 2 redis server starting at `STARTPORT=6479` for redis on `6479` and `6480` TCP ports.
 * systemd files for controlling each redis server at `/usr/lib/systemd/system/redis6479.service` and `/usr/lib/systemd/system/redis6480.service`
+* pid files at `/var/run/redis/redis_6479.pid` and `/var/run/redis/redis_6480.pid`
 * dedicated redis directories for each redis server instance at `/etc/redis6479` and `/etc/redis6480`
 * main `/usr/bin/redis-server` binary gets copied to dedicated redis directories at `/etc/redis6479/redis-server` and `/etc/redis6480/redis-server`
 * dedicated redis config files at `/etc/redis6479/redis6479.conf` and `/etc/redis6479/redis6480.conf` 
