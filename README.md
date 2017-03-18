@@ -558,6 +558,50 @@ Sentinel log
     29035:X 17 Mar 23:03:24.758 # +monitor master master-6479 127.0.0.1 6479 quorum 1
     29035:X 17 Mar 23:03:34.816 * +slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
 
+Querying sentinel listening on port `16479`
+
+    redis-cli -h 127.0.0.1 -p 16479 sentinel master master-6479
+    1) "name"
+    2) "master-6479"
+    3) "ip"
+    4) "127.0.0.1"
+    5) "port"
+    6) "6479"
+    7) "runid"
+    8) "3df44c68f8b9c8bf20fa51684589638046d343e6"
+    9) "flags"
+    10) "master"
+    11) "link-pending-commands"
+    12) "0"
+    13) "link-refcount"
+    14) "1"
+    15) "last-ping-sent"
+    16) "0"
+    17) "last-ok-ping-reply"
+    18) "14"
+    19) "last-ping-reply"
+    20) "14"
+    21) "down-after-milliseconds"
+    22) "3000"
+    23) "info-refresh"
+    24) "9324"
+    25) "role-reported"
+    26) "master"
+    27) "role-reported-time"
+    28) "662803"
+    29) "config-epoch"
+    30) "1"
+    31) "num-slaves"
+    32) "1"
+    33) "num-other-sentinels"
+    34) "0"
+    35) "quorum"
+    36) "1"
+    37) "failover-timeout"
+    38) "6000"
+    39) "parallel-syncs"
+    40) "1"
+
 Processes
 
     ps aufxw | grep redis | grep -v grep
