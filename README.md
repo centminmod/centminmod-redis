@@ -430,7 +430,7 @@ If TCP port 6579 already in use, you'll get an error
     
     Error: TCP port 6579 in use, try another port
 
-Optionally, you can enable auto sentinel setup which is tied to the redis master instance on `STARTPORT` by enabling `SENTINEL_SETUP='y'` prior to running replication command.
+Optionally, you can enable auto [redis sentinel](https://redis.io/topics/sentinel) setup which is tied to the redis master instance on `STARTPORT` by enabling `SENTINEL_SETUP='y'` prior to running replication command.
 
 Example would create
 

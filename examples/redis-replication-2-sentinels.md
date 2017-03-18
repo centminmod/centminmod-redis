@@ -1,7 +1,7 @@
 Example
 =========
 
-Example of using [redis-generator.sh](https://github.com/centminmod/centminmod-redis) to create 2 redis server master + slave replication on ports 6479 and 6480 + enable auto sentinel setup which is tied to the redis master instance on `STARTPORT` by enabling `SENTINEL_SETUP='y'` prior to running replication command.
+Example of using [redis-generator.sh](https://github.com/centminmod/centminmod-redis) to create 2 redis server master + slave replication on ports 6479 and 6480 + enable auto [redis sentinel](https://redis.io/topics/sentinel) setup which is tied to the redis master instance on `STARTPORT` by enabling `SENTINEL_SETUP='y'` prior to running replication command.
 
 Usage:
 =======
