@@ -615,15 +615,16 @@ Will result in:
 * 1st redis replication 2x nodes - master + slave on default 6479 master, 6480 slave with sentinels on 16479, 16480, and 16481 ports
 * 2nd redis replication 2x nodes - master + slave on default 6597 master, 6698 slave with sentinels on 16597, 16598, and 16599 ports
 
-    ps aufxw | grep redis | grep -v grep | sort
-    redis     5470  0.3  0.1 142896  2760 ?        Ssl  23:14   0:07 /etc/redis6480/redis-server 127.0.0.1:6480
-    redis     5621  0.3  0.1 142896  2680 ?        Ssl  23:27   0:04 /etc/redis6479/redis-server 127.0.0.1:6479
-    redis     5959  0.2  0.1 142896  2632 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server 127.0.0.1:6597
-    redis     6171  0.3  0.1 142896  2592 ?        Ssl  23:51   0:00 /etc/redis6598/redis-server 127.0.0.1:6598
-    root      5373  0.4  0.1  39308  2156 ?        Ssl  23:14   0:10 /etc/redis6479/redis-server *:16480 [sentinel]
-    root      5420  0.4  0.1  39308  2152 ?        Ssl  23:14   0:10 /etc/redis6479/redis-server *:16481 [sentinel]
-    root      5745  0.4  0.1 142896  2120 ?        Ssl  23:30   0:06 /etc/redis6479/redis-server *:16479 [sentinel]
-    root      6027  0.4  0.1  39308  2140 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server *:16597 [sentinel]
-    root      6074  0.4  0.1  39308  2140 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server *:16598 [sentinel]
-    root      6121  0.4  0.1  39308  2136 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server *:16599 [sentinel]
-
+```
+ps aufxw | grep redis | grep -v grep | sort
+redis     5470  0.3  0.1 142896  2760 ?        Ssl  23:14   0:07 /etc/redis6480/redis-server 127.0.0.1:6480
+redis     5621  0.3  0.1 142896  2680 ?        Ssl  23:27   0:04 /etc/redis6479/redis-server 127.0.0.1:6479
+redis     5959  0.2  0.1 142896  2632 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server 127.0.0.1:6597
+redis     6171  0.3  0.1 142896  2592 ?        Ssl  23:51   0:00 /etc/redis6598/redis-server 127.0.0.1:6598
+root      5373  0.4  0.1  39308  2156 ?        Ssl  23:14   0:10 /etc/redis6479/redis-server *:16480 [sentinel]
+root      5420  0.4  0.1  39308  2152 ?        Ssl  23:14   0:10 /etc/redis6479/redis-server *:16481 [sentinel]
+root      5745  0.4  0.1 142896  2120 ?        Ssl  23:30   0:06 /etc/redis6479/redis-server *:16479 [sentinel]
+root      6027  0.4  0.1  39308  2140 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server *:16597 [sentinel]
+root      6074  0.4  0.1  39308  2140 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server *:16598 [sentinel]
+root      6121  0.4  0.1  39308  2136 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server *:16599 [sentinel]
+```
