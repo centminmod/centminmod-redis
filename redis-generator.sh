@@ -6,11 +6,11 @@
 ######################################################
 # variables
 #############
-VER=0.9
+VER=1.0
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
-DEBUG_REDISGEN='y'
+DEBUG_REDISGEN='n'
 UNIXSOCKET='n'
 SENTINEL_SETUP='n'
 INSTALLDIR='/svr-setup'
@@ -24,6 +24,10 @@ fi
 
 if [ ! -d ${SENTDIR} ]; then
   mkdir -p ${SENTDIR}
+fi
+
+if [ ! -f /bin/bc ]; then
+  yum -q -y install bc
 fi
 
 if [ ! -f /usr/lib/systemd/system/redis.service ]; then
@@ -75,6 +79,7 @@ redis_cluster_install() {
 genredis_del() {
   # increment starts at 0
   NUMBER=$(($1-1))
+  NUMBER_SENTINELS=2
   if [[ "$NUMBER" -le '1' ]]; then
     NUMBER=1
   fi
@@ -125,34 +130,37 @@ genredis_del() {
         rm -rf "/var/lib/redis/appendonly${REDISPORT}.aof"
       fi
     fi
-    if [ -f "${SENTDIR}/sentinel-${REDISPORT}.conf" ]; then
+    for (( sp=0; sp <= $NUMBER_SENTINELS; sp++ ))
+      do
+      SENTPORT=$(($REDISPORT+10000+$sp))
+    if [ -f "${SENTDIR}/sentinel-${SENTPORT}.conf" ]; then
       if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
-        echo "rm -rf "${SENTDIR}/sentinel-${REDISPORT}.conf""
+        echo "rm -rf "${SENTDIR}/sentinel-${SENTPORT}.conf""
       else
-        rm -rf "${SENTDIR}/sentinel-${REDISPORT}.conf"
+        rm -rf "${SENTDIR}/sentinel-${SENTPORT}.conf"
       fi
     fi
-    if [ -d "/var/lib/redis/sentinel_${REDISPORT}" ]; then
+    if [ -d "/var/lib/redis/sentinel_${SENTPORT}" ]; then
       if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
-        echo "rm -rf "/var/lib/redis/sentinel_${REDISPORT}""
+        echo "rm -rf "/var/lib/redis/sentinel_${SENTPORT}""
       else
-        rm -rf "/var/lib/redis/sentinel_${REDISPORT}"
+        rm -rf "/var/lib/redis/sentinel_${SENTPORT}"
       fi
     fi
-    if [ -f "/var/log/redis/sentinel-${REDISPORT}.log" ]; then
+    if [ -f "/var/log/redis/sentinel-${SENTPORT}.log" ]; then
       if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
-        echo "rm -rf "/var/log/redis/sentinel-${REDISPORT}.log""
+        echo "rm -rf "/var/log/redis/sentinel-${SENTPORT}.log""
       else
-        rm -rf "/var/log/redis/sentinel-${REDISPORT}.log"
+        rm -rf "/var/log/redis/sentinel-${SENTPORT}.log"
       fi
     fi
-    if [ -f "/var/run/redis/redis-sentinel-${REDISPORT}.pid" ]; then
+    if [ -f "/var/run/redis/redis-sentinel-${SENTPORT}.pid" ]; then
       if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
-        echo "kill -9 $(cat "/var/run/redis/redis-sentinel-${REDISPORT}.pid")"
-        echo "rm -rf "/var/run/redis/redis-sentinel-${REDISPORT}.pid""
+        echo "kill -9 $(cat "/var/run/redis/redis-sentinel-${SENTPORT}.pid")"
+        echo "rm -rf "/var/run/redis/redis-sentinel-${SENTPORT}.pid""
       else
-        kill -9 $(cat "/var/run/redis/redis-sentinel-${REDISPORT}.pid")
-        rm -rf "/var/run/redis/redis-sentinel-${REDISPORT}.pid"
+        kill -9 $(cat "/var/run/redis/redis-sentinel-${SENTPORT}.pid")
+        rm -rf "/var/run/redis/redis-sentinel-${SENTPORT}.pid"
       fi
     fi
     if [ -f "/etc/init.d/sentinel_${SENTPORT}" ]; then
@@ -162,6 +170,8 @@ genredis_del() {
         rm -rf "/etc/init.d/sentinel_${SENTPORT}"
       fi
     fi
+    done
+
     if [ -d "/var/lib/redis${REDISPORT}" ]; then
       if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
         echo "rm -rf "/var/lib/redis${REDISPORT}""
@@ -179,9 +189,16 @@ genredis() {
   CLUSTER_CREATE=$3
   # increment starts at 0
   NUMBER=$(($1-1))
+  NUMBER_SENTINELS=2
+  QUORUM=2
+  # QUORUM=$(echo "$1*0.5045" | bc)
+  # QUORUM=$(printf "%1.f\n" $QUORUM)
   if [[ "$NUMBER" -le '1' ]]; then
     NUMBER=1
   fi
+  # if [[ "$QUORUM" -eq '1' ]]; then
+  #   QUORUM=2
+  # fi
   echo
   echo "Creating redis servers starting at TCP = $STARTPORT..."
   for (( p=0; p <= $NUMBER; p++ ))
@@ -270,30 +287,33 @@ genredis() {
             fi
           fi
           # sentinel setup for redis replication
+          # create as many sentinels as replication nodes
+          for (( sp=0; sp <= $NUMBER_SENTINELS; sp++ ))
+            do
           if [[ "$SENTINEL_SETUP" = [yY] && "$CLUSTER" = 'replication' && "$REDISPORT" = "$STARTPORT" ]]; then
             SPORT="$STARTPORT"
-            SENTPORT=$(($SPORT+10000))
+            SENTPORT=$(($SPORT+10000+$sp))
             echo
             echo "-----------------"
-            echo "creating ${SENTDIR}/sentinel-${SPORT}.conf ..."
-            echo "mkdir -p "/var/lib/redis/sentinel_${SPORT}""
-            echo "touch "/var/log/redis/sentinel-${SPORT}.log""
-            echo "chown redis:redis "/var/log/redis/sentinel-${SPORT}.log""
-            echo "create sentinel config: ${SENTDIR}/sentinel-${SPORT}.conf"
+            echo "creating ${SENTDIR}/sentinel-${SENTPORT}.conf ..."
+            echo "mkdir -p "/var/lib/redis/sentinel_${SENTPORT}""
+            echo "touch "/var/log/redis/sentinel-${SENTPORT}.log""
+            echo "chown redis:redis "/var/log/redis/sentinel-${SENTPORT}.log""
+            echo "create sentinel config: ${SENTDIR}/sentinel-${SENTPORT}.conf"
             echo
             echo "------------------------------------------"
             echo "port $SENTPORT"
             echo "daemonize yes"
-            echo "dir /var/lib/redis/sentinel_${SPORT}"
-            echo "pidfile /var/run/redis/redis-sentinel-${SPORT}.pid"
-            echo "sentinel monitor master-${SPORT} 127.0.0.1 ${SPORT} 1"
+            echo "dir /var/lib/redis/sentinel_${SENTPORT}"
+            echo "pidfile /var/run/redis/redis-sentinel-${SENTPORT}.pid"
+            echo "sentinel monitor master-${SPORT} 127.0.0.1 ${SPORT} $QUORUM"
             echo "sentinel down-after-milliseconds master-${SPORT} 3000"
             echo "sentinel failover-timeout master-${SPORT} 6000"
             echo "sentinel parallel-syncs master-${SPORT} 1"
-            echo "logfile /var/log/redis/sentinel-${SPORT}.log"
+            echo "logfile /var/log/redis/sentinel-${SENTPORT}.log"
             echo "------------------------------------------"
             echo
-            echo "create startup script: "/etc/init.d/sentinel_$SENTPORT""
+            echo "create startup script: "/etc/init.d/sentinel_${SENTPORT}""
             echo
 echo "
 #!/bin/bash
@@ -302,8 +322,8 @@ echo "
 
 NAME=\$(basename \${0})
 EXEC=/etc/redis${SPORT}/redis-server
-PIDFILE=/var/run/redis/redis-sentinel-${SPORT}.pid
-CONF=${SENTDIR}/sentinel-${SPORT}.conf
+PIDFILE=/var/run/redis/redis-sentinel-${SENTPORT}.pid
+CONF=${SENTDIR}/sentinel-${SENTPORT}.conf
 
 PID=\$(cat \$PIDFILE 2> /dev/null)
 case "\$1" in
@@ -334,6 +354,7 @@ esac
             echo "sleep 2"
             echo "tail -4 "/var/log/redis/sentinel-${SPORT}.log""
           fi
+          done #sp
         fi
       else
         if [ ! -f "/usr/lib/systemd/system/redis${REDISPORT}.service" ]; then
@@ -420,35 +441,38 @@ esac
             fi
           fi
           # sentinel setup for redis replication
+          # create as many sentinels as replication nodes
+          for (( sp=0; sp <= $NUMBER_SENTINELS; sp++ ))
+            do
           if [[ "$SENTINEL_SETUP" = [yY] && "$CLUSTER" = 'replication' && "$REDISPORT" = "$STARTPORT" ]]; then
             SPORT="$STARTPORT"
-            SENTPORT=$(($SPORT+10000))
+            SENTPORT=$(($SPORT+10000+$sp))
             echo
             echo "-----------------"
-            echo "creating ${SENTDIR}/sentinel-${SPORT}.conf ..."
-            mkdir -p "/var/lib/redis/sentinel_${SPORT}"
-            touch "/var/log/redis/sentinel-${SPORT}.log"
-            chown redis:redis "/var/log/redis/sentinel-${SPORT}.log"
-cat > "${SENTDIR}/sentinel-${SPORT}.conf" <<JJJ
+            echo "creating ${SENTDIR}/sentinel-${SENTPORT}.conf ..."
+            mkdir -p "/var/lib/redis/sentinel_${SENTPORT}"
+            touch "/var/log/redis/sentinel-${SENTPORT}.log"
+            chown redis:redis "/var/log/redis/sentinel-${SENTPORT}.log"
+cat > "${SENTDIR}/sentinel-${SENTPORT}.conf" <<JJJ
 port $SENTPORT
 daemonize yes
-dir /var/lib/redis/sentinel_${SPORT}
-pidfile /var/run/redis/redis-sentinel-${SPORT}.pid
-sentinel monitor master-${SPORT} 127.0.0.1 ${SPORT} 1
+dir /var/lib/redis/sentinel_${SENTPORT}
+pidfile /var/run/redis/redis-sentinel-${SENTPORT}.pid
+sentinel monitor master-${SPORT} 127.0.0.1 ${SPORT} $QUORUM
 sentinel down-after-milliseconds master-${SPORT} 3000
 sentinel failover-timeout master-${SPORT} 6000
 sentinel parallel-syncs master-${SPORT} 1
-logfile /var/log/redis/sentinel-${SPORT}.log
+logfile /var/log/redis/sentinel-${SENTPORT}.log
 JJJ
           echo
 
-            if [ -f "${SENTDIR}/sentinel-${SPORT}.conf" ]; then
-              echo "sentinel sentinel-${SPORT}.conf contents"
+            if [ -f "${SENTDIR}/sentinel-${SENTPORT}.conf" ]; then
+              echo "sentinel sentinel-${SENTPORT}.conf contents"
               echo
-              cat "${SENTDIR}/sentinel-${SPORT}.conf"
+              cat "${SENTDIR}/sentinel-${SENTPORT}.conf"
             
-              echo "starting Redis sentinel (sentinel-${SPORT}.conf)"
-              # /etc/redis${SPORT}/redis-server "${SENTDIR}/sentinel-${SPORT}.conf" --sentinel
+              echo "starting Redis sentinel (sentinel-${SENTPORT}.conf)"
+              # /etc/redis${SPORT}/redis-server "${SENTDIR}/sentinel-${SENTPORT}.conf" --sentinel
 
 cat > "/etc/init.d/sentinel_$SENTPORT" <<TTT
 #!/bin/bash
@@ -457,8 +481,8 @@ cat > "/etc/init.d/sentinel_$SENTPORT" <<TTT
 
 NAME=\$(basename \${0})
 EXEC=/etc/redis${SPORT}/redis-server
-PIDFILE=/var/run/redis/redis-sentinel-${SPORT}.pid
-CONF=${SENTDIR}/sentinel-${SPORT}.conf
+PIDFILE=/var/run/redis/redis-sentinel-${SENTPORT}.pid
+CONF=${SENTDIR}/sentinel-${SENTPORT}.conf
 
 PID=\$(cat \$PIDFILE 2> /dev/null)
 case "\$1" in
@@ -490,6 +514,7 @@ TTT
 
             fi
           fi
+          done #sp
         fi
       fi
   done

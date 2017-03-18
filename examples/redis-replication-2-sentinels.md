@@ -1,7 +1,7 @@
 Example
 =========
 
-Example of using [redis-generator.sh](https://github.com/centminmod/centminmod-redis) to create 2 redis server master + slave replication on ports 6479 and 6480 + enable auto [redis sentinel](https://redis.io/topics/sentinel) setup which is tied to the redis master instance on `STARTPORT` by enabling `SENTINEL_SETUP='y'` prior to running replication command.
+Example of using [redis-generator.sh](https://github.com/centminmod/centminmod-redis) to create 2 redis server master + slave replication on ports 6479 and 6480 + enable auto [redis sentinel](https://redis.io/topics/sentinel) setup (3x sentinel with quorum of 2) which is tied to the redis master instance on `STARTPORT` by enabling `SENTINEL_SETUP='y'` prior to running replication command.
 
 Usage:
 =======
@@ -37,18 +37,19 @@ Default is to create the redis servers via TCP ports.
 
 Example would create
 
-* sentinel config file `/root/tools/redis-sentinel/sentinel-6479.conf` where `STARTPORT` is 6479
-* sentinel port is `STARTPORT` + 10000 = 6479 + 10000 = `16479`
-* sentinel init.d startup script is at `/etc/init.d/sentinel_16479` 
-* sentinel directory /var/lib/redis/sentinel_6479
-* sentinel log /var/log/redis/sentinel-6479.log
-* sentinel pid file /var/run/redis/redis-sentinel-6479.pid
-* quorum is set to 1 as each replication run only creates one master redis instanced paired to redis slaves.
+* sentinel config file `/root/tools/redis-sentinel/sentinel-16479.conf` where `STARTPORT` is 6479 and incremented by 2 for `/root/tools/redis-sentinel/sentinel-16480.conf` and `/root/tools/redis-sentinel/sentinel-16481.conf`
+* sentinel port is `STARTPORT` + 10000 = 6479 + 10000 = `16479` and incremented by 2 for `16480` and `16481`
+* sentinel init.d startup script is at `/etc/init.d/sentinel_16479` and incremented by 2 for `/etc/init.d/sentinel_16480` and `/etc/init.d/sentinel_16481`
+* sentinel directory `/var/lib/redis/sentinel_16479`, `/var/lib/redis/sentinel_16480` and `/var/lib/redis/sentinel_16481`
+* sentinel log `/var/log/redis/sentinel-16479.log`, `/var/log/redis/sentinel-16480.log` and `/var/log/redis/sentinel-16481.log`
+* sentinel pid file `/var/run/redis/redis-sentinel-16479.pid`, `/var/run/redis/redis-sentinel-16480.pid` and `/var/run/redis/redis-sentinel-16481.pid`
+* quorum is set to 2 with 3x redis sentinels
 
 Output
 
+
     ./redis-generator.sh replication 2
-    
+
     Creating redis servers starting at TCP = 6479...
     -------------------------------------------------------
     creating redis server: redis6479.service [increment value: 0]
@@ -64,7 +65,7 @@ Output
     ## Redis TCP 6479 Info ##
     redis_version:3.2.8
     redis_mode:standalone
-    process_id:28968
+    process_id:5259
     tcp_port:6479
     uptime_in_seconds:0
     uptime_in_days:0
@@ -80,25 +81,55 @@ Output
     repl_backlog_histlen:0
     
     -----------------
-    creating /root/tools/redis-sentinel/sentinel-6479.conf ...
+    creating /root/tools/redis-sentinel/sentinel-16479.conf ...
     
-    sentinel sentinel-6479.conf contents
+    sentinel sentinel-16479.conf contents
     
     port 16479
     daemonize yes
-    dir /var/lib/redis/sentinel_6479
-    pidfile /var/run/redis/redis-sentinel-6479.pid
-    sentinel monitor master-6479 127.0.0.1 6479 1
+    dir /var/lib/redis/sentinel_16479
+    pidfile /var/run/redis/redis-sentinel-16479.pid
+    sentinel monitor master-6479 127.0.0.1 6479 2
     sentinel down-after-milliseconds master-6479 3000
     sentinel failover-timeout master-6479 6000
     sentinel parallel-syncs master-6479 1
-    logfile /var/log/redis/sentinel-6479.log
-    starting Redis sentinel (sentinel-6479.conf)
+    logfile /var/log/redis/sentinel-16479.log
+    starting Redis sentinel (sentinel-16479.conf)
     Starting sentinel_16479 ...
-                `-.__.-'                                               
     
-    29035:X 17 Mar 23:03:24.758 # Sentinel ID is 6a0509340d3d75262f1ff123f3734bf37f4ec3ff
-    29035:X 17 Mar 23:03:24.758 # +monitor master master-6479 127.0.0.1 6479 quorum 1
+    -----------------
+    creating /root/tools/redis-sentinel/sentinel-16480.conf ...
+    
+    sentinel sentinel-16480.conf contents
+    
+    port 16480
+    daemonize yes
+    dir /var/lib/redis/sentinel_16480
+    pidfile /var/run/redis/redis-sentinel-16480.pid
+    sentinel monitor master-6479 127.0.0.1 6479 2
+    sentinel down-after-milliseconds master-6479 3000
+    sentinel failover-timeout master-6479 6000
+    sentinel parallel-syncs master-6479 1
+    logfile /var/log/redis/sentinel-16480.log
+    starting Redis sentinel (sentinel-16480.conf)
+    Starting sentinel_16480 ...
+    
+    -----------------
+    creating /root/tools/redis-sentinel/sentinel-16481.conf ...
+    
+    sentinel sentinel-16481.conf contents
+    
+    port 16481
+    daemonize yes
+    dir /var/lib/redis/sentinel_16481
+    pidfile /var/run/redis/redis-sentinel-16481.pid
+    sentinel monitor master-6479 127.0.0.1 6479 2
+    sentinel down-after-milliseconds master-6479 3000
+    sentinel failover-timeout master-6479 6000
+    sentinel parallel-syncs master-6479 1
+    logfile /var/log/redis/sentinel-16481.log
+    starting Redis sentinel (sentinel-16481.conf)
+    Starting sentinel_16481 ...
     -------------------------------------------------------
     creating redis server: redis6480.service [increment value: 1]
     redis TCP port: 6480
@@ -113,9 +144,9 @@ Output
     ## Redis TCP 6480 Info ##
     redis_version:3.2.8
     redis_mode:standalone
-    process_id:29085
+    process_id:5470
     tcp_port:6480
-    uptime_in_seconds:1
+    uptime_in_seconds:0
     uptime_in_days:0
     executable:/etc/redis6480/redis-server
     config_file:/etc/redis6480/redis6480.conf
@@ -124,9 +155,9 @@ Output
     master_host:127.0.0.1
     master_port:6479
     master_link_status:up
-    master_last_io_seconds_ago:1
+    master_last_io_seconds_ago:0
     master_sync_in_progress:0
-    slave_repl_offset:160
+    slave_repl_offset:446
     slave_priority:100
     slave_read_only:1
     connected_slaves:0
@@ -136,16 +167,16 @@ Output
     repl_backlog_first_byte_offset:0
     repl_backlog_histlen:0
 
-Sentinel log
+Sentinel #1 listening on port 16479 log
 
-    tail -30 /var/log/redis/sentinel-6479.log
+    tail -30 /var/log/redis/sentinel-16479.log
                     _._                                                  
             _.-``__ ''-._                                             
         _.-``    `.  `_.  ''-._           Redis 3.2.8 (00000000/0) 64 bit
     .-`` .-```.  ```\/    _.,_ ''-._                                   
     (    '      ,       .-`  | `,    )     Running in sentinel mode
     |`-._`-...-` __...-.``-._|'` _.-'|     Port: 16479
-    |    `-._   `._    /     _.-'    |     PID: 29035
+    |    `-._   `._    /     _.-'    |     PID: 5326
     `-._    `-._  `-./  _.-'    _.-'                                   
     |`-._`-._    `-.__.-'    _.-'_.-'|                                  
     |    `-._`-._        _.-'_.-'    |           http://redis.io        
@@ -157,11 +188,68 @@ Sentinel log
             `-._        _.-'                                           
                 `-.__.-'                                               
     
-    29035:X 17 Mar 23:03:24.758 # Sentinel ID is 6a0509340d3d75262f1ff123f3734bf37f4ec3ff
-    29035:X 17 Mar 23:03:24.758 # +monitor master master-6479 127.0.0.1 6479 quorum 1
-    29035:X 17 Mar 23:03:34.816 * +slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:14:05.963 # Sentinel ID is a0e19053fde3cd81c5ad1e657bc9b0d91a785117
+    5326:X 18 Mar 23:14:05.963 # +monitor master master-6479 127.0.0.1 6479 quorum 2
+    5326:X 18 Mar 23:14:10.212 * +sentinel sentinel 1dcfc361efe53842f96fa6febbd4a1e14f2083d5 127.0.0.1 16480 @ master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:14:12.221 * +sentinel sentinel f7b12d2547b457ac6971fb19f818fcda70739506 127.0.0.1 16481 @ master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:14:15.969 * +slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
 
-Querying sentinel listening on port `16479`
+Sentinel #2 listening on port 16480 log
+
+    tail -30 /var/log/redis/sentinel-16480.log
+                    _._                                                  
+            _.-``__ ''-._                                             
+        _.-``    `.  `_.  ''-._           Redis 3.2.8 (00000000/0) 64 bit
+    .-`` .-```.  ```\/    _.,_ ''-._                                   
+    (    '      ,       .-`  | `,    )     Running in sentinel mode
+    |`-._`-...-` __...-.``-._|'` _.-'|     Port: 16480
+    |    `-._   `._    /     _.-'    |     PID: 5373
+    `-._    `-._  `-./  _.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |           http://redis.io        
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |                                  
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+        `-._    `-.__.-'    _.-'                                       
+            `-._        _.-'                                           
+                `-.__.-'                                               
+    
+    5373:X 18 Mar 23:14:08.072 # Sentinel ID is 1dcfc361efe53842f96fa6febbd4a1e14f2083d5
+    5373:X 18 Mar 23:14:08.072 # +monitor master master-6479 127.0.0.1 6479 quorum 2
+    5373:X 18 Mar 23:14:09.966 * +sentinel sentinel a0e19053fde3cd81c5ad1e657bc9b0d91a785117 127.0.0.1 16479 @ master-6479 127.0.0.1 6479
+    5373:X 18 Mar 23:14:12.221 * +sentinel sentinel f7b12d2547b457ac6971fb19f818fcda70739506 127.0.0.1 16481 @ master-6479 127.0.0.1 6479
+    5373:X 18 Mar 23:14:18.142 * +slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+
+Sentinel #3 listening on port 16481 log
+
+    tail -30 /var/log/redis/sentinel-16481.log
+                    _._                                                  
+            _.-``__ ''-._                                             
+        _.-``    `.  `_.  ''-._           Redis 3.2.8 (00000000/0) 64 bit
+    .-`` .-```.  ```\/    _.,_ ''-._                                   
+    (    '      ,       .-`  | `,    )     Running in sentinel mode
+    |`-._`-...-` __...-.``-._|'` _.-'|     Port: 16481
+    |    `-._   `._    /     _.-'    |     PID: 5420
+    `-._    `-._  `-./  _.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |           http://redis.io        
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |                                  
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+        `-._    `-.__.-'    _.-'                                       
+            `-._        _.-'                                           
+                `-.__.-'                                               
+    
+    5420:X 18 Mar 23:14:10.190 # Sentinel ID is f7b12d2547b457ac6971fb19f818fcda70739506
+    5420:X 18 Mar 23:14:10.190 # +monitor master master-6479 127.0.0.1 6479 quorum 2
+    5420:X 18 Mar 23:14:10.212 * +sentinel sentinel 1dcfc361efe53842f96fa6febbd4a1e14f2083d5 127.0.0.1 16480 @ master-6479 127.0.0.1 6479
+    5420:X 18 Mar 23:14:12.000 * +sentinel sentinel a0e19053fde3cd81c5ad1e657bc9b0d91a785117 127.0.0.1 16479 @ master-6479 127.0.0.1 6479
+    5420:X 18 Mar 23:14:20.209 * +slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+
+
+Querying sentinel #1 listening on port `16479`
 
     redis-cli -h 127.0.0.1 -p 16479 sentinel master master-6479
     1) "name"
@@ -171,7 +259,7 @@ Querying sentinel listening on port `16479`
     5) "port"
     6) "6479"
     7) "runid"
-    8) "3df44c68f8b9c8bf20fa51684589638046d343e6"
+    8) "690fec7d163884df17d3aa7fd145a621c51eba13"
     9) "flags"
     10) "master"
     11) "link-pending-commands"
@@ -181,25 +269,113 @@ Querying sentinel listening on port `16479`
     15) "last-ping-sent"
     16) "0"
     17) "last-ok-ping-reply"
-    18) "14"
+    18) "201"
     19) "last-ping-reply"
-    20) "14"
+    20) "201"
     21) "down-after-milliseconds"
     22) "3000"
     23) "info-refresh"
-    24) "9324"
+    24) "9103"
     25) "role-reported"
     26) "master"
     27) "role-reported-time"
-    28) "662803"
+    28) "531211"
     29) "config-epoch"
-    30) "1"
+    30) "0"
     31) "num-slaves"
     32) "1"
     33) "num-other-sentinels"
-    34) "0"
+    34) "2"
     35) "quorum"
-    36) "1"
+    36) "2"
+    37) "failover-timeout"
+    38) "6000"
+    39) "parallel-syncs"
+    40) "1"
+
+Querying sentinel #1 listening on port `16480`
+
+    redis-cli -h 127.0.0.1 -p 16480 sentinel master master-6479  
+    1) "name"
+    2) "master-6479"
+    3) "ip"
+    4) "127.0.0.1"
+    5) "port"
+    6) "6479"
+    7) "runid"
+    8) "690fec7d163884df17d3aa7fd145a621c51eba13"
+    9) "flags"
+    10) "master"
+    11) "link-pending-commands"
+    12) "0"
+    13) "link-refcount"
+    14) "1"
+    15) "last-ping-sent"
+    16) "0"
+    17) "last-ok-ping-reply"
+    18) "60"
+    19) "last-ping-reply"
+    20) "60"
+    21) "down-after-milliseconds"
+    22) "3000"
+    23) "info-refresh"
+    24) "7092"
+    25) "role-reported"
+    26) "master"
+    27) "role-reported-time"
+    28) "539092"
+    29) "config-epoch"
+    30) "0"
+    31) "num-slaves"
+    32) "1"
+    33) "num-other-sentinels"
+    34) "2"
+    35) "quorum"
+    36) "2"
+    37) "failover-timeout"
+    38) "6000"
+    39) "parallel-syncs"
+    40) "1"
+
+Querying sentinel #1 listening on port `16481`
+
+    redis-cli -h 127.0.0.1 -p 16481 sentinel master master-6479 
+    1) "name"
+    2) "master-6479"
+    3) "ip"
+    4) "127.0.0.1"
+    5) "port"
+    6) "6479"
+    7) "runid"
+    8) "690fec7d163884df17d3aa7fd145a621c51eba13"
+    9) "flags"
+    10) "master"
+    11) "link-pending-commands"
+    12) "0"
+    13) "link-refcount"
+    14) "1"
+    15) "last-ping-sent"
+    16) "0"
+    17) "last-ok-ping-reply"
+    18) "384"
+    19) "last-ping-reply"
+    20) "384"
+    21) "down-after-milliseconds"
+    22) "3000"
+    23) "info-refresh"
+    24) "8378"
+    25) "role-reported"
+    26) "master"
+    27) "role-reported-time"
+    28) "540287"
+    29) "config-epoch"
+    30) "0"
+    31) "num-slaves"
+    32) "1"
+    33) "num-other-sentinels"
+    34) "2"
+    35) "quorum"
+    36) "2"
     37) "failover-timeout"
     38) "6000"
     39) "parallel-syncs"
@@ -208,9 +384,11 @@ Querying sentinel listening on port `16479`
 Processes
 
     ps aufxw | grep redis | grep -v grep
-    redis    29610  0.2  0.1 142896  2608 ?        Ssl  23:42   0:00 /etc/redis6479/redis-server 127.0.0.1:6479
-    root     29677  0.3  0.1  39308  2084 ?        Ssl  23:42   0:00 /etc/redis6479/redis-server *:16479 [sentinel]
-    redis    29727  0.2  0.1 142896  2552 ?        Ssl  23:42   0:00 /etc/redis6480/redis-server 127.0.0.1:6480
+    redis     5259  0.3  0.1 142896  2772 ?        Ssl  23:14   0:02 /etc/redis6479/redis-server 127.0.0.1:6479
+    root      5326  0.4  0.1  39308  2128 ?        Ssl  23:14   0:03 /etc/redis6479/redis-server *:16479 [sentinel]
+    root      5373  0.4  0.1  39308  2136 ?        Ssl  23:14   0:03 /etc/redis6479/redis-server *:16480 [sentinel]
+    root      5420  0.4  0.1  39308  2140 ?        Ssl  23:14   0:02 /etc/redis6479/redis-server *:16481 [sentinel]
+    redis     5470  0.3  0.1 142896  2604 ?        Ssl  23:14   0:02 /etc/redis6480/redis-server 127.0.0.1:6480
 
 Simulate Redis master on port 6479 failure
 
@@ -233,16 +411,16 @@ Check replication info for promoted redis slave 6480 to master
     repl_backlog_first_byte_offset:0
     repl_backlog_histlen:0
 
-Checking sentinel log
+Checking sentinel #1 log on port 16479
 
-    tail -50 /var/log/redis/sentinel-6479.log 
+    tail -50 /var/log/redis/sentinel-16479.log
                     _._                                                  
             _.-``__ ''-._                                             
         _.-``    `.  `_.  ''-._           Redis 3.2.8 (00000000/0) 64 bit
     .-`` .-```.  ```\/    _.,_ ''-._                                   
     (    '      ,       .-`  | `,    )     Running in sentinel mode
     |`-._`-...-` __...-.``-._|'` _.-'|     Port: 16479
-    |    `-._   `._    /     _.-'    |     PID: 29677
+    |    `-._   `._    /     _.-'    |     PID: 5326
     `-._    `-._  `-./  _.-'    _.-'                                   
     |`-._`-._    `-.__.-'    _.-'_.-'|                                  
     |    `-._`-._        _.-'_.-'    |           http://redis.io        
@@ -254,25 +432,101 @@ Checking sentinel log
             `-._        _.-'                                           
                 `-.__.-'                                               
     
-    29677:X 17 Mar 23:42:24.224 # Sentinel ID is e4a06cca515c15bc1fa002c2ce4959105000163a
-    29677:X 17 Mar 23:42:24.224 # +monitor master master-6479 127.0.0.1 6479 quorum 1
-    29677:X 17 Mar 23:42:34.265 * +slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
-    29677:X 17 Mar 23:45:53.734 # +sdown master master-6479 127.0.0.1 6479
-    29677:X 17 Mar 23:45:53.734 # +odown master master-6479 127.0.0.1 6479 #quorum 1/1
-    29677:X 17 Mar 23:45:53.734 # +new-epoch 1
-    29677:X 17 Mar 23:45:53.734 # +try-failover master master-6479 127.0.0.1 6479
-    29677:X 17 Mar 23:45:53.737 # +vote-for-leader e4a06cca515c15bc1fa002c2ce4959105000163a 1
-    29677:X 17 Mar 23:45:53.737 # +elected-leader master master-6479 127.0.0.1 6479
-    29677:X 17 Mar 23:45:53.737 # +failover-state-select-slave master master-6479 127.0.0.1 6479
-    29677:X 17 Mar 23:45:53.796 # +selected-slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
-    29677:X 17 Mar 23:45:53.796 * +failover-state-send-slaveof-noone slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
-    29677:X 17 Mar 23:45:53.872 * +failover-state-wait-promotion slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
-    29677:X 17 Mar 23:45:54.805 # +promoted-slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
-    29677:X 17 Mar 23:45:54.805 # +failover-state-reconf-slaves master master-6479 127.0.0.1 6479
-    29677:X 17 Mar 23:45:54.858 # +failover-end master master-6479 127.0.0.1 6479
-    29677:X 17 Mar 23:45:54.858 # +switch-master master-6479 127.0.0.1 6479 127.0.0.1 6480
-    29677:X 17 Mar 23:45:54.858 * +slave slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
-    29677:X 17 Mar 23:45:57.868 # +sdown slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
+    5326:X 18 Mar 23:14:05.963 # Sentinel ID is a0e19053fde3cd81c5ad1e657bc9b0d91a785117
+    5326:X 18 Mar 23:14:05.963 # +monitor master master-6479 127.0.0.1 6479 quorum 2
+    5326:X 18 Mar 23:14:10.212 * +sentinel sentinel 1dcfc361efe53842f96fa6febbd4a1e14f2083d5 127.0.0.1 16480 @ master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:14:12.221 * +sentinel sentinel f7b12d2547b457ac6971fb19f818fcda70739506 127.0.0.1 16481 @ master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:14:15.969 * +slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:25:06.960 # +sdown master master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:25:07.014 # +odown master master-6479 127.0.0.1 6479 #quorum 2/2
+    5326:X 18 Mar 23:25:07.014 # +new-epoch 1
+    5326:X 18 Mar 23:25:07.014 # +try-failover master master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:25:07.017 # +vote-for-leader a0e19053fde3cd81c5ad1e657bc9b0d91a785117 1
+    5326:X 18 Mar 23:25:07.024 # f7b12d2547b457ac6971fb19f818fcda70739506 voted for a0e19053fde3cd81c5ad1e657bc9b0d91a785117 1
+    5326:X 18 Mar 23:25:07.029 # 1dcfc361efe53842f96fa6febbd4a1e14f2083d5 voted for a0e19053fde3cd81c5ad1e657bc9b0d91a785117 1
+    5326:X 18 Mar 23:25:07.093 # +elected-leader master master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:25:07.093 # +failover-state-select-slave master master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:25:07.183 # +selected-slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:25:07.183 * +failover-state-send-slaveof-noone slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:25:07.239 * +failover-state-wait-promotion slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:25:08.058 # +promoted-slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:25:08.058 # +failover-state-reconf-slaves master master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:25:08.131 # +failover-end master master-6479 127.0.0.1 6479
+    5326:X 18 Mar 23:25:08.131 # +switch-master master-6479 127.0.0.1 6479 127.0.0.1 6480
+    5326:X 18 Mar 23:25:08.132 * +slave slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
+    5326:X 18 Mar 23:25:11.145 # +sdown slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6
+
+Checking sentinel #2 log on port 16480
+
+    tail -50 /var/log/redis/sentinel-16480.log
+                    _._                                                  
+            _.-``__ ''-._                                             
+        _.-``    `.  `_.  ''-._           Redis 3.2.8 (00000000/0) 64 bit
+    .-`` .-```.  ```\/    _.,_ ''-._                                   
+    (    '      ,       .-`  | `,    )     Running in sentinel mode
+    |`-._`-...-` __...-.``-._|'` _.-'|     Port: 16480
+    |    `-._   `._    /     _.-'    |     PID: 5373
+    `-._    `-._  `-./  _.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |           http://redis.io        
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |                                  
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+        `-._    `-.__.-'    _.-'                                       
+            `-._        _.-'                                           
+                `-.__.-'                                               
+    
+    5373:X 18 Mar 23:14:08.072 # Sentinel ID is 1dcfc361efe53842f96fa6febbd4a1e14f2083d5
+    5373:X 18 Mar 23:14:08.072 # +monitor master master-6479 127.0.0.1 6479 quorum 2
+    5373:X 18 Mar 23:14:09.966 * +sentinel sentinel a0e19053fde3cd81c5ad1e657bc9b0d91a785117 127.0.0.1 16479 @ master-6479 127.0.0.1 6479
+    5373:X 18 Mar 23:14:12.221 * +sentinel sentinel f7b12d2547b457ac6971fb19f818fcda70739506 127.0.0.1 16481 @ master-6479 127.0.0.1 6479
+    5373:X 18 Mar 23:14:18.142 * +slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    5373:X 18 Mar 23:25:06.961 # +sdown master master-6479 127.0.0.1 6479
+    5373:X 18 Mar 23:25:07.023 # +new-epoch 1
+    5373:X 18 Mar 23:25:07.028 # +vote-for-leader a0e19053fde3cd81c5ad1e657bc9b0d91a785117 1
+    5373:X 18 Mar 23:25:07.028 # +odown master master-6479 127.0.0.1 6479 #quorum 3/2
+    5373:X 18 Mar 23:25:07.028 # Next failover delay: I will not start a failover before Sat Mar 18 23:25:19 2017
+    5373:X 18 Mar 23:25:08.136 # +config-update-from sentinel a0e19053fde3cd81c5ad1e657bc9b0d91a785117 127.0.0.1 16479 @ master-6479 127.0.0.1 6479
+    5373:X 18 Mar 23:25:08.136 # +switch-master master-6479 127.0.0.1 6479 127.0.0.1 6480
+    5373:X 18 Mar 23:25:08.136 * +slave slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
+    5373:X 18 Mar 23:25:11.166 # +sdown slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
+
+Checking sentinel #3 log on port 16481
+
+    tail -50 /var/log/redis/sentinel-16481.log
+                    _._                                                  
+            _.-``__ ''-._                                             
+        _.-``    `.  `_.  ''-._           Redis 3.2.8 (00000000/0) 64 bit
+    .-`` .-```.  ```\/    _.,_ ''-._                                   
+    (    '      ,       .-`  | `,    )     Running in sentinel mode
+    |`-._`-...-` __...-.``-._|'` _.-'|     Port: 16481
+    |    `-._   `._    /     _.-'    |     PID: 5420
+    `-._    `-._  `-./  _.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |           http://redis.io        
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |                                  
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+        `-._    `-.__.-'    _.-'                                       
+            `-._        _.-'                                           
+                `-.__.-'                                               
+    
+    5420:X 18 Mar 23:14:10.190 # Sentinel ID is f7b12d2547b457ac6971fb19f818fcda70739506
+    5420:X 18 Mar 23:14:10.190 # +monitor master master-6479 127.0.0.1 6479 quorum 2
+    5420:X 18 Mar 23:14:10.212 * +sentinel sentinel 1dcfc361efe53842f96fa6febbd4a1e14f2083d5 127.0.0.1 16480 @ master-6479 127.0.0.1 6479
+    5420:X 18 Mar 23:14:12.000 * +sentinel sentinel a0e19053fde3cd81c5ad1e657bc9b0d91a785117 127.0.0.1 16479 @ master-6479 127.0.0.1 6479
+    5420:X 18 Mar 23:14:20.209 * +slave slave 127.0.0.1:6480 127.0.0.1 6480 @ master-6479 127.0.0.1 6479
+    5420:X 18 Mar 23:25:06.939 # +sdown master master-6479 127.0.0.1 6479
+    5420:X 18 Mar 23:25:07.022 # +new-epoch 1
+    5420:X 18 Mar 23:25:07.024 # +vote-for-leader a0e19053fde3cd81c5ad1e657bc9b0d91a785117 1
+    5420:X 18 Mar 23:25:08.031 # +odown master master-6479 127.0.0.1 6479 #quorum 3/2
+    5420:X 18 Mar 23:25:08.031 # Next failover delay: I will not start a failover before Sat Mar 18 23:25:19 2017
+    5420:X 18 Mar 23:25:08.136 # +config-update-from sentinel a0e19053fde3cd81c5ad1e657bc9b0d91a785117 127.0.0.1 16479 @ master-6479 127.0.0.1 6479
+    5420:X 18 Mar 23:25:08.136 # +switch-master master-6479 127.0.0.1 6479 127.0.0.1 6480
+    5420:X 18 Mar 23:25:08.136 * +slave slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
+    5420:X 18 Mar 23:25:11.140 # +sdown slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
 
 Restart Redis 6479 port instance will currently be set to redis slave
 
@@ -282,15 +536,7 @@ redis 6479 replication info
 
     redis-cli -h 127.0.0.1 -p 6479 INFO REPLICATION
     # Replication
-    role:slave
-    master_host:127.0.0.1
-    master_port:6480
-    master_link_status:up
-    master_last_io_seconds_ago:1
-    master_sync_in_progress:0
-    slave_repl_offset:296
-    slave_priority:100
-    slave_read_only:1
+    role:master
     connected_slaves:0
     master_repl_offset:0
     repl_backlog_active:0
@@ -298,11 +544,11 @@ redis 6479 replication info
     repl_backlog_first_byte_offset:0
     repl_backlog_histlen:0
 
-Two additional entries in sentinel log at `/var/log/redis/sentinel-6479.log `
+Two additional entries in sentinel log at `/var/log/redis/sentinel-16479.log `
 
-    tail -2 /var/log/redis/sentinel-6479.log 
-    29677:X 17 Mar 23:51:21.109 # -sdown slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
-    29677:X 17 Mar 23:51:31.132 * +convert-to-slave slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
+    tail -2 /var/log/redis/sentinel-16479.log 
+    5326:X 18 Mar 23:27:17.798 # -sdown slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
+    5326:X 18 Mar 23:27:27.776 * +convert-to-slave slave 127.0.0.1:6479 127.0.0.1 6479 @ master-6479 127.0.0.1 6480
 
 When you run delete command it will wipe the redis instances including sentinel setups
 
@@ -315,7 +561,7 @@ Sentinels monitor the health of redis master and slaves but you may need to moni
 
 Example Monit config at `/etc/monit.d/sentinel_16479`
 
-    check process sentinel_16479 with pidfile /var/run/redis/redis-sentinel-6479.pid
+    check process sentinel_16479 with pidfile /var/run/redis/redis-sentinel-16479.pid
       start program = "/etc/init.d/sentinel_16479 start"
       stop program  = "/etc/init.d/sentinel_16479 stop"
       if 2 restarts within 3 cycles then timeout
@@ -324,23 +570,24 @@ Example Monit config at `/etc/monit.d/sentinel_16479`
 simulate sentinel downtime
 
 ```
-kill -9 $(cat /var/run/redis/redis-sentinel-6479.pid)
+kill -9 $(cat /var/run/redis/redis-sentinel-16479.pid)
 ```
 
 ```
 tail -10 /var/log/monit.log
 
-[UTC Mar 18 02:32:59] info     : Starting Monit 5.21.0 daemon with http interface at [127.0.0.1]:2812
-[UTC Mar 18 02:32:59] info     : Monit start delay set to 60s
-[UTC Mar 18 02:33:59] info     : 'centos7.localdomain' Monit 5.21.0 started
-[UTC Mar 18 02:33:59] error    : 'sentinel_16479' process is not running
-[UTC Mar 18 02:33:59] info     : 'sentinel_16479' trying to restart
-[UTC Mar 18 02:33:59] info     : 'sentinel_16479' start: '/etc/init.d/sentinel_16479 start'
-[UTC Mar 18 02:34:09] info     : 'sentinel_16479' process is running with pid 12316
+[UTC Mar 18 23:29:28] info     : Monit daemon with pid [2544] stopped
+[UTC Mar 18 23:29:28] info     : 'centos7.localdomain' Monit 5.21.0 stopped
+[UTC Mar 18 23:29:29] info     : Starting Monit 5.21.0 daemon with http interface at [127.0.0.1]:2812
+[UTC Mar 18 23:29:29] info     : Monit start delay set to 60s
+[UTC Mar 18 23:30:29] info     : 'centos7.localdomain' Monit 5.21.0 started
+[UTC Mar 18 23:30:29] error    : 'sentinel_16479' process is not running
+[UTC Mar 18 23:30:29] info     : 'sentinel_16479' trying to restart
+[UTC Mar 18 23:30:29] info     : 'sentinel_16479' start: '/etc/init.d/sentinel_16479 start'
 ```
 
 ```
-tail -10 /var/log/redis/sentinel-6479.log
+tail -10 /var/log/redis/sentinel-16479.log
   `-._    `-._`-.__.-'_.-'    _.-'                                   
  |`-._`-._    `-.__.-'    _.-'_.-'|                                  
  |    `-._`-._        _.-'_.-'    |                                  
@@ -349,6 +596,6 @@ tail -10 /var/log/redis/sentinel-6479.log
           `-._        _.-'                                           
               `-.__.-'                                               
 
-12316:X 18 Mar 02:33:59.071 # Sentinel ID is e38082c87193130f5ce0e6417735b62aca3c68ed
-12316:X 18 Mar 02:33:59.071 # +monitor master master-6479 127.0.0.1 6479 quorum 1
+5745:X 18 Mar 23:30:29.832 # Sentinel ID is a0e19053fde3cd81c5ad1e657bc9b0d91a785117
+5745:X 18 Mar 23:30:29.832 # +monitor master master-6479 127.0.0.1 6480 quorum 2
 ```
