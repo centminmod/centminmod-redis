@@ -3,6 +3,38 @@ Example
 
 Example of using [redis-generator.sh](https://github.com/centminmod/centminmod-redis) to create 2 redis server master + slave replication on ports 6479 and 6480 + enable auto sentinel setup which is tied to the redis master instance on `STARTPORT` by enabling `SENTINEL_SETUP='y'` prior to running replication command.
 
+Usage:
+=======
+
+Default is to create the redis servers via TCP ports.
+
+    ./redis-generator.sh
+    
+    * Usage: where X equal postive integer for number of redis
+    servers to create with incrementing TCP redis ports
+    starting at STARTPORT=6479.
+    * prep - standalone prep command installs redis-cluster-tool
+    * prepupdate - standalone prep update command updates redis-cluster-tool
+    * multi X - no. of standalone redis instances to create
+    * clusterprep X - no. of cluster enabled config instances
+    * clustermake 6 - to enable cluster mode + create cluster
+    * clustermake 9 - flag to enable cluster mode + create cluster
+    * replication X - create redis replication
+    * replication X 6579 - create replication with custom start port 6579
+    * delete X - no. of redis instances to delete
+    * delete X 6579 - no. of redis instances to delete + custom start port 6579
+    
+    ./redis-generator.sh prep
+    ./redis-generator.sh prepupdate
+    ./redis-generator.sh multi X
+    ./redis-generator.sh clusterprep X
+    ./redis-generator.sh clustermake 6
+    ./redis-generator.sh clustermake 9
+    ./redis-generator.sh replication X
+    ./redis-generator.sh replication X 6579
+    ./redis-generator.sh delete X
+    ./redis-generator.sh delete X 6579
+
 Example would create
 
 * sentinel config file `/root/tools/redis-sentinel/sentinel-6479.conf` where `STARTPORT` is 6479
