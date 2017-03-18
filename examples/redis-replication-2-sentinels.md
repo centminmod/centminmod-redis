@@ -599,3 +599,31 @@ tail -10 /var/log/redis/sentinel-16479.log
 5745:X 18 Mar 23:30:29.832 # Sentinel ID is a0e19053fde3cd81c5ad1e657bc9b0d91a785117
 5745:X 18 Mar 23:30:29.832 # +monitor master master-6479 127.0.0.1 6480 quorum 2
 ```
+
+### Custom Start Ports
+
+By default `STARTPORT=6479` is used when you run redis replication mode
+
+    ./redis-generator.sh replication 2
+
+You can create additional redis replication sets by appending a custom start port at end of command i.e. use start port `6597` will create another redis replication set
+
+    ./redis-generator.sh replication 2 6597
+
+Will result in:
+
+* 1st redis replication 2x nodes - master + slave on default 6479 master, 6480 slave with sentinels on 16479, 16480, and 16481 ports
+* 2nd redis replication 2x nodes - master + slave on default 6597 master, 6698 slave with sentinels on 16597, 16598, and 16599 ports
+
+    ps aufxw | grep redis | grep -v grep | sort
+    redis     5470  0.3  0.1 142896  2760 ?        Ssl  23:14   0:07 /etc/redis6480/redis-server 127.0.0.1:6480
+    redis     5621  0.3  0.1 142896  2680 ?        Ssl  23:27   0:04 /etc/redis6479/redis-server 127.0.0.1:6479
+    redis     5959  0.2  0.1 142896  2632 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server 127.0.0.1:6597
+    redis     6171  0.3  0.1 142896  2592 ?        Ssl  23:51   0:00 /etc/redis6598/redis-server 127.0.0.1:6598
+    root      5373  0.4  0.1  39308  2156 ?        Ssl  23:14   0:10 /etc/redis6479/redis-server *:16480 [sentinel]
+    root      5420  0.4  0.1  39308  2152 ?        Ssl  23:14   0:10 /etc/redis6479/redis-server *:16481 [sentinel]
+    root      5745  0.4  0.1 142896  2120 ?        Ssl  23:30   0:06 /etc/redis6479/redis-server *:16479 [sentinel]
+    root      6027  0.4  0.1  39308  2140 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server *:16597 [sentinel]
+    root      6074  0.4  0.1  39308  2140 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server *:16598 [sentinel]
+    root      6121  0.4  0.1  39308  2136 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server *:16599 [sentinel]
+
