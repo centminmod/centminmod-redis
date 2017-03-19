@@ -604,7 +604,8 @@ tail -10 /var/log/redis/sentinel-16479.log
 5745:X 18 Mar 23:30:29.832 # +monitor master master-6479 127.0.0.1 6480 quorum 2
 ```
 
-### Custom Start Ports
+Custom Start Ports
+======
 
 By default `STARTPORT=6479` is used when you run redis replication mode
 
@@ -633,7 +634,8 @@ root      6074  0.4  0.1  39308  2140 ?        Ssl  23:51   0:00 /etc/redis6597/
 root      6121  0.4  0.1  39308  2136 ?        Ssl  23:51   0:00 /etc/redis6597/redis-server *:16599 [sentinel]
 ```
 
-### Redis Replication Ondisk Persistence Disabled
+Redis Replication Ondisk Persistence Disabled
+======
 
 For redis caching only servers, ondisk persistent isn't required so added a new `replication-cache` option
 
