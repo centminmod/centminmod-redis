@@ -637,7 +637,7 @@ root      6121  0.4  0.1  39308  2136 ?        Ssl  23:51   0:00 /etc/redis6597/
 Redis Replication Ondisk Persistence Disabled
 ======
 
-For redis caching only servers, ondisk persistent isn't required so added a new `replication-cache` option
+For redis caching only servers, ondisk persistence isn't required so added a new `replication-cache` option
 
 
     ./redis-generator.sh replication-cache 2 
