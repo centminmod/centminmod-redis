@@ -6,13 +6,13 @@
 ######################################################
 # variables
 #############
-VER=1.0
+VER=1.1
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
 DEBUG_REDISGEN='n'
 UNIXSOCKET='n'
-SENTINEL_SETUP='n'
+SENTINEL_SETUP='y'
 INSTALLDIR='/svr-setup'
 SENTDIR='/root/tools/redis-sentinel'
 ######################################################
@@ -200,7 +200,11 @@ genredis() {
   #   QUORUM=2
   # fi
   echo
-  echo "Creating redis servers starting at TCP = $STARTPORT..."
+  if [[ "$CLUSTER_CREATE" = 'repcache' ]]; then
+    echo "Creating redis servers (with ondisk persistence disabled) starting at TCP = $STARTPORT..."
+  else
+    echo "Creating redis servers starting at TCP = $STARTPORT..."
+  fi
   for (( p=0; p <= $NUMBER; p++ ))
     do
       REDISPORT=$(($STARTPORT+$p))
@@ -262,6 +266,12 @@ genredis() {
             echo "sed -i \"s|port $REDISPORT|port 0|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
             echo "sed -i \"s|^# unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
             echo "sed -i 's|^# unixsocketperm 700|unixsocketperm 700|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          fi
+          if [[ "$CLUSTER_CREATE" = 'repcache' ]]; then
+            echo "sed -i 's|^save 900|#save 900|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+            echo "sed -i 's|^save 300|#save 300|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+            echo "sed -i 's|^save 60|#save 60|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+            echo "sed -i 's|^appendonly .*|appendonly no|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           fi
           echo "systemctl daemon-reload"
           echo "systemctl restart redis${REDISPORT}"
@@ -415,6 +425,12 @@ esac
             sed -i "s|port $REDISPORT|port 0|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
             sed -i "s|^# unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
             sed -i 's|^# unixsocketperm 700|unixsocketperm 700|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          fi
+          if [[ "$CLUSTER_CREATE" = 'repcache' ]]; then
+            sed -i 's|^save 900|#save 900|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+            sed -i 's|^save 300|#save 300|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+            sed -i 's|^save 60|#save 60|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+            sed -i 's|^appendonly .*|appendonly no|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           fi
           systemctl daemon-reload
           systemctl restart redis${REDISPORT}
@@ -612,6 +628,37 @@ case "$1" in
     UNIXSOCKET='n'
     genredis $NUM replication
     ;;
+  replication-cache )
+    NUM=$2
+    CUSTOM_STARTPORT=$3
+    # allow users to create redis replication with custom STARTPORTs
+    # i.e. ./redis-generator.sh replication 2 6579
+    # would create master + slave 2x redis replication starting on TCP
+    # port 6579 if available, or it will provide the next available TCP
+    # port in the sequence starting at 6579
+    if [[ ! -z "$CUSTOM_STARTPORT" ]]; then
+      CHECK_PORT=$(netstat -nt | grep -q $CUSTOM_STARTPORT; echo $?)
+      if [[ "$CHECK_PORT" -ne '0' ]]; then
+        STARTPORT=$CUSTOM_STARTPORT
+      else
+        echo
+        echo "Error: TCP port $CUSTOM_STARTPORT in use, try another port"
+        echo
+        exit
+      fi
+    fi
+    if [ "$NUM" -lt '2' ]; then
+      echo
+      echo "minimum of 2 nodes are required for redis"
+      echo "replication configuration"
+      echo "i.e. 1x master + 1x slave"
+      echo
+      echo "$0 replication X"
+      exit
+    fi
+    UNIXSOCKET='n'
+    genredis $NUM replication repcache
+    ;;
   clusterprep )
     NUM=$2
     if [ "$NUM" -lt '6' ]; then
@@ -672,6 +719,8 @@ case "$1" in
     echo "* clustermake 9 - flag to enable cluster mode + create cluster"
     echo "* replication X - create redis replication"
     echo "* replication X 6579 - create replication with custom start port 6579"
+    echo "* replication-cache X - create redis replication + disable ondisk persistence"
+    echo "* replication-cache X 6579 - create replication with custom start port 6579"
     echo "* delete X - no. of redis instances to delete"
     echo "* delete X 6579 - no. of redis instances to delete + custom start port 6579"
     echo
@@ -683,6 +732,8 @@ case "$1" in
     echo "$0 clustermake 9"
     echo "$0 replication X"
     echo "$0 replication X 6579"
+    echo "$0 replication-cache X"
+    echo "$0 replication-cache X 6579"
     echo "$0 delete X"
     echo "$0 delete X 6579"
     ;;

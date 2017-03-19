@@ -60,6 +60,8 @@ Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='
     * clustermake 9 - flag to enable cluster mode + create cluster
     * replication X - create redis replication
     * replication X 6579 - create replication with custom start port 6579
+    * replication-cache X - create redis replication + disable ondisk persistence
+    * replication-cache X 6579 - create replication with custom start port 6579
     * delete X - no. of redis instances to delete
     * delete X 6579 - no. of redis instances to delete + custom start port 6579
     
@@ -71,6 +73,8 @@ Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='
     ./redis-generator.sh clustermake 9
     ./redis-generator.sh replication X
     ./redis-generator.sh replication X 6579
+    ./redis-generator.sh replication-cache X
+    ./redis-generator.sh replication-cache X 6579
     ./redis-generator.sh delete X
     ./redis-generator.sh delete X 6579
 
