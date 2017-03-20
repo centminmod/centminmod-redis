@@ -3,6 +3,10 @@ Info:
 
 Redis server generator to create multiple Redis servers in standalone, replication (+ optional sentinel setup) and cluster enabled configurations on local listener `127.0.0.1` with starting port `STARTPORT=6479` and incrementally created additional redis servers via integer passed on `redis-generator.sh` command line. Written for CentOS 7 only with [centminmod.com](https://centminmod.com) LEMP stacks specifically though should work on any CentOS 7 or RHEL 7 based system.
 
+### Redis Source Install Support
+
+* Optional redis source install support has been added. Example of using `redis-generator.sh` with [redis 4.0rc2 source installed](examples/redis-sourceinstall-support.md).
+
 Requirements:
 =======
 
