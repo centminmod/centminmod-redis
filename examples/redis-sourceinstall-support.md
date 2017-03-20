@@ -192,7 +192,9 @@ For example redis 4.0-rc2 version (tagged as 3.9.102) source install
     
     /usr/local/bin/redis-server -v
     Redis server v=3.9.102 sha=8226f2c3:0 malloc=jemalloc-4.0.3 bits=64 build=4b846d91c40ae29c
-
+    
+    /etc/redis6479/redis-server -v
+    Redis server v=3.9.102 sha=8226f2c3:0 malloc=jemalloc-4.0.3 bits=64 build=4b846d91c40ae29c
 
 Using `/usr/local/bin/redis-cli` for redis 4.0-rc2 master 6479
 
