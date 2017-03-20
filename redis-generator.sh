@@ -389,7 +389,7 @@ esac
             echo "chkconfig "sentinel_$SENTPORT on""
             echo "service "sentinel_$SENTPORT" start"
             echo "sleep 2"
-            echo "tail -4 "/var/log/redis/sentinel-${SENTSENTPORT.log""
+            echo "tail -4 "/var/log/redis/sentinel-${SENTSENTPORT}.log""
           fi
           done #sp
         fi
