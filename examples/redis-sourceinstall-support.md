@@ -45,6 +45,11 @@ Example would create
 
 * redis systemd files at `/usr/lib/systemd/system/redis6479.service` and `/usr/lib/systemd/system/redis6480.service`
 * redis-server binaries at `/etc/redis6479/redis-server` and `/etc/redis6480/redis-server` copied from `/usr/local/bin/redis-server` (source install) instead of `/usr/bin/redis-server`
+* redis pid files at `/var/run/redis/redis_6479.pid` and `/var/run/redis/redis_6480.pid`
+* dedicated redis config files at `/etc/redis6479/redis6479.conf` and `/etc/redis6479/redis6480.conf` 
+* each config file will have `dbfilename` as `dump6479.rdb` and `dump6480.rdb` with commented out unix sockets at `/var/run/redis/redis6479.sock` and `/var/run/redis/redis6480.sock`
+* dedicated redis data directories at `/var/lib/redis6479` and `/var/lib/redis6480`
+* dedicated redis log files at `/var/log/redis/redis6479.log` and `/var/log/redis/redis6480.log`
 * sentinel config file `/root/tools/redis-sentinel/sentinel-16479.conf` where `STARTPORT` is 6479 and incremented by 2 for `/root/tools/redis-sentinel/sentinel-16480.conf` and `/root/tools/redis-sentinel/sentinel-16481.conf`
 * sentinel port is `STARTPORT` + 10000 = 6479 + 10000 = `16479` and incremented by 2 for `16480` and `16481`
 * sentinel init.d startup script is at `/etc/init.d/sentinel_16479` and incremented by 2 for `/etc/init.d/sentinel_16480` and `/etc/init.d/sentinel_16481`
@@ -303,3 +308,59 @@ Using `/usr/local/bin/redis-cli` for redis 4.0-rc2 master 6479
     cluster_enabled:0
     
     # Keyspace
+
+Processes for replication setup above
+
+    ps aufxw | grep redis | grep -v grep
+    redis    13222  0.3  0.1 147244  2928 ?        Ssl  01:19   0:03 /etc/redis6479/redis-server 127.0.0.1:6479
+    root     13290  0.4  0.1  41608  2332 ?        Ssl  01:19   0:04 /etc/redis6479/redis-server *:16479 [sentinel]
+    root     13338  0.4  0.1  41608  2336 ?        Ssl  01:19   0:04 /etc/redis6479/redis-server *:16480 [sentinel]
+    root     13386  0.4  0.1  41608  2336 ?        Ssl  01:19   0:04 /etc/redis6479/redis-server *:16481 [sentinel]
+    redis    13438  0.3  0.1 147244  2904 ?        Ssl  01:19   0:03 /etc/redis6480/redis-server 127.0.0.1:6480
+
+Contents of systemd file `/usr/lib/systemd/system/redis6479.service`
+
+    [Unit]
+    Description=Redis persistent key-value database
+    After=network.target
+    
+    [Service]
+    ExecStart=/etc/redis6479/redis-server /etc/redis6479/redis6479.conf --daemonize no
+    ExecStop=/usr/local/bin/redis-shutdown
+    User=redis
+    Group=redis
+    
+    [Install]
+    WantedBy=multi-user.target
+
+Redis master 6479 log file `/var/log/redis/redis6479.log`
+
+    tail -100 /var/log/redis/redis6479.log
+                    _._                                                  
+            _.-``__ ''-._                                             
+        _.-``    `.  `_.  ''-._           Redis 3.9.102 (8226f2c3/0) 64 bit
+    .-`` .-```.  ```\/    _.,_ ''-._                                   
+    (    '      ,       .-`  | `,    )     Running in standalone mode
+    |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6479
+    |    `-._   `._    /     _.-'    |     PID: 13222
+    `-._    `-._  `-./  _.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |           http://redis.io        
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+    |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+    |    `-._`-._        _.-'_.-'    |                                  
+    `-._    `-._`-.__.-'_.-'    _.-'                                   
+        `-._    `-.__.-'    _.-'                                       
+            `-._        _.-'                                           
+                `-.__.-'                                               
+    
+    13222:M 20 Mar 01:19:51.766 # Server started, Redis version 3.9.102
+    13222:M 20 Mar 01:19:51.766 * The server is now ready to accept connections on port 6479
+    13222:M 20 Mar 01:20:00.332 * Slave 127.0.0.1:6480 asks for synchronization
+    13222:M 20 Mar 01:20:00.332 * Full resync requested by slave 127.0.0.1:6480
+    13222:M 20 Mar 01:20:00.332 * Starting BGSAVE for SYNC with target: disk
+    13222:M 20 Mar 01:20:00.332 * Background saving started by pid 13442
+    13442:C 20 Mar 01:20:00.337 * DB saved on disk
+    13442:C 20 Mar 01:20:00.338 * RDB: 0 MB of memory used by copy-on-write
+    13222:M 20 Mar 01:20:00.345 * Background saving terminated with success
+    13222:M 20 Mar 01:20:00.345 * Synchronization with slave 127.0.0.1:6480 succeeded
