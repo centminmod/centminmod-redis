@@ -1,0 +1,13 @@
+# /usr/lib/systemd/system/redis6479.service
+[Unit]
+Description=Redis persistent key-value database
+After=network.target
+
+[Service]
+ExecStart=/etc/redis6479/redis-server /etc/redis6479/redis6479.conf --daemonize no
+ExecStop=/usr/local/bin/redis-shutdown
+User=redis
+Group=redis
+
+[Install]
+WantedBy=multi-user.target
