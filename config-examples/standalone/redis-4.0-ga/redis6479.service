@@ -5,7 +5,7 @@ After=network.target
 
 [Service]
 ExecStart=/etc/redis6479/redis-server /etc/redis6479/redis6479.conf --daemonize no
-ExecStop=/usr/local/bin/redis-shutdown
+ExecStop=/usr/local/bin/redis6479-shutdown
 User=redis
 Group=redis
 
