@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=1.2
+VER=1.3
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -115,6 +115,15 @@ genredis_del() {
         systemctl disable redis${REDISPORT}.service
         systemctl stop redis${REDISPORT}.service
         rm -rf "/usr/lib/systemd/system/redis${REDISPORT}.service"
+      fi
+    fi
+    if [ -f "/usr/local/bin/redis${REDISPORT}-shutdown" ]; then
+      echo "-------------------------------------------------------"
+      echo "Deleting redis${REDISPORT}-shutdown ..."
+      if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
+        echo "rm -rf "/usr/local/bin/redis${REDISPORT}-shutdown""
+      else
+        rm -rf "/usr/local/bin/redis${REDISPORT}-shutdown"
       fi
     fi
     if [ -f "/etc/redis${REDISPORT}/redis${REDISPORT}.conf" ]; then
@@ -240,6 +249,25 @@ genredis() {
         else
           echo "/etc/redis${REDISPORT}/redis${REDISPORT}.conf already exists"
         fi
+        if [[ "$USE_SOURCEREDIS" = [Yy] ]]; then
+          if [ -f /usr/local/bin/redis-shutdown ]; then
+            echo "\cp -af /usr/local/bin/redis-shutdown /usr/local/bin/redis${REDISPORT}-shutdown"
+            echo "sed -i \"s|SERVICE_NAME=redis|SERVICE_NAME=redis${REDISPORT}|\" /usr/local/bin/redis${REDISPORT}-shutdown"
+            echo "sed -i \"s|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME.conf\"|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME\/\$SERVICE_NAME.conf\"|\" /usr/local/bin/redis${REDISPORT}-shutdown"
+            echo "sed -i \"s|\"\$SERVICE_NAME\" = redis|\"\$SERVICE_NAME\" = redis${REDISPORT}|\" /usr/local/bin/redis${REDISPORT}-shutdown"
+            echo "sed -i \"s|6379|${REDISPORT}|\" /usr/local/bin/redis${REDISPORT}-shutdown"
+            
+          fi
+        else
+          if [ -f /usr/libexec/redis-shutdown ]; then
+            echo "\cp -af /usr/libexec/redis-shutdown /usr/local/bin/redis${REDISPORT}-shutdown"
+            echo "sed -i \"s|SERVICE_NAME=redis|SERVICE_NAME=redis${REDISPORT}|\" /usr/local/bin/redis${REDISPORT}-shutdown"
+            echo "sed -i \"s|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME.conf\"|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME\/\$SERVICE_NAME.conf\"|\" /usr/local/bin/redis${REDISPORT}-shutdown"
+            echo "sed -i \"s|\"\$SERVICE_NAME\" = redis|\"\$SERVICE_NAME\" = redis${REDISPORT}|\" /usr/local/bin/redis${REDISPORT}-shutdown"
+            echo "sed -i \"s|6379|${REDISPORT}|\" /usr/local/bin/redis${REDISPORT}-shutdown"
+            
+          fi
+        fi
         if [ -f /etc/systemd/system/redis.service.d/limit.conf ]; then
           echo "mkdir -p "/etc/systemd/system/redis${REDISPORT}.service.d/""
           echo "\cp -af /etc/systemd/system/redis.service.d/limit.conf "/etc/systemd/system/redis${REDISPORT}.service.d/limit.conf""
@@ -252,9 +280,10 @@ genredis() {
           if [[ "$USE_SOURCEREDIS" = [Yy] ]]; then
             # echo "sed -i \"s|\/usr\/local\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
             echo "sed -i \"s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
-            echo "sed -i 's|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis-shutdown|' "/usr/lib/systemd/system/redis${REDISPORT}.service""
+            echo "sed -i 's|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis${REDISPORT}-shutdown|' "/usr/lib/systemd/system/redis${REDISPORT}.service""
           else
             echo "sed -i \"s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
+            echo "sed -i 's|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis${REDISPORT}-shutdown|' "/usr/lib/systemd/system/redis${REDISPORT}.service""
           fi
           echo "sed -i \"s|dir \/var\/lib\/redis\/|dir \/var\/lib\/redis${REDISPORT}|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
@@ -272,9 +301,10 @@ genredis() {
             if [[ "$USE_SOURCEREDIS" = [Yy] ]]; then
               # echo "sed -i \"s|\/usr\/local\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
               echo "sed -i \"s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
-              echo "sed -i 's|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis-shutdown|' "/usr/lib/systemd/system/redis${REDISPORT}.service""
+              echo "sed -i 's|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis${REDISPORT}-shutdown|' "/usr/lib/systemd/system/redis${REDISPORT}.service""
             else
               echo "sed -i \"s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
+              echo "sed -i 's|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis${REDISPORT}-shutdown|' "/usr/lib/systemd/system/redis${REDISPORT}.service""
             fi
             echo "sed -i 's|^# cluster-enabled yes|cluster-enabled yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
             echo "sed -i \"s|^# cluster-config-file nodes-${REDISPORT}.conf|cluster-config-file nodes-${DT}.conf|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
@@ -410,6 +440,23 @@ esac
         else
           echo "/etc/redis${REDISPORT}/redis${REDISPORT}.conf already exists"
         fi
+        if [[ "$USE_SOURCEREDIS" = [Yy] ]]; then
+          if [ -f /usr/local/bin/redis-shutdown ]; then
+            \cp -af /usr/local/bin/redis-shutdown /usr/local/bin/redis${REDISPORT}-shutdown
+            sed -i "s|SERVICE_NAME=redis|SERVICE_NAME=redis${REDISPORT}|" /usr/local/bin/redis${REDISPORT}-shutdown
+            sed -i "s|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME.conf\"|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME\/\$SERVICE_NAME.conf\"|" /usr/local/bin/redis${REDISPORT}-shutdown
+            sed -i "s|\"\$SERVICE_NAME\" = redis|\"\$SERVICE_NAME\" = redis${REDISPORT}|" /usr/local/bin/redis${REDISPORT}-shutdown
+            sed -i "s|6379|${REDISPORT}|" /usr/local/bin/redis${REDISPORT}-shutdown
+          fi
+        else
+          if [ -f /usr/libexec/redis-shutdown ]; then
+            \cp -af /usr/libexec/redis-shutdown /usr/local/bin/redis${REDISPORT}-shutdown
+            sed -i "s|SERVICE_NAME=redis|SERVICE_NAME=redis${REDISPORT}|" /usr/local/bin/redis${REDISPORT}-shutdown
+            sed -i "s|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME.conf\"|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME\/\$SERVICE_NAME.conf\"|" /usr/local/bin/redis${REDISPORT}-shutdown
+            sed -i "s|\"\$SERVICE_NAME\" = redis|\"\$SERVICE_NAME\" = redis${REDISPORT}|" /usr/local/bin/redis${REDISPORT}-shutdown
+            sed -i "s|6379|${REDISPORT}|" /usr/local/bin/redis${REDISPORT}-shutdown
+          fi
+        fi
         if [ -f /etc/systemd/system/redis.service.d/limit.conf ]; then
           mkdir -p "/etc/systemd/system/redis${REDISPORT}.service.d/"
           \cp -af /etc/systemd/system/redis.service.d/limit.conf "/etc/systemd/system/redis${REDISPORT}.service.d/limit.conf"
@@ -423,9 +470,10 @@ esac
           if [[ "$USE_SOURCEREDIS" = [Yy] ]]; then
             # sed -i "s|\/usr\/local\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
             sed -i "s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
-            sed -i 's|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis-shutdown|' "/usr/lib/systemd/system/redis${REDISPORT}.service"
+            sed -i "s|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis${REDISPORT}-shutdown|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
           else
             sed -i "s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
+            sed -i "s|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis${REDISPORT}-shutdown|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
           fi
           sed -i "s|dir \/var\/lib\/redis\/|dir \/var\/lib\/redis${REDISPORT}|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
@@ -443,9 +491,10 @@ esac
             if [[ "$USE_SOURCEREDIS" = [Yy] ]]; then
               # sed -i "s|\/usr\/local\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
               sed -i "s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
-              sed -i 's|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis-shutdown|' "/usr/lib/systemd/system/redis${REDISPORT}.service"
+              sed -i "s|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis${REDISPORT}-shutdown|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
             else
               sed -i "s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
+              sed -i "s|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis${REDISPORT}-shutdown|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
             fi
             sed -i 's|^# cluster-enabled yes|cluster-enabled yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
             sed -i "s|^# cluster-config-file nodes-${REDISPORT}.conf|cluster-config-file nodes-${DT}.conf|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
