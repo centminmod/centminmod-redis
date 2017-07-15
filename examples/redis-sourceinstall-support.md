@@ -1,7 +1,26 @@
 Redis Source Install Binary Support
 =========
 
-[redis-generator.sh](https://github.com/centminmod/centminmod-redis) can now optionally support [redis source installed bianries](https://github.com/antirez/redis) at `/usr/local/bin/redis-server` via a new `USE_SOURCEREDIS='y'` variable. You still need for redis remi yum repo installed package as redis-generator.sh borrows the systemd redis.service file and makes a custom copy for redis source installed binaries installed at `/usr/local/bin/redis-server` and a copy of `/usr/libexec/redis-shutdown` at `/usr/local/bin/redis-shutdown`. This allows you to use `redis-generator.sh` and create concurrent redis servers of different redis versions - one for redis remi yum repo installed redis 3.2.8 and one for your desired redis source installed version. Below example is using [redis 4.0-rc2](http://antirez.com/news/110) source install as an example.
+[redis-generator.sh](https://github.com/centminmod/centminmod-redis) can now optionally support [redis source installed bianries](https://github.com/antirez/redis) at `/usr/local/bin/redis-server` via a new `USE_SOURCEREDIS='y'` variable. You still need for redis remi yum repo installed package as redis-generator.sh borrows the systemd redis.service file and makes a custom copy for redis source installed binaries installed at `/usr/local/bin/redis-server` and a copy of `/usr/libexec/redis-shutdown` at `/usr/local/bin/redis-shutdown`. This allows you to use `redis-generator.sh` and create concurrent redis servers of different redis versions - one for redis remi yum repo installed redis 3.2.8 and one for your desired redis source installed version. 
+
+Update: Redis 4.0.0 stable install
+
+```
+cd /root/tools/
+git clone https://github.com/centminmod/centminmod-redis
+cd centminmod-redis
+./redis-install.sh install
+sed -i "s|^USE_SOURCEREDIS='n'|USE_SOURCEREDIS='y'|" redis-generator.sh
+sed -i "s|^DEBUG_REDISGEN='y'|DEBUG_REDISGEN='n'|" redis-generator.sh
+cd /svr-setup
+wget http://download.redis.io/releases/redis-4.0.0.tar.gz
+tar xvzf redis-4.0.0.tar.gz
+cd redis-4.0.0
+make -j4
+make install
+```
+
+Below example is using [redis 4.0-rc2](http://antirez.com/news/110) source install as an example.
 
 To enable this, set `USE_SOURCEREDIS='y'` and then example to create 2 redis server master + slave replication on ports 6479 and 6480 + enable auto [redis sentinel](https://redis.io/topics/sentinel) setup (3x sentinel with quorum of 2) which is tied to the redis master instance on `STARTPORT` by enabling `SENTINEL_SETUP='y'` prior to running replication command.
 
