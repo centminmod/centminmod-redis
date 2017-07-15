@@ -12,6 +12,17 @@ Requirements:
 
 * redis 3.2 branch is required and must be installed prior to using `redis-generator.sh`
 * [Remi YUM repository](https://blog.remirepo.net/pages/Config-en) if you want to install redis server via Remi YUM repo for latest redis 3.2 branch. [centminmod.com](https://centminmod.com) auto installer already installs Remi YUM repo.
+* Optional: [stunnel](https://www.stunnel.org/index.html) for secure TLS encrypted redis remote connections.
+
+```
+yum list stunnel -q
+Installed Packages
+stunnel.x86_64      5.41-1.el7.centos      installed
+
+rpm -qa --changelog stunnel | head -3
+* Sun Jul 16 2017 George Liu <centminmod.com>
+- custom stunnel 5.41 rpm built for centminmod.com
+```
 
 Redis Server Install:
 =======
