@@ -59,9 +59,11 @@ redisinstall() {
   if [[ "$(sysctl -n vm.overcommit_memory)" -ne '1' ]]; then
     echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
   fi
-  echo never > /sys/kernel/mm/transparent_hugepage/enabled
-  if [[ -z "$(grep 'transparent_hugepage\/enabled' /etc/rc.local)" ]]; then
-    echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" >> /etc/rc.local
+  if [ -f /sys/kernel/mm/transparent_hugepage/enabled ]; then
+    echo never > /sys/kernel/mm/transparent_hugepage/enabled
+    if [[ -z "$(grep 'transparent_hugepage\/enabled' /etc/rc.local)" ]]; then
+      echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" >> /etc/rc.local
+    fi
   fi
   sysctl -p
   echo "redis server installled"
