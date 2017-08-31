@@ -5,12 +5,17 @@
 ######################################################
 # variables
 #############
-DT=`date +"%d%m%y-%H%M%S"`
+DT=$(date +"%d%m%y-%H%M%S")
+REDIS_SOURCEVER='4.0.1'
 
 OSARCH=$(uname -m)
+SRCDIR=/svr-setup
 ######################################################
 # functions
 #############
+if [ ! -d "$SRCDIR" ]; then
+  mkdir -p "$SRCDIR"
+fi
 
 if [ "$OSARCH" != 'x86_64' ]; then
   echo
@@ -41,6 +46,26 @@ if [ ! -f /etc/yum.repos.d/epel.repo ]; then
   yum -y install epel-release
 fi
 
+if [ -f /proc/user_beancounters ]; then
+    CPUS=$(grep -c "processor" /proc/cpuinfo)
+    if [[ "$CPUS" -gt '8' ]]; then
+        CPUS=$(echo $(($CPUS+2)))
+    else
+        CPUS=$(echo $(($CPUS+1)))
+    fi
+    MAKETHREADS=" -j$CPUS"
+else
+    CPUS=$(grep -c "processor" /proc/cpuinfo)
+    if [[ "$CPUS" -gt '8' ]]; then
+        CPUS=$(echo $(($CPUS+4)))
+    elif [[ "$CPUS" -eq '8' ]]; then
+        CPUS=$(echo $(($CPUS+2)))
+    else
+        CPUS=$(echo $(($CPUS+1)))
+    fi
+    MAKETHREADS=" -j$CPUS"
+fi
+
 redisinstall() {
   echo "install redis server..."
   if [[ -f /etc/yum/pluginconf.d/priorities.conf && "$(grep 'enabled = 1' /etc/yum/pluginconf.d/priorities.conf)" ]]; then
@@ -69,17 +94,37 @@ redisinstall() {
   echo "redis server installled"
 }
 
+redisinstall_source() {
+  echo "source install redis server..."
+  export OPT=-03
+  export CFLAGS="-march=native -pipe -funroll-loops -fvisibility=hidden -flto -fuse-ld=gold -gsplit-dwarf"
+  export CXXFLAGS="$CFLAGS"
+  cd "$SRCDIR"
+  rm -rf redis-${REDIS_SOURCEVER}*
+  wget http://download.redis.io/releases/redis-${REDIS_SOURCEVER}.tar.gz
+  tar xzf redis-${REDIS_SOURCEVER}.tar.gz
+  cd redis-${REDIS_SOURCEVER}
+  make distclean
+  make clean
+  make${MAKETHREADS}
+  make install
+  echo "redis server source installled" 
+}
+
 ######################################################
 
 case "$1" in
   install )
     redisinstall
     ;;
+  install-source )
+    redisinstall_source
+    ;;
   * )
     echo
     echo "Usage:"
     echo
-    echo "$0 {install}"
+    echo "$0 {install|install-source}"
     echo
     ;;
 esac
