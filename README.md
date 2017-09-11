@@ -10,7 +10,7 @@ Redis server generator to create multiple Redis servers in standalone, replicati
 Requirements:
 =======
 
-* redis 3.2 branch is required and must be installed prior to using `redis-generator.sh`
+* redis 3.2+ or higher branch is required and must be installed prior to using `redis-generator.sh`
 * [Remi YUM repository](https://blog.remirepo.net/pages/Config-en) if you want to install redis server via Remi YUM repo for latest redis 3.2 branch. [centminmod.com](https://centminmod.com) auto installer already installs Remi YUM repo.
 * Optional: [stunnel](https://www.stunnel.org/index.html) for secure TLS encrypted redis remote connections.
 
