@@ -6,10 +6,14 @@
 # variables
 #############
 DT=$(date +"%d%m%y-%H%M%S")
-REDIS_SOURCEVER='4.0.1'
+REDIS_SOURCEVER='4.0.2'
 
 OSARCH=$(uname -m)
 SRCDIR=/svr-setup
+
+DEVTOOLSETFOUR='y'
+DEVTOOLSETSIX='y'
+DEVTOOLSETSEVEN='y'
 ######################################################
 # functions
 #############
@@ -96,6 +100,21 @@ redisinstall() {
 
 redisinstall_source() {
   echo "source install redis server..."
+  if [[ "$DEVTOOLSETFOUR" = [yY] ]]; then
+    if [[ -f /opt/rh/devtoolset-4/root/usr/bin/gcc && -f /opt/rh/devtoolset-4/root/usr/bin/g++ ]]; then
+      source /opt/rh/devtoolset-4/enable
+    fi
+  fi
+  if [[ "$DEVTOOLSETSIX" = [yY] ]]; then
+    if [[ -f /opt/rh/devtoolset-6/root/usr/bin/gcc && -f /opt/rh/devtoolset-6/root/usr/bin/g++ ]]; then
+      source /opt/rh/devtoolset-6/enable
+    fi
+  fi
+  if [[ "$DEVTOOLSETSEVEN" = [yY] ]]; then
+    if [[ -f /opt/rh/devtoolset-7/root/usr/bin/gcc && -f /opt/rh/devtoolset-7/root/usr/bin/g++ ]]; then
+      source /opt/rh/devtoolset-7/enable
+    fi
+  fi
   export OPT=-03
   export CFLAGS="-march=native -pipe -funroll-loops -fvisibility=hidden -flto -fuse-ld=gold -gsplit-dwarf"
   export CXXFLAGS="$CFLAGS"
