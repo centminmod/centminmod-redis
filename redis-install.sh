@@ -78,6 +78,34 @@ redisinstall() {
     yum -y install redis --enablerepo=remi
   fi
   sed -i 's|LimitNOFILE=.*|LimitNOFILE=262144|' /etc/systemd/system/redis.service.d/limit.conf
+  # echo -e "[Service]\nExecStartPre=/usr/sbin/sysctl vm.overcommit_memory=1" > /etc/systemd/system/redis.service.d/vm.conf
+  # mkdir -p /redis/tools
+  # echo '#!/bin/bash' > /redis/tools/disable_thp.sh
+  # echo "/usr/bin/echo 'never' > /sys/kernel/mm/transparent_hugepage/enabled" >> /redis/tools/disable_thp.sh
+  # chmod +x /redis/tools/disable_thp.sh
+  # chown -R redis:redis /redis/tools
+  # echo -e "[Service]\nExecStartPre=-/redis/tools/disable_thp.sh" > /etc/systemd/system/redis.service.d/execstartpre.conf
+  echo -e "[Unit]\nAfter=network.target rc.local" > /etc/systemd/system/redis.service.d/after-rc-local.conf
+
+cat > "/etc/systemd/system/disable-thp.service" <<EOF
+[Unit]
+Description=Disable Transparent Huge Pages (THP)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c "/usr/bin/echo 'never' > /sys/kernel/mm/transparent_hugepage/enabled"
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+if [ -f /etc/systemd/system/disable-thp.service ]; then
+  systemctl daemon-reload
+  systemctl start disable-thp
+  systemctl enable disable-thp
+fi
+
   echo "d      /var/run/redis/         0755 redis redis" > /etc/tmpfiles.d/redis.conf
   mkdir -p /var/run/redis
   chown redis:redis /var/run/redis
