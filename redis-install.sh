@@ -6,7 +6,7 @@
 # variables
 #############
 DT=$(date +"%d%m%y-%H%M%S")
-REDIS_SOURCEVER='4.0.2'
+REDIS_SOURCEVER='4.0.6'
 
 OSARCH=$(uname -m)
 SRCDIR=/svr-setup
@@ -14,6 +14,7 @@ SRCDIR=/svr-setup
 DEVTOOLSETFOUR='y'
 DEVTOOLSETSIX='y'
 DEVTOOLSETSEVEN='y'
+DEVTOOLSETEIGHT='y'
 ######################################################
 # functions
 #############
@@ -143,8 +144,14 @@ redisinstall_source() {
       source /opt/rh/devtoolset-7/enable
     fi
   fi
+  if [[ "$DEVTOOLSETEIGHT" = [yY] ]]; then
+    if [[ -f /opt/gcc8/bin/gcc && -f /opt/gcc8/bin/g++ ]]; then
+      source /opt/gcc8/enable
+      EXTRA_CFLAGS=' -Wimplicit-fallthrough=0 -Wno-maybe-uninitialized -Wno-stringop-truncation'
+    fi
+  fi
   export OPT=-03
-  export CFLAGS="-march=native -pipe -funroll-loops -fvisibility=hidden -flto -fuse-ld=gold -gsplit-dwarf"
+  export CFLAGS="-march=native -pipe -funroll-loops -fvisibility=hidden -flto -fuse-ld=gold -gsplit-dwarf${EXTRA_CFLAGS}"
   export CXXFLAGS="$CFLAGS"
   cd "$SRCDIR"
   rm -rf redis-${REDIS_SOURCEVER}*
