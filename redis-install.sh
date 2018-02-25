@@ -6,15 +6,19 @@
 # variables
 #############
 DT=$(date +"%d%m%y-%H%M%S")
-REDIS_SOURCEVER='4.0.7'
+REDIS_SOURCEVER='4.0.8'
 
 OSARCH=$(uname -m)
 SRCDIR=/svr-setup
 
-DEVTOOLSETFOUR='y'
-DEVTOOLSETSIX='y'
+DEVTOOLSETFOUR='n'
+DEVTOOLSETSIX='n'
 DEVTOOLSETSEVEN='y'
-DEVTOOLSETEIGHT='y'
+DEVTOOLSETEIGHT='n'
+GOLDLINKER='n'
+FLTO='n'
+DWARF='n'
+HOIST='y'
 ######################################################
 # functions
 #############
@@ -142,16 +146,32 @@ redisinstall_source() {
   if [[ "$DEVTOOLSETSEVEN" = [yY] ]]; then
     if [[ -f /opt/rh/devtoolset-7/root/usr/bin/gcc && -f /opt/rh/devtoolset-7/root/usr/bin/g++ ]]; then
       source /opt/rh/devtoolset-7/enable
+      if [[ "$HOIST" = [yY] ]]; then
+        HOIST_OPT=' -fcode-hoisting'
+      fi
+      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation"
     fi
   fi
   if [[ "$DEVTOOLSETEIGHT" = [yY] ]]; then
     if [[ -f /opt/gcc8/bin/gcc && -f /opt/gcc8/bin/g++ ]]; then
       source /opt/gcc8/enable
-      EXTRA_CFLAGS=' -Wimplicit-fallthrough=0 -Wno-maybe-uninitialized -Wno-stringop-truncation'
+      if [[ "$HOIST" = [yY] ]]; then
+        HOIST_OPT=' -fcode-hoisting'
+      fi
+      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation"
     fi
   fi
+  if [[ "$FLTO" = [yY] ]]; then
+    FLTO_OPT=' -flto'
+  fi
+  if [[ "$GOLDLINKER" = [yY] ]]; then
+    GOLDLINKER_OPT=' -fuse-ld=gold'
+  fi
+  if [[ "$DWARF" = [yY] ]]; then
+    DWARF_OPT=' -gsplit-dwarf'
+  fi
   export OPT=-03
-  export CFLAGS="-march=native -pipe -funroll-loops -fvisibility=hidden -flto -fuse-ld=gold -gsplit-dwarf${EXTRA_CFLAGS}"
+  export CFLAGS="-march=native -fvisibility=hidden${FLTO_OPT}${GOLDLINKER_OPT}${DWARF_OPT}${EXTRA_CFLAGS}"
   export CXXFLAGS="$CFLAGS"
   cd "$SRCDIR"
   rm -rf redis-${REDIS_SOURCEVER}*
