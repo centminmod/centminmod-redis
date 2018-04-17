@@ -5,7 +5,7 @@ Redis server generator to create multiple Redis servers in standalone, replicati
 
 ### Redis Source Install Support
 
-* Optional redis source install support has been added. Example of using `redis-generator.sh` with [redis 4.0rc2 source installed](examples/redis-sourceinstall-support.md).
+* Optional redis source install support has been added. Example of using `redis-generator.sh` with [redis 4.x source installed](examples/redis-sourceinstall-support.md).
 
 Requirements:
 =======
