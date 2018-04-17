@@ -3,7 +3,7 @@ Redis Source Install Binary Support
 
 [redis-generator.sh](https://github.com/centminmod/centminmod-redis) can now optionally support [redis source installed bianries](https://github.com/antirez/redis) at `/usr/local/bin/redis-server` via a new `USE_SOURCEREDIS='y'` variable. You still need for redis remi yum repo installed package as redis-generator.sh borrows the systemd redis.service file and makes a custom copy for redis source installed binaries installed at `/usr/local/bin/redis-server` and a copy of `/usr/libexec/redis-shutdown` at `/usr/local/bin/redis-shutdown`. This allows you to use `redis-generator.sh` and create concurrent redis servers of different redis versions - one for redis remi yum repo installed redis 3.2.8 and one for your desired redis source installed version. 
 
-Update: Redis 4.0.1 stable install
+Update: Redis 4.0.9 stable install
 
 ```
 cd /root/tools/
@@ -13,9 +13,9 @@ cd centminmod-redis
 sed -i "s|^USE_SOURCEREDIS='n'|USE_SOURCEREDIS='y'|" redis-generator.sh
 sed -i "s|^DEBUG_REDISGEN='y'|DEBUG_REDISGEN='n'|" redis-generator.sh
 cd /svr-setup
-wget http://download.redis.io/releases/redis-4.0.1.tar.gz
-tar xvzf redis-4.0.1.tar.gz
-cd redis-4.0.1
+wget http://download.redis.io/releases/redis-4.0.9.tar.gz
+tar xvzf redis-4.0.9.tar.gz
+cd redis-4.0.9
 make -j4
 make install
 ```
@@ -63,7 +63,7 @@ Default is to create the redis servers via TCP ports.
 Example would create
 
 * redis systemd files at `/usr/lib/systemd/system/redis6479.service` and `/usr/lib/systemd/system/redis6480.service`
-* redis-server binaries at `/etc/redis6479/redis-server` and `/etc/redis6480/redis-server` copied from `/usr/local/bin/redis-server` (source install) instead of `/usr/bin/redis-server`
+* redis-server binaries at `/etc/redis6479/redis-server` and `/etc/redis6480/redis-server` symlinked from `/usr/local/bin/redis-server` (source install) instead of `/usr/bin/redis-server`
 * redis pid files at `/var/run/redis/redis_6479.pid` and `/var/run/redis/redis_6480.pid`
 * dedicated redis config files at `/etc/redis6479/redis6479.conf` and `/etc/redis6479/redis6480.conf` 
 * each config file will have `dbfilename` as `dump6479.rdb` and `dump6480.rdb` with commented out unix sockets at `/var/run/redis/redis6479.sock` and `/var/run/redis/redis6480.sock`

@@ -107,7 +107,7 @@ You will create:
 * redis systemd files for controlling each redis server at `/usr/lib/systemd/system/redis6479.service` and `/usr/lib/systemd/system/redis6480.service`
 * redis pid files at `/var/run/redis/redis_6479.pid` and `/var/run/redis/redis_6480.pid`
 * dedicated redis directories for each redis server instance at `/etc/redis6479` and `/etc/redis6480`
-* main `/usr/bin/redis-server` binary gets copied to dedicated redis directories at `/etc/redis6479/redis-server` and `/etc/redis6480/redis-server`
+* main `/usr/bin/redis-server` binary gets symlinked to dedicated redis directories at `/etc/redis6479/redis-server` and `/etc/redis6480/redis-server`
 * dedicated redis config files at `/etc/redis6479/redis6479.conf` and `/etc/redis6479/redis6480.conf` 
 * each config file will have `dbfilename` as `dump6479.rdb` and `dump6480.rdb` with commented out unix sockets at `/var/run/redis/redis6479.sock` and `/var/run/redis/redis6480.sock`
 * dedicated redis data directories at `/var/lib/redis6479` and `/var/lib/redis6480`

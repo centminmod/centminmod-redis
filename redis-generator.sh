@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=1.3
+VER=1.4
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -276,7 +276,7 @@ genredis() {
           echo "sed -i \"s|^port 6379|port $REDISPORT|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "mkdir -p "/var/lib/redis${REDISPORT}""
           echo "chown -R redis:redis "/var/lib/redis${REDISPORT}""
-          echo "\cp -af "$REDISBINARY" "/etc/redis${REDISPORT}/redis-server""
+          echo "ln -s "$REDISBINARY" "/etc/redis${REDISPORT}/redis-server""
           if [[ "$USE_SOURCEREDIS" = [Yy] ]]; then
             # echo "sed -i \"s|\/usr\/local\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
             echo "sed -i \"s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
@@ -297,7 +297,7 @@ genredis() {
           echo "sed -i \"s|\/etc\/redis.conf|\/etc\/redis${REDISPORT}\/redis${REDISPORT}.conf|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
           # enable redis cluster settings
           if [[ "$CLUSTER" = 'cluster' ]]; then
-            echo "\cp -af "$REDISBINARY" "/etc/redis${REDISPORT}/redis-server""
+            echo "ln -s "$REDISBINARY" "/etc/redis${REDISPORT}/redis-server""
             if [[ "$USE_SOURCEREDIS" = [Yy] ]]; then
               # echo "sed -i \"s|\/usr\/local\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
               echo "sed -i \"s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
@@ -466,7 +466,7 @@ esac
           sed -i "s|^port 6379|port $REDISPORT|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           mkdir -p "/var/lib/redis${REDISPORT}"
           chown -R redis:redis "/var/lib/redis${REDISPORT}"
-          \cp -af "$REDISBINARY" "/etc/redis${REDISPORT}/redis-server"
+          ln -s "$REDISBINARY" "/etc/redis${REDISPORT}/redis-server"
           if [[ "$USE_SOURCEREDIS" = [Yy] ]]; then
             # sed -i "s|\/usr\/local\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
             sed -i "s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
@@ -487,7 +487,7 @@ esac
           sed -i "s|\/etc\/redis.conf|\/etc\/redis${REDISPORT}\/redis${REDISPORT}.conf|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
           # enable redis cluster settings
           if [[ "$CLUSTER" = 'cluster' ]]; then
-            \cp -af "$REDISBINARY" "/etc/redis${REDISPORT}/redis-server"
+            ln -s "$REDISBINARY" "/etc/redis${REDISPORT}/redis-server"
             if [[ "$USE_SOURCEREDIS" = [Yy] ]]; then
               # sed -i "s|\/usr\/local\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
               sed -i "s|\/usr\/bin\/redis-server|\/etc\/redis${REDISPORT}\/redis-server|" "/usr/lib/systemd/system/redis${REDISPORT}.service"

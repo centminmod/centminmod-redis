@@ -42,7 +42,7 @@ Default is to create the redis servers via TCP ports.
 Example would create
 
 * redis systemd files at `/usr/lib/systemd/system/redis6479.service` and `/usr/lib/systemd/system/redis6480.service`
-* redis-server binaries at `/etc/redis6479/redis-server` and `/etc/redis6480/redis-server` copied from `/usr/bin/redis-server`
+* redis-server binaries at `/etc/redis6479/redis-server` and `/etc/redis6480/redis-server` symlinked from `/usr/bin/redis-server`
 * redis pid files at `/var/run/redis/redis_6479.pid` and `/var/run/redis/redis_6480.pid`
 * dedicated redis config files at `/etc/redis6479/redis6479.conf` and `/etc/redis6479/redis6480.conf` 
 * each config file will have `dbfilename` as `dump6479.rdb` and `dump6480.rdb` with commented out unix sockets at `/var/run/redis/redis6479.sock` and `/var/run/redis/redis6480.sock`
