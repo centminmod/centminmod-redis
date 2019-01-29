@@ -6,7 +6,7 @@
 # variables
 #############
 DT=$(date +"%d%m%y-%H%M%S")
-REDIS_SOURCEVER='4.0.9'
+REDIS_SOURCEVER='5.0.3'
 
 OSARCH=$(uname -m)
 SRCDIR=/svr-setup

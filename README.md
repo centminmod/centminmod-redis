@@ -10,7 +10,7 @@ Redis server generator to create multiple Redis servers in standalone, replicati
 Requirements:
 =======
 
-* redis 4.0+ or higher branch is required and must be installed prior to using `redis-generator.sh`
+* redis 5.0+ or higher branch is required and must be installed prior to using `redis-generator.sh`
 * [Remi YUM repository](https://blog.remirepo.net/pages/Config-en) if you want to install redis server via Remi YUM repo for latest redis 4.0 branch. [centminmod.com](https://centminmod.com) auto installer already installs Remi YUM repo.
 * Optional: [stunnel](https://www.stunnel.org/index.html) for secure TLS encrypted redis remote connections.
 
@@ -70,6 +70,7 @@ Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='
     * prep - standalone prep command installs redis-cluster-tool
     * prepupdate - standalone prep update command updates redis-cluster-tool
     * multi X - no. of standalone redis instances to create
+    * multi-cache X - no. of standalone redis instances + disable ondisk persistence
     * clusterprep X - no. of cluster enabled config instances
     * clustermake 6 - to enable cluster mode + create cluster
     * clustermake 9 - flag to enable cluster mode + create cluster
@@ -83,6 +84,7 @@ Default is to create the redis servers via TCP ports. You can edit `UNIXSOCKET='
     ./redis-generator.sh prep
     ./redis-generator.sh prepupdate
     ./redis-generator.sh multi X
+    ./redis-generator.sh multi-cache X
     ./redis-generator.sh clusterprep X
     ./redis-generator.sh clustermake 6
     ./redis-generator.sh clustermake 9

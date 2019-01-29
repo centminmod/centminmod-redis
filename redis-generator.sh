@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=1.4
+VER=1.5
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -224,7 +224,9 @@ genredis() {
   #   QUORUM=2
   # fi
   echo
-  if [[ "$CLUSTER_CREATE" = 'repcache' ]]; then
+  if [[ "$CLUSTER" = 'cache-only' ]]; then
+    echo "Creating redis servers (with ondisk persistence disabled) starting at TCP = $STARTPORT..."
+  elif [[ "$CLUSTER_CREATE" = 'repcache' ]]; then
     echo "Creating redis servers (with ondisk persistence disabled) starting at TCP = $STARTPORT..."
   else
     echo "Creating redis servers starting at TCP = $STARTPORT..."
@@ -324,7 +326,7 @@ genredis() {
             echo "sed -i \"s|^# unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
             echo "sed -i 's|^# unixsocketperm 700|unixsocketperm 700|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           fi
-          if [[ "$CLUSTER_CREATE" = 'repcache' ]]; then
+          if [[ "$CLUSTER_CREATE" = 'repcache' || "$CLUSTER" = 'cache-only' ]]; then
             echo "sed -i 's|^save 900|#save 900|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
             echo "sed -i 's|^save 300|#save 300|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
             echo "sed -i 's|^save 60|#save 60|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
@@ -514,7 +516,7 @@ esac
             sed -i "s|^# unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
             sed -i 's|^# unixsocketperm 700|unixsocketperm 700|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           fi
-          if [[ "$CLUSTER_CREATE" = 'repcache' ]]; then
+          if [[ "$CLUSTER_CREATE" = 'repcache' || "$CLUSTER" = 'cache-only' ]]; then
             sed -i 's|^save 900|#save 900|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
             sed -i 's|^save 300|#save 300|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
             sed -i 's|^save 60|#save 60|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
@@ -677,6 +679,10 @@ case "$1" in
     NUM=$2
     genredis $NUM
     ;;
+  multi-cache )
+    NUM=$2
+    genredis $NUM cache-only
+    ;;
   prep )
     redis_cluster_install
     PREP=y
@@ -802,6 +808,7 @@ case "$1" in
     echo "* prep - standalone prep command installs redis-cluster-tool"
     echo "* prepupdate - standalone prep update command updates redis-cluster-tool"
     echo "* multi X - no. of standalone redis instances to create"
+    echo "* multi-cache X - no. of standalone redis instances + disable ondisk persistence"
     echo "* clusterprep X - no. of cluster enabled config instances"
     echo "* clustermake 6 - to enable cluster mode + create cluster"
     echo "* clustermake 9 - flag to enable cluster mode + create cluster"
@@ -815,6 +822,7 @@ case "$1" in
     echo "$0 prep"
     echo "$0 prepupdate"
     echo "$0 multi X"
+    echo "$0 multi-cache X"
     echo "$0 clusterprep X"
     echo "$0 clustermake 6"
     echo "$0 clustermake 9"
