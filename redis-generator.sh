@@ -338,7 +338,7 @@ genredis() {
           if [[ "$UNIXSOCKET" = [Yy] ]]; then
             echo "sed -i \"s|port $REDISPORT|port 0|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
             echo "sed -i \"s|^# unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
-            echo "sed -i 's|^# unixsocketperm 700|unixsocketperm 700|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+            echo "sed -i 's|^# unixsocketperm 700|unixsocketperm 775|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           fi
           if [[ "$CLUSTER_CREATE" = 'repcache' || "$CLUSTER" = 'cache-only' ]]; then
             echo "sed -i 's|^save 900|#save 900|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
@@ -534,7 +534,7 @@ esac
           if [[ "$UNIXSOCKET" = [Yy] ]]; then
             sed -i "s|port $REDISPORT|port 0|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
             sed -i "s|^# unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
-            sed -i 's|^# unixsocketperm 700|unixsocketperm 700|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+            sed -i 's|^# unixsocketperm 700|unixsocketperm 775|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           fi
           if [[ "$CLUSTER_CREATE" = 'repcache' || "$CLUSTER" = 'cache-only' ]]; then
             sed -i 's|^save 900|#save 900|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
