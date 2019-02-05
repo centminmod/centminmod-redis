@@ -92,6 +92,12 @@ redisinstall() {
   # echo -e "[Service]\nExecStartPre=-/redis/tools/disable_thp.sh" > /etc/systemd/system/redis.service.d/execstartpre.conf
   # echo -e "[Unit]\nAfter=network.target rc.local" > /etc/systemd/system/redis.service.d/after-rc-local.conf
 
+cat > "/etc/systemd/system/redis.service.d/user.conf" <<EOF
+[Service]
+User=redis
+Group=nginx
+EOF
+
 cat > "/etc/systemd/system/disable-thp.service" <<EOF
 [Unit]
 Description=Disable Transparent Huge Pages (THP)
