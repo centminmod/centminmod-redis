@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=1.5
+VER=1.6
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -56,6 +56,14 @@ fi
 
 if [[ -f /etc/systemd/system/redis.service.d/limit.conf && ! "$(grep 262144 /etc/systemd/system/redis.service.d/limit.conf)" ]]; then
   sed -i 's|LimitNOFILE=.*|LimitNOFILE=262144|' /etc/systemd/system/redis.service.d/limit.conf
+fi
+
+if [[ ! -f /etc/systemd/system/redis.service.d/user.conf ]]; then
+cat > "/etc/systemd/system/redis.service.d/user.conf" <<EOF
+[Service]
+User=redis
+Group=nginx
+EOF
 fi
 
 redis_cluster_install() {
@@ -274,8 +282,14 @@ genredis() {
           echo "mkdir -p "/etc/systemd/system/redis${REDISPORT}.service.d/""
           echo "\cp -af /etc/systemd/system/redis.service.d/limit.conf "/etc/systemd/system/redis${REDISPORT}.service.d/limit.conf""
         fi
+        if [ -f /etc/systemd/system/redis.service.d/user.conf ]; then
+          echo "mkdir -p "/etc/systemd/system/redis${REDISPORT}.service.d/""
+          echo "\cp -af /etc/systemd/system/redis.service.d/user.conf "/etc/systemd/system/redis${REDISPORT}.service.d/user.conf""
+        fi
         if [[ -f "/etc/redis${REDISPORT}/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}/redis${REDISPORT}.conf)" ]] || [[ "$DEBUG_REDISGEN" = [yY] ]]; then
           echo "sed -i \"s|^port 6379|port $REDISPORT|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          # ensure any copied over unixsocket configs from /etc/redis.conf are not actively in play on new redis instances
+          echo "sed -i '/^unixsocket/d' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "mkdir -p "/var/lib/redis${REDISPORT}""
           echo "chown -R redis:redis "/var/lib/redis${REDISPORT}""
           echo "ln -s "$REDISBINARY" "/etc/redis${REDISPORT}/redis-server""
@@ -463,9 +477,15 @@ esac
           mkdir -p "/etc/systemd/system/redis${REDISPORT}.service.d/"
           \cp -af /etc/systemd/system/redis.service.d/limit.conf "/etc/systemd/system/redis${REDISPORT}.service.d/limit.conf"
         fi
+        if [ -f /etc/systemd/system/redis.service.d/user.conf ]; then
+          mkdir -p "/etc/systemd/system/redis${REDISPORT}.service.d/"
+          \cp -af /etc/systemd/system/redis.service.d/user.conf "/etc/systemd/system/redis${REDISPORT}.service.d/user.conf"
+        fi
         ls -lah "/usr/lib/systemd/system/redis${REDISPORT}.service" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
         if [[ -f "/etc/redis${REDISPORT}/redis${REDISPORT}.conf" && ! "$(grep "dump${REDISPORT}.rdb" /etc/redis${REDISPORT}/redis${REDISPORT}.conf)" ]]; then
           sed -i "s|^port 6379|port $REDISPORT|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          # ensure any copied over unixsocket configs from /etc/redis.conf are not actively in play on new redis instances
+          sed -i '/^unixsocket/d' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           mkdir -p "/var/lib/redis${REDISPORT}"
           chown -R redis:redis "/var/lib/redis${REDISPORT}"
           ln -s "$REDISBINARY" "/etc/redis${REDISPORT}/redis-server"
