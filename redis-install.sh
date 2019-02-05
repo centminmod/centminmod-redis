@@ -90,7 +90,7 @@ redisinstall() {
   # chmod +x /redis/tools/disable_thp.sh
   # chown -R redis:redis /redis/tools
   # echo -e "[Service]\nExecStartPre=-/redis/tools/disable_thp.sh" > /etc/systemd/system/redis.service.d/execstartpre.conf
-  echo -e "[Unit]\nAfter=network.target rc.local" > /etc/systemd/system/redis.service.d/after-rc-local.conf
+  # echo -e "[Unit]\nAfter=network.target rc.local" > /etc/systemd/system/redis.service.d/after-rc-local.conf
 
 cat > "/etc/systemd/system/disable-thp.service" <<EOF
 [Unit]
