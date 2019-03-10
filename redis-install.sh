@@ -122,8 +122,9 @@ fi
   chown redis:redis /var/run/redis
   chmod 755 /var/run/redis
   systemctl daemon-reload
-  systemctl start redis
+  systemctl restart redis
   systemctl enable redis
+  systemctl restart redis
   if [[ "$(sysctl -n vm.overcommit_memory)" -ne '1' ]]; then
     echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
   fi
