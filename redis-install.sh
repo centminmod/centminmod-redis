@@ -125,6 +125,7 @@ fi
   systemctl restart redis
   systemctl enable redis
   systemctl restart redis
+  systemctl enable redis
   if [[ "$(sysctl -n vm.overcommit_memory)" -ne '1' ]]; then
     echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
   fi
