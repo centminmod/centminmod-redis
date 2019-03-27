@@ -6,7 +6,8 @@
 # variables
 #############
 DT=$(date +"%d%m%y-%H%M%S")
-REDIS_SOURCEVER='5.0.3'
+REDIS_SOURCEVER='5.0.4'
+REDIS_THREADIO='n'
 
 OSARCH=$(uname -m)
 SRCDIR=/svr-setup
@@ -183,9 +184,15 @@ redisinstall_source() {
   export CXXFLAGS="$CFLAGS"
   cd "$SRCDIR"
   rm -rf redis-${REDIS_SOURCEVER}*
-  wget http://download.redis.io/releases/redis-${REDIS_SOURCEVER}.tar.gz
-  tar xzf redis-${REDIS_SOURCEVER}.tar.gz
-  cd redis-${REDIS_SOURCEVER}
+  rm -rf redis-${REDIS_SOURCEVER}-threaded*
+  if [[ "$REDIS_THREADIO" = [yY] ]]; then
+    git clone -b threaded-io --depth=1 https://github.com/antirez/redis redis-${REDIS_SOURCEVER}-threaded
+    cd redis-${REDIS_SOURCEVER}-threaded
+  else
+    wget http://download.redis.io/releases/redis-${REDIS_SOURCEVER}.tar.gz
+    tar xzf redis-${REDIS_SOURCEVER}.tar.gz
+    cd redis-${REDIS_SOURCEVER}
+  fi
   make distclean
   make clean
   make${MAKETHREADS}
