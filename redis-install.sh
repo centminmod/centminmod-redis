@@ -14,8 +14,8 @@ SRCDIR=/svr-setup
 
 DEVTOOLSETFOUR='n'
 DEVTOOLSETSIX='n'
-DEVTOOLSETSEVEN='y'
-DEVTOOLSETEIGHT='n'
+DEVTOOLSETSEVEN='n'
+DEVTOOLSETEIGHT='y'
 GOLDLINKER='n'
 FLTO='n'
 DWARF='n'
@@ -155,6 +155,15 @@ redisinstall_source() {
   if [[ "$DEVTOOLSETSEVEN" = [yY] ]]; then
     if [[ -f /opt/rh/devtoolset-7/root/usr/bin/gcc && -f /opt/rh/devtoolset-7/root/usr/bin/g++ ]]; then
       source /opt/rh/devtoolset-7/enable
+      if [[ "$HOIST" = [yY] ]]; then
+        HOIST_OPT=' -fcode-hoisting'
+      fi
+      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation"
+    fi
+  fi
+  if [[ "$DEVTOOLSETEIGHT" = [yY] ]]; then
+    if [[ -f /opt/rh/devtoolset-8/root/usr/bin/gcc && -f /opt/rh/devtoolset-8/root/usr/bin/g++ ]]; then
+      source /opt/rh/devtoolset-8/enable
       if [[ "$HOIST" = [yY] ]]; then
         HOIST_OPT=' -fcode-hoisting'
       fi
