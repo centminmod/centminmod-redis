@@ -180,7 +180,7 @@ redisinstall_source() {
     fi
   fi
   if [[ "$FLTO" = [yY] ]]; then
-    FLTO_OPT=' -flto'
+    FLTO_OPT=' -flto -ffat-lto-objects'
   fi
   if [[ "$GOLDLINKER" = [yY] ]]; then
     GOLDLINKER_OPT=' -fuse-ld=gold'
