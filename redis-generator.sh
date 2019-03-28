@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=1.6
+VER=1.7
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -219,6 +219,7 @@ genredis_del() {
 genredis() {
   CLUSTER=$2
   CLUSTER_CREATE=$3
+  STARTPORT=$4
   # increment starts at 0
   NUMBER=$(($1-1))
   NUMBER_SENTINELS=2
@@ -697,11 +698,35 @@ TTT
 case "$1" in
   multi )
     NUM=$2
-    genredis $NUM
+    CUSTOM_STARTPORT=$3
+    if [[ ! -z "$CUSTOM_STARTPORT" ]]; then
+      CHECK_PORT=$(netstat -nt | grep -q $CUSTOM_STARTPORT; echo $?)
+      if [[ "$CHECK_PORT" -ne '0' ]]; then
+        STARTPORT=$CUSTOM_STARTPORT
+      else
+        echo
+        echo "Error: TCP port $CUSTOM_STARTPORT in use, try another port"
+        echo
+        exit
+      fi
+    fi
+    genredis $NUM na na $STARTPORT
     ;;
   multi-cache )
     NUM=$2
-    genredis $NUM cache-only
+    CUSTOM_STARTPORT=$3
+    if [[ ! -z "$CUSTOM_STARTPORT" ]]; then
+      CHECK_PORT=$(netstat -nt | grep -q $CUSTOM_STARTPORT; echo $?)
+      if [[ "$CHECK_PORT" -ne '0' ]]; then
+        STARTPORT=$CUSTOM_STARTPORT
+      else
+        echo
+        echo "Error: TCP port $CUSTOM_STARTPORT in use, try another port"
+        echo
+        exit
+      fi
+    fi
+    genredis $NUM cache-only na $STARTPORT
     ;;
   prep )
     redis_cluster_install
@@ -817,7 +842,7 @@ case "$1" in
     if [[ ! -z "$CUSTOM_STARTPORT" ]]; then
       STARTPORT=$CUSTOM_STARTPORT
     fi
-    genredis_del $NUM
+    genredis_del $NUM na na $STARTPORT
     ;;
   * )
     echo
