@@ -158,7 +158,7 @@ redisinstall_source() {
       if [[ "$HOIST" = [yY] ]]; then
         HOIST_OPT=' -fcode-hoisting'
       fi
-      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation"
+      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
     fi
   fi
   if [[ "$DEVTOOLSETEIGHT" = [yY] ]]; then
@@ -167,7 +167,7 @@ redisinstall_source() {
       if [[ "$HOIST" = [yY] ]]; then
         HOIST_OPT=' -fcode-hoisting'
       fi
-      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation"
+      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
     fi
   fi
   if [[ "$DEVTOOLSETEIGHT" = [yY] ]]; then
@@ -176,7 +176,7 @@ redisinstall_source() {
       if [[ "$HOIST" = [yY] ]]; then
         HOIST_OPT=' -fcode-hoisting'
       fi
-      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation"
+      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
     fi
   fi
   if [[ "$FLTO" = [yY] ]]; then
@@ -189,7 +189,7 @@ redisinstall_source() {
     DWARF_OPT=' -gsplit-dwarf'
   fi
   export OPT=-03
-  export CFLAGS="-march=native -fvisibility=hidden${FLTO_OPT}${GOLDLINKER_OPT}${DWARF_OPT}${EXTRA_CFLAGS}"
+  export CFLAGS="-march=native${FLTO_OPT}${GOLDLINKER_OPT} -fvisibility=hidden${DWARF_OPT}${EXTRA_CFLAGS}"
   export CXXFLAGS="$CFLAGS"
   cd "$SRCDIR"
   rm -rf redis-${REDIS_SOURCEVER}*
