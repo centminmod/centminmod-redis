@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=1.7
+VER=1.8
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -103,7 +103,9 @@ genredis_del() {
   # increment starts at 0
   NUMBER=$(($1-1))
   NUMBER_SENTINELS=2
-  if [[ "$NUMBER" -le '1' ]]; then
+  if [[ "$NUMBER" -eq '0' ]]; then
+    NUMBER=0
+  elif [[ "$NUMBER" -eq '1' ]]; then
     NUMBER=1
   fi
   echo
@@ -226,7 +228,9 @@ genredis() {
   QUORUM=2
   # QUORUM=$(echo "$1*0.5045" | bc)
   # QUORUM=$(printf "%1.f\n" $QUORUM)
-  if [[ "$NUMBER" -le '1' ]]; then
+  if [[ "$NUMBER" -eq '0' ]]; then
+    NUMBER=0
+  elif [[ "$NUMBER" -eq '1' ]]; then
     NUMBER=1
   fi
   # if [[ "$QUORUM" -eq '1' ]]; then
