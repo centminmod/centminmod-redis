@@ -3,7 +3,7 @@ Redis Source Install Binary Support
 
 [redis-generator.sh](https://github.com/centminmod/centminmod-redis) can now optionally support [redis source installed bianries](https://github.com/antirez/redis) at `/usr/local/bin/redis-server` via a new `USE_SOURCEREDIS='y'` variable. You still need for redis remi yum repo installed package as redis-generator.sh borrows the systemd redis.service file and makes a custom copy for redis source installed binaries installed at `/usr/local/bin/redis-server` and a copy of `/usr/libexec/redis-shutdown` at `/usr/local/bin/redis-shutdown`. This allows you to use `redis-generator.sh` and create concurrent redis servers of different redis versions - one for redis remi yum repo installed redis 3.2.8 and one for your desired redis source installed version. 
 
-Update: Redis 4.0.9 stable install
+Update: Redis 5.0.7 stable install
 
 ```
 cd /root/tools/
@@ -13,9 +13,9 @@ cd centminmod-redis
 sed -i "s|^USE_SOURCEREDIS='n'|USE_SOURCEREDIS='y'|" redis-generator.sh
 sed -i "s|^DEBUG_REDISGEN='y'|DEBUG_REDISGEN='n'|" redis-generator.sh
 cd /svr-setup
-wget http://download.redis.io/releases/redis-4.0.9.tar.gz
-tar xvzf redis-4.0.9.tar.gz
-cd redis-4.0.9
+wget http://download.redis.io/releases/redis-5.0.7.tar.gz
+tar xvzf redis-5.0.7.tar.gz
+cd redis-5.0.7
 make -j4
 make install
 ```
