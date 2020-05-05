@@ -118,7 +118,7 @@ if [ -f /etc/systemd/system/disable-thp.service ]; then
   systemctl enable disable-thp
 fi
 
-  echo "d      /var/run/redis/         0755 redis nginx" > /etc/tmpfiles.d/redis.conf
+  # echo "d      /var/run/redis/         0755 redis nginx" > /etc/tmpfiles.d/redis.conf
   mkdir -p /var/run/redis
   chown redis:nginx /var/run/redis
   chmod 755 /var/run/redis

@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=1.8
+VER=1.9
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -119,10 +119,12 @@ genredis_del() {
       echo "Deleting redis${REDISPORT}.service ..."
       if [[ "$DEBUG_REDISGEN" = [yY] ]]; then
         echo "systemctl disable redis${REDISPORT}.service"
+        echo "chkconfig redis${REDISPORT} off"
         echo "systemctl stop redis${REDISPORT}.service"
         echo "rm -rf "/usr/lib/systemd/system/redis${REDISPORT}.service""
       else
         systemctl disable redis${REDISPORT}.service
+        chkconfig redis${REDISPORT} off
         systemctl stop redis${REDISPORT}.service
         rm -rf "/usr/lib/systemd/system/redis${REDISPORT}.service"
       fi
@@ -354,6 +356,7 @@ genredis() {
           echo "systemctl daemon-reload"
           echo "systemctl restart redis${REDISPORT}"
           echo "systemctl enable redis${REDISPORT}"
+          echo "chkconfig redis${REDISPORT} on"
           echo "Redis TCP $REDISPORT Info:"
           if [[ "$UNIXSOCKET" = [Yy] ]]; then
             echo "redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
@@ -550,6 +553,7 @@ esac
           systemctl daemon-reload
           systemctl restart redis${REDISPORT}
           systemctl enable redis${REDISPORT}
+          chkconfig redis${REDISPORT} on
           echo "## Redis TCP $REDISPORT Info ##"
           if [[ "$UNIXSOCKET" = [Yy] ]]; then
             redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO SERVER| egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'
