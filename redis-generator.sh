@@ -256,6 +256,7 @@ genredis() {
         if [ ! -f "/usr/lib/systemd/system/redis${REDISPORT}.service" ]; then
           echo "create systemd redis${REDISPORT}.service"
           echo "cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis${REDISPORT}.service"
+          echo "sed -i 's|Type=notify|Type=forking|' /usr/lib/systemd/system/redis${REDISPORT}.service"
         else
           echo "/usr/lib/systemd/system/redis${REDISPORT}.service already exists"
         fi
@@ -451,7 +452,9 @@ esac
         if [ ! -f "/usr/lib/systemd/system/redis${REDISPORT}.service" ]; then
           echo "create systemd redis${REDISPORT}.service"
           echo "cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis${REDISPORT}.service"
+          echo "sed -i 's|Type=notify|Type=forking|' /usr/lib/systemd/system/redis${REDISPORT}.service"
           cp -a /usr/lib/systemd/system/redis.service "/usr/lib/systemd/system/redis${REDISPORT}.service"
+          sed -i 's|Type=notify|Type=forking|' "/usr/lib/systemd/system/redis${REDISPORT}.service"
         else
           echo "/usr/lib/systemd/system/redis${REDISPORT}.service already exists"
         fi
