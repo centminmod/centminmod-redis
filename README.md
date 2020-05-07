@@ -11,7 +11,7 @@ Requirements:
 =======
 
 * redis 5.0+ or higher branch is required and must be installed prior to using `redis-generator.sh`
-* [Remi YUM repository](https://blog.remirepo.net/pages/Config-en) if you want to install redis server via Remi YUM repo for latest redis 4.0 branch. [centminmod.com](https://centminmod.com) auto installer already installs Remi YUM repo.
+* [Remi YUM repository](https://blog.remirepo.net/pages/Config-en) if you want to install redis server via Remi YUM repo for latest redis 6.0 branch. [centminmod.com](https://centminmod.com) auto installer already installs Remi YUM repo.
 * Optional: [stunnel](https://www.stunnel.org/index.html) for secure TLS encrypted redis remote connections.
 
 ```
@@ -27,13 +27,13 @@ rpm -qa --changelog stunnel | head -3
 Redis Server Install:
 =======
 
-For [Centmin Mod LEMP web stacks](https://centminmod.com), installing redis 4.0 branch is simple as using these SSH command steps or using `redis-install.sh` script:
+For [Centmin Mod LEMP web stacks](https://centminmod.com), installing redis 6.0 branch is simple as using these SSH command steps or using `redis-install.sh` script:
 
 `redis-install.sh` script
 
     ./redis-install.sh install
 
-Manual install steps
+Manual install steps provided you have installed Remi YUM repository first - which Centmin Mod LEMP stacks already have done.
 
     yum -y install redis --enablerepo=remi --disableplugin=priorities
     sed -i 's|LimitNOFILE=.*|LimitNOFILE=262144|' /etc/systemd/system/redis.service.d/limit.conf
@@ -56,6 +56,27 @@ If redis isn't installed `redis-generator.sh` will alert you
     /usr/lib/systemd/system/redis.service not found
     Script is for CentOS 7 only and requires redis
     server installed first
+
+Redis 6 Server Changes:
+=======
+
+Updating from Redis 5.x to Redis 6.x may result in additional Redis servers created via `redis-generator.sh` not being able to start up properly - particularly on server reboot. This is due to changes with Redis 6.x and probably CentOS 7.8 systemd updates/changes. The below outlined changes will fix this startup issue for Redis 6 servers on CentOS 7.
+
+1. Redis systemd service file's listed `RuntimeDirectory=redis` option seems to now actually work on CentOS 7.8 (maybe due to systemd changes/updates ?) to create the Redis runtime directory at `/var/run/redis`. Prior, this didn't work with Redis 5.x, so had created `/etc/tmpfiles.d/redis.conf` to create the runtime directory. But now that Redis 6 systemd service file's `RuntimeDirectory=redis` runtime option works, it will conflict with previously created `/etc/tmpfiles.d/redis.conf` so this file needs removal so as to not conflict and prevent the additional Redis generated instances from booting up on server reboots. `redis-generator.sh` has been updated with this fix for newly generated Redis server instances. But for existing Redis servers, you will need to manually remove `/etc/tmpfiles.d/redis.conf`.
+
+```
+cd  /etc/tmpfiles.d/
+rm -f  /etc/tmpfiles.d/redis.conf
+```
+
+2. Redis systemd service files for additional Redis servers created via `redis-generator.sh` on Redis 6 updated servers need their `Type=notify` changed to `Type=forking`.  `redis-generator.sh` has been updated with this fix for newly generated Redis server instances. But for existing Redis servers, you will need to manually do this. For instance, if you generated additional Redis server instances on port 6479 and 6480, the manual fix would be:
+
+```
+sed -i 's|Type=notify|Type=forking|' /usr/lib/systemd/system/redis6479.service
+sed -i 's|Type=notify|Type=forking|' /usr/lib/systemd/system/redis6480.service
+systemctl daemon-reload
+systemctl restart redis6479 redis6480
+```
 
 Usage:
 =======
