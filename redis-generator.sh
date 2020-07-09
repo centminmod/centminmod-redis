@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=1.9
+VER=2.0
 DT=`date +"%d%m%y-%H%M%S"`
 
 STARTPORT=6479
@@ -257,7 +257,8 @@ genredis() {
           echo "create systemd redis${REDISPORT}.service"
           echo "cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis${REDISPORT}.service"
           #echo "sed -i 's|Type=notify|Type=forking|' /usr/lib/systemd/system/redis${REDISPORT}.service"
-          echo "sed -i \"s|^RuntimeDirectoryMode=0755|RuntimeDirectoryMode=0755\nExecStartPost=/bin/sh -c \\"echo \$MAINPID > /var/run/redis/redis_${REDISPORT}.pid\\"|\" /usr/lib/systemd/system/redis${REDISPORT}.service"
+          echo "sed -i \"s|^RuntimeDirectory=redis|RuntimeDirectory=redis${REDISPORT}|\" \"/usr/lib/systemd/system/redis${REDISPORT}.service\""
+          echo "sed -i \"s|^RuntimeDirectoryMode=0755|RuntimeDirectoryMode=0755\nExecStartPost=/bin/sh -c \\"echo \$MAINPID > /var/run/redis${REDISPORT}/redis_${REDISPORT}.pid\\"|\" /usr/lib/systemd/system/redis${REDISPORT}.service"
         else
           echo "/usr/lib/systemd/system/redis${REDISPORT}.service already exists"
         fi
@@ -313,8 +314,8 @@ genredis() {
           echo "sed -i \"s|dir \/var\/lib\/redis\/|dir \/var\/lib\/redis${REDISPORT}|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           #echo "sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i \"s|cluster-config-file nodes-6379.conf|cluster-config-file nodes-${REDISPORT}.conf|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
-          echo "sed -i \"s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
-          echo "sed -i \"s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "sed -i \"s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis${REDISPORT}\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "sed -i \"s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis${REDISPORT}\/redis_${REDISPORT}.pid|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i \"s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis${REDISPORT}.log|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i \"s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i \"s|appendfilename \"appendonly.aof\"|appendfilename \"appendonly${REDISPORT}.aof\"|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
@@ -456,7 +457,8 @@ esac
           #echo "sed -i 's|Type=notify|Type=forking|' /usr/lib/systemd/system/redis${REDISPORT}.service"
           cp -a /usr/lib/systemd/system/redis.service "/usr/lib/systemd/system/redis${REDISPORT}.service"
           #sed -i 's|Type=notify|Type=forking|' "/usr/lib/systemd/system/redis${REDISPORT}.service"
-          sed -i "s|^RuntimeDirectoryMode=0755|RuntimeDirectoryMode=0755\nExecStartPost=/bin/sh -c \"echo \$MAINPID > /var/run/redis/redis_${REDISPORT}.pid\"|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
+          sed -i "s|^RuntimeDirectory=redis|RuntimeDirectory=redis${REDISPORT}|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
+          sed -i "s|^RuntimeDirectoryMode=0755|RuntimeDirectoryMode=0755\nExecStartPost=/bin/sh -c \"echo \$MAINPID > /var/run/redis${REDISPORT}/redis_${REDISPORT}.pid\"|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
         else
           echo "/usr/lib/systemd/system/redis${REDISPORT}.service already exists"
         fi
@@ -513,8 +515,8 @@ esac
           sed -i "s|dir \/var\/lib\/redis\/|dir \/var\/lib\/redis${REDISPORT}|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           #sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i "s|cluster-config-file nodes-6379.conf|cluster-config-file nodes-${REDISPORT}.conf|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
-          sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
-          sed -i "s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis${REDISPORT}\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          sed -i "s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis${REDISPORT}\/redis_${REDISPORT}.pid|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i "s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis${REDISPORT}.log|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i "s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i "s|appendfilename \"appendonly.aof\"|appendfilename \"appendonly${REDISPORT}.aof\"|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
