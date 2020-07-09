@@ -256,7 +256,8 @@ genredis() {
         if [ ! -f "/usr/lib/systemd/system/redis${REDISPORT}.service" ]; then
           echo "create systemd redis${REDISPORT}.service"
           echo "cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis${REDISPORT}.service"
-          echo "sed -i 's|Type=notify|Type=forking|' /usr/lib/systemd/system/redis${REDISPORT}.service"
+          #echo "sed -i 's|Type=notify|Type=forking|' /usr/lib/systemd/system/redis${REDISPORT}.service"
+          echo "sed -i \"s|^RuntimeDirectoryMode=0755|RuntimeDirectoryMode=0755\nExecStartPost=/bin/sh -c \\"echo \$MAINPID > /var/run/redis/redis_${REDISPORT}.pid\\"|\" /usr/lib/systemd/system/redis${REDISPORT}.service"
         else
           echo "/usr/lib/systemd/system/redis${REDISPORT}.service already exists"
         fi
@@ -310,7 +311,7 @@ genredis() {
             echo "sed -i 's|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis${REDISPORT}-shutdown|' "/usr/lib/systemd/system/redis${REDISPORT}.service""
           fi
           echo "sed -i \"s|dir \/var\/lib\/redis\/|dir \/var\/lib\/redis${REDISPORT}|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
-          echo "sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          #echo "sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i \"s|cluster-config-file nodes-6379.conf|cluster-config-file nodes-${REDISPORT}.conf|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i \"s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i \"s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
@@ -452,9 +453,10 @@ esac
         if [ ! -f "/usr/lib/systemd/system/redis${REDISPORT}.service" ]; then
           echo "create systemd redis${REDISPORT}.service"
           echo "cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis${REDISPORT}.service"
-          echo "sed -i 's|Type=notify|Type=forking|' /usr/lib/systemd/system/redis${REDISPORT}.service"
+          #echo "sed -i 's|Type=notify|Type=forking|' /usr/lib/systemd/system/redis${REDISPORT}.service"
           cp -a /usr/lib/systemd/system/redis.service "/usr/lib/systemd/system/redis${REDISPORT}.service"
-          sed -i 's|Type=notify|Type=forking|' "/usr/lib/systemd/system/redis${REDISPORT}.service"
+          #sed -i 's|Type=notify|Type=forking|' "/usr/lib/systemd/system/redis${REDISPORT}.service"
+          sed -i "s|^RuntimeDirectoryMode=0755|RuntimeDirectoryMode=0755\nExecStartPost=/bin/sh -c \"echo \$MAINPID > /var/run/redis/redis_${REDISPORT}.pid\"|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
         else
           echo "/usr/lib/systemd/system/redis${REDISPORT}.service already exists"
         fi
@@ -509,7 +511,7 @@ esac
             sed -i "s|\/usr\/libexec\/redis-shutdown|\/usr\/local\/bin\/redis${REDISPORT}-shutdown|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
           fi
           sed -i "s|dir \/var\/lib\/redis\/|dir \/var\/lib\/redis${REDISPORT}|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
-          sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          #sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i "s|cluster-config-file nodes-6379.conf|cluster-config-file nodes-${REDISPORT}.conf|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i "s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis\/redis_${REDISPORT}.pid|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
