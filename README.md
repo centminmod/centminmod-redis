@@ -69,13 +69,29 @@ cd  /etc/tmpfiles.d/
 rm -f  /etc/tmpfiles.d/redis.conf
 ```
 
-2. Redis systemd service files for additional Redis servers created via `redis-generator.sh` on Redis 6 updated servers need their `Type=notify` changed to `Type=forking`.  `redis-generator.sh` has been updated with this fix for newly generated Redis server instances. But for existing Redis servers, you will need to manually do this. For instance, if you generated additional Redis server instances on port 6479 and 6480, the manual fix would be:
+2. Redis systemd service files for additional Redis servers created via `redis-generator.sh` on Redis 6 updated servers need an additional changes in their service file as at July 2020:
+
+Example `/usr/lib/systemd/system/redis6479.service` service file for Redis on port 6479 now has it's own runtime directory at `/var/run/6479`
+
+change from
 
 ```
-sed -i 's|Type=notify|Type=forking|' /usr/lib/systemd/system/redis6479.service
-sed -i 's|Type=notify|Type=forking|' /usr/lib/systemd/system/redis6480.service
-systemctl daemon-reload
-systemctl restart redis6479 redis6480
+RuntimeDirectory=redis
+```
+
+change to
+
+```
+RuntimeDirectory=redis6479
+RuntimeDirectoryMode=0755
+ExecStartPost=/bin/sh -c "echo $MAINPID > /var/run/redis6479/redis_6479.pid"
+```
+
+and Redis 6479 port server's redis config file has `daemonize no` set
+
+```
+grep ^daemonize /etc/redis6479/redis6479.conf
+daemonize no
 ```
 
 Usage:
@@ -132,7 +148,7 @@ You will create:
 * dedicated redis directories for each redis server instance at `/etc/redis6479` and `/etc/redis6480`
 * main `/usr/bin/redis-server` binary gets symlinked to dedicated redis directories at `/etc/redis6479/redis-server` and `/etc/redis6480/redis-server`
 * dedicated redis config files at `/etc/redis6479/redis6479.conf` and `/etc/redis6479/redis6480.conf` 
-* each config file will have `dbfilename` as `dump6479.rdb` and `dump6480.rdb` with commented out unix sockets at `/var/run/redis/redis6479.sock` and `/var/run/redis/redis6480.sock`
+* each config file will have `dbfilename` as `dump6479.rdb` and `dump6480.rdb` with commented out unix sockets at `/var/run/redis/redis6479.sock` and `/var/run/redis6480/redis6480.sock`
 * dedicated redis data directories at `/var/lib/redis6479` and `/var/lib/redis6480`
 * if `cluster` flag is used, each redis config file will reference a `cluster-config-file` in format of `cluster-config-file nodes-150317-003235.conf` where date/timestamped
 
