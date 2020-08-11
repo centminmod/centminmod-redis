@@ -37,7 +37,6 @@ Manual install steps provided you have installed Remi YUM repository first - whi
 
     yum -y install redis --enablerepo=remi --disableplugin=priorities
     sed -i 's|LimitNOFILE=.*|LimitNOFILE=262144|' /etc/systemd/system/redis.service.d/limit.conf
-    echo "d      /var/run/redis/         0755 redis redis" > /etc/tmpfiles.d/redis.conf
     mkdir -p /var/run/redis
     chown redis:redis /var/run/redis
     chmod 755 /var/run/redis
