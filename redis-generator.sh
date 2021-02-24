@@ -6,8 +6,8 @@
 ######################################################
 # variables
 #############
-VER=2.0
-DT=`date +"%d%m%y-%H%M%S"`
+VER=2.1
+DT=$(date +"%d%m%y-%H%M%S")
 
 STARTPORT=6479
 DEBUG_REDISGEN='y'
@@ -265,7 +265,7 @@ genredis() {
         if [ ! -f "/etc/redis${REDISPORT}/redis${REDISPORT}.conf" ]; then
           echo "create /etc/redis${REDISPORT}/redis${REDISPORT}.conf config file"
           echo "mkdir -p "/etc/redis${REDISPORT}""
-          echo "cp -a /etc/redis.conf /etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          echo "cp -a /etc/redis/redis.conf /etc/redis${REDISPORT}/redis${REDISPORT}.conf"
         else
           echo "/etc/redis${REDISPORT}/redis${REDISPORT}.conf already exists"
         fi
@@ -273,7 +273,7 @@ genredis() {
           if [ -f /usr/local/bin/redis-shutdown ]; then
             echo "\cp -af /usr/local/bin/redis-shutdown /usr/local/bin/redis${REDISPORT}-shutdown"
             echo "sed -i \"s|SERVICE_NAME=redis|SERVICE_NAME=redis${REDISPORT}|\" /usr/local/bin/redis${REDISPORT}-shutdown"
-            echo "sed -i \"s|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME.conf\"|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME\/\$SERVICE_NAME.conf\"|\" /usr/local/bin/redis${REDISPORT}-shutdown"
+            echo "sed -i \"s|CONFIG_FILE=\"\/etc\/redis\/\$SERVICE_NAME.conf\"|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME\/\$SERVICE_NAME.conf\"|\" /usr/local/bin/redis${REDISPORT}-shutdown"
             echo "sed -i \"s|\"\$SERVICE_NAME\" = redis|\"\$SERVICE_NAME\" = redis${REDISPORT}|\" /usr/local/bin/redis${REDISPORT}-shutdown"
             echo "sed -i \"s|6379|${REDISPORT}|\" /usr/local/bin/redis${REDISPORT}-shutdown"
             
@@ -282,7 +282,7 @@ genredis() {
           if [ -f /usr/libexec/redis-shutdown ]; then
             echo "\cp -af /usr/libexec/redis-shutdown /usr/local/bin/redis${REDISPORT}-shutdown"
             echo "sed -i \"s|SERVICE_NAME=redis|SERVICE_NAME=redis${REDISPORT}|\" /usr/local/bin/redis${REDISPORT}-shutdown"
-            echo "sed -i \"s|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME.conf\"|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME\/\$SERVICE_NAME.conf\"|\" /usr/local/bin/redis${REDISPORT}-shutdown"
+            echo "sed -i \"s|CONFIG_FILE=\"\/etc\/redis\/\$SERVICE_NAME.conf\"|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME\/\$SERVICE_NAME.conf\"|\" /usr/local/bin/redis${REDISPORT}-shutdown"
             echo "sed -i \"s|\"\$SERVICE_NAME\" = redis|\"\$SERVICE_NAME\" = redis${REDISPORT}|\" /usr/local/bin/redis${REDISPORT}-shutdown"
             echo "sed -i \"s|6379|${REDISPORT}|\" /usr/local/bin/redis${REDISPORT}-shutdown"
             
@@ -465,9 +465,9 @@ esac
         if [ ! -f "/etc/redis${REDISPORT}/redis${REDISPORT}.conf" ]; then
           echo "create /etc/redis${REDISPORT}/redis${REDISPORT}.conf config file"
           echo "mkdir -p "/etc/redis${REDISPORT}""
-          echo "cp -a /etc/redis.conf /etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          echo "cp -a /etc/redis/redis.conf /etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           mkdir -p "/etc/redis${REDISPORT}"
-          cp -a /etc/redis.conf "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          cp -a /etc/redis/redis.conf "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
         else
           echo "/etc/redis${REDISPORT}/redis${REDISPORT}.conf already exists"
         fi
@@ -475,7 +475,7 @@ esac
           if [ -f /usr/local/bin/redis-shutdown ]; then
             \cp -af /usr/local/bin/redis-shutdown /usr/local/bin/redis${REDISPORT}-shutdown
             sed -i "s|SERVICE_NAME=redis|SERVICE_NAME=redis${REDISPORT}|" /usr/local/bin/redis${REDISPORT}-shutdown
-            sed -i "s|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME.conf\"|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME\/\$SERVICE_NAME.conf\"|" /usr/local/bin/redis${REDISPORT}-shutdown
+            sed -i "s|CONFIG_FILE=\"\/etc\/redis\/\$SERVICE_NAME.conf\"|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME\/\$SERVICE_NAME.conf\"|" /usr/local/bin/redis${REDISPORT}-shutdown
             sed -i "s|\"\$SERVICE_NAME\" = redis|\"\$SERVICE_NAME\" = redis${REDISPORT}|" /usr/local/bin/redis${REDISPORT}-shutdown
             sed -i "s|6379|${REDISPORT}|" /usr/local/bin/redis${REDISPORT}-shutdown
           fi
@@ -483,7 +483,7 @@ esac
           if [ -f /usr/libexec/redis-shutdown ]; then
             \cp -af /usr/libexec/redis-shutdown /usr/local/bin/redis${REDISPORT}-shutdown
             sed -i "s|SERVICE_NAME=redis|SERVICE_NAME=redis${REDISPORT}|" /usr/local/bin/redis${REDISPORT}-shutdown
-            sed -i "s|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME.conf\"|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME\/\$SERVICE_NAME.conf\"|" /usr/local/bin/redis${REDISPORT}-shutdown
+            sed -i "s|CONFIG_FILE=\"\/etc\/redis\/\$SERVICE_NAME.conf\"|CONFIG_FILE=\"\/etc\/\$SERVICE_NAME\/\$SERVICE_NAME.conf\"|" /usr/local/bin/redis${REDISPORT}-shutdown
             sed -i "s|\"\$SERVICE_NAME\" = redis|\"\$SERVICE_NAME\" = redis${REDISPORT}|" /usr/local/bin/redis${REDISPORT}-shutdown
             sed -i "s|6379|${REDISPORT}|" /usr/local/bin/redis${REDISPORT}-shutdown
           fi

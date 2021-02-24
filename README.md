@@ -10,7 +10,7 @@ Redis server generator to create multiple Redis servers in standalone, replicati
 Requirements:
 =======
 
-* Redis 5.0+ or higher branch is required and must be installed prior to using `redis-generator.sh`
+* Redis 6.2.0+ or higher branch is required and must be installed prior to using `redis-generator.sh`
 * [Remi YUM repository](https://blog.remirepo.net/pages/Config-en) if you want to install redis server via Remi YUM repo for latest Redis 6.0 branch. [centminmod.com](https://centminmod.com) auto installer already installs Remi YUM repo.
 * Optional: [stunnel](https://www.stunnel.org/index.html) for secure TLS encrypted redis remote connections.
 
@@ -27,7 +27,7 @@ rpm -qa --changelog stunnel | head -3
 Redis Server Install:
 =======
 
-For [Centmin Mod LEMP web stacks](https://centminmod.com), installing redis 6.0 branch is simple as using these SSH command steps or using `redis-install.sh` script:
+For [Centmin Mod LEMP web stacks](https://centminmod.com), installing redis 6.2.x branch is simple as using these SSH command steps or using `redis-install.sh` script:
 
 `redis-install.sh` script
 
@@ -194,7 +194,7 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
     create /etc/redis6479/redis6479.conf config file
     mkdir -p /etc/redis6479
-    cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
+    cp -a /etc/redis/redis.conf /etc/redis6479/redis6479.conf
     mkdir -p /etc/systemd/system/redis6479.service.d/
     \cp -af /etc/systemd/system/redis.service.d/limit.conf /etc/systemd/system/redis6479.service.d/limit.conf
     sed -i "s|^port 6379|port 6479|" /etc/redis6479/redis6479.conf
@@ -224,7 +224,7 @@ With `DEBUG_REDISGEN='y'` for dry run debug run checks
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
     create /etc/redis6480/redis6480.conf config file
     mkdir -p /etc/redis6480
-    cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
+    cp -a /etc/redis/redis.conf /etc/redis6480/redis6480.conf
     mkdir -p /etc/systemd/system/redis6480.service.d/
     \cp -af /etc/systemd/system/redis.service.d/limit.conf /etc/systemd/system/redis6480.service.d/limit.conf
     sed -i "s|^port 6379|port 6480|" /etc/redis6480/redis6480.conf
@@ -260,7 +260,7 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
     create /etc/redis6479/redis6479.conf config file
     mkdir -p /etc/redis6479
-    cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
+    cp -a /etc/redis/redis.conf /etc/redis6479/redis6479.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6479/redis6479.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
@@ -280,7 +280,7 @@ With `DEBUG_REDISGEN='n'` for live run and generation of redis servers with X = 
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
     create /etc/redis6480/redis6480.conf config file
     mkdir -p /etc/redis6480
-    cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
+    cp -a /etc/redis/redis.conf /etc/redis6480/redis6480.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6480/redis6480.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
@@ -350,7 +350,7 @@ Create 2 redis servers with `UNIXSOCKET='y'` enabled for redis Unix socket usage
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
     create /etc/redis6479/redis6479.conf config file
     mkdir -p /etc/redis6479
-    cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
+    cp -a /etc/redis/redis.conf /etc/redis6479/redis6479.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6479/redis6479.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
@@ -370,7 +370,7 @@ Create 2 redis servers with `UNIXSOCKET='y'` enabled for redis Unix socket usage
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
     create /etc/redis6480/redis6480.conf config file
     mkdir -p /etc/redis6480
-    cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
+    cp -a /etc/redis/redis.conf /etc/redis6480/redis6480.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6480/redis6480.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
@@ -420,7 +420,7 @@ Create 2 redis server master + slave replication on ports 6479 and 6480
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
     create /etc/redis6479/redis6479.conf config file
     mkdir -p /etc/redis6479
-    cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
+    cp -a /etc/redis/redis.conf /etc/redis6479/redis6479.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6479/redis6479.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6479.service to /usr/lib/systemd/system/redis6479.service.
@@ -448,7 +448,7 @@ Create 2 redis server master + slave replication on ports 6479 and 6480
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
     create /etc/redis6480/redis6480.conf config file
     mkdir -p /etc/redis6480
-    cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
+    cp -a /etc/redis/redis.conf /etc/redis6480/redis6480.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6480/redis6480.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
     Created symlink from /etc/systemd/system/multi-user.target.wants/redis6480.service to /usr/lib/systemd/system/redis6480.service.
@@ -508,7 +508,7 @@ Optionally, you can enable auto [redis sentinel](https://redis.io/topics/sentine
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6479.service
     create /etc/redis6479/redis6479.conf config file
     mkdir -p /etc/redis6479
-    cp -a /etc/redis.conf /etc/redis6479/redis6479.conf
+    cp -a /etc/redis/redis.conf /etc/redis6479/redis6479.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6479/redis6479.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6479.service
     enabled cluster mode with cluster-config-file nodes-150317-175739.conf
@@ -531,7 +531,7 @@ Optionally, you can enable auto [redis sentinel](https://redis.io/topics/sentine
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6480.service
     create /etc/redis6480/redis6480.conf config file
     mkdir -p /etc/redis6480
-    cp -a /etc/redis.conf /etc/redis6480/redis6480.conf
+    cp -a /etc/redis/redis.conf /etc/redis6480/redis6480.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6480/redis6480.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6480.service
     enabled cluster mode with cluster-config-file nodes-150317-175739.conf
@@ -554,7 +554,7 @@ Optionally, you can enable auto [redis sentinel](https://redis.io/topics/sentine
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6481.service
     create /etc/redis6481/redis6481.conf config file
     mkdir -p /etc/redis6481
-    cp -a /etc/redis.conf /etc/redis6481/redis6481.conf
+    cp -a /etc/redis/redis.conf /etc/redis6481/redis6481.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6481/redis6481.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6481.service
     enabled cluster mode with cluster-config-file nodes-150317-175739.conf
@@ -577,7 +577,7 @@ Optionally, you can enable auto [redis sentinel](https://redis.io/topics/sentine
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6482.service
     create /etc/redis6482/redis6482.conf config file
     mkdir -p /etc/redis6482
-    cp -a /etc/redis.conf /etc/redis6482/redis6482.conf
+    cp -a /etc/redis/redis.conf /etc/redis6482/redis6482.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6482/redis6482.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6482.service
     enabled cluster mode with cluster-config-file nodes-150317-175739.conf
@@ -600,7 +600,7 @@ Optionally, you can enable auto [redis sentinel](https://redis.io/topics/sentine
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6483.service
     create /etc/redis6483/redis6483.conf config file
     mkdir -p /etc/redis6483
-    cp -a /etc/redis.conf /etc/redis6483/redis6483.conf
+    cp -a /etc/redis/redis.conf /etc/redis6483/redis6483.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6483/redis6483.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6483.service
     enabled cluster mode with cluster-config-file nodes-150317-175739.conf
@@ -623,7 +623,7 @@ Optionally, you can enable auto [redis sentinel](https://redis.io/topics/sentine
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6484.service
     create /etc/redis6484/redis6484.conf config file
     mkdir -p /etc/redis6484
-    cp -a /etc/redis.conf /etc/redis6484/redis6484.conf
+    cp -a /etc/redis/redis.conf /etc/redis6484/redis6484.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6484/redis6484.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6484.service
     enabled cluster mode with cluster-config-file nodes-150317-175739.conf
@@ -646,7 +646,7 @@ Optionally, you can enable auto [redis sentinel](https://redis.io/topics/sentine
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6485.service
     create /etc/redis6485/redis6485.conf config file
     mkdir -p /etc/redis6485
-    cp -a /etc/redis.conf /etc/redis6485/redis6485.conf
+    cp -a /etc/redis/redis.conf /etc/redis6485/redis6485.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6485/redis6485.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6485.service
     enabled cluster mode with cluster-config-file nodes-150317-175739.conf
@@ -669,7 +669,7 @@ Optionally, you can enable auto [redis sentinel](https://redis.io/topics/sentine
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6486.service
     create /etc/redis6486/redis6486.conf config file
     mkdir -p /etc/redis6486
-    cp -a /etc/redis.conf /etc/redis6486/redis6486.conf
+    cp -a /etc/redis/redis.conf /etc/redis6486/redis6486.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6486/redis6486.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6486.service
     enabled cluster mode with cluster-config-file nodes-150317-175739.conf
@@ -692,7 +692,7 @@ Optionally, you can enable auto [redis sentinel](https://redis.io/topics/sentine
     cp -a /usr/lib/systemd/system/redis.service /usr/lib/systemd/system/redis6487.service
     create /etc/redis6487/redis6487.conf config file
     mkdir -p /etc/redis6487
-    cp -a /etc/redis.conf /etc/redis6487/redis6487.conf
+    cp -a /etc/redis/redis.conf /etc/redis6487/redis6487.conf
     -rw-r----- 1 redis root 46K Feb 13 08:07 /etc/redis6487/redis6487.conf
     -rw-r--r-- 1 root  root 249 Sep 14 08:43 /usr/lib/systemd/system/redis6487.service
     enabled cluster mode with cluster-config-file nodes-150317-175739.conf

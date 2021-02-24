@@ -6,7 +6,7 @@
 # variables
 #############
 DT=$(date +"%d%m%y-%H%M%S")
-REDIS_SOURCEVER='5.0.4'
+REDIS_SOURCEVER='6.2.0'
 REDIS_THREADIO='n'
 
 OSARCH=$(uname -m)
