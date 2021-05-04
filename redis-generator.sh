@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=2.1
+VER=2.2
 DT=$(date +"%d%m%y-%H%M%S")
 
 STARTPORT=6479
@@ -320,7 +320,7 @@ genredis() {
           echo "sed -i \"s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i \"s|appendfilename \"appendonly.aof\"|appendfilename \"appendonly${REDISPORT}.aof\"|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "echo \"#masterauth abc123\" >> "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
-          echo "sed -i \"s|\/etc\/redis.conf|\/etc\/redis${REDISPORT}\/redis${REDISPORT}.conf|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
+          echo "sed -i \"s|\/etc\/redis\/redis.conf|\/etc\/redis${REDISPORT}\/redis${REDISPORT}.conf|\" "/usr/lib/systemd/system/redis${REDISPORT}.service""
           # enable redis cluster settings
           if [[ "$CLUSTER" = 'cluster' ]]; then
             echo "ln -s "$REDISBINARY" "/etc/redis${REDISPORT}/redis-server""
@@ -521,7 +521,7 @@ esac
           sed -i "s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i "s|appendfilename \"appendonly.aof\"|appendfilename \"appendonly${REDISPORT}.aof\"|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           echo "#masterauth abc123" >> "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
-          sed -i "s|\/etc\/redis.conf|\/etc\/redis${REDISPORT}\/redis${REDISPORT}.conf|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
+          sed -i "s|\/etc\/redis\/redis.conf|\/etc\/redis${REDISPORT}\/redis${REDISPORT}.conf|" "/usr/lib/systemd/system/redis${REDISPORT}.service"
           # enable redis cluster settings
           if [[ "$CLUSTER" = 'cluster' ]]; then
             ln -s "$REDISBINARY" "/etc/redis${REDISPORT}/redis-server"
