@@ -931,3 +931,42 @@ Test the redis cluster
     
     redis-cli -h 127.0.0.1 -p 6487 -c get foo 
     "bar"
+
+# redis-keys.sh
+
+`redis-keys.sh` script allows you to list all redis cache keys for a specific redis dataabase name or for all redis databases as well as purge a specific redis database. Below is an example from Centmin Mod's centmin.sh menu option 22 Wordpress auto installer's Redis Nginx level full HTML page caching setup querying the cached full HTML Wordpress pages and listing their redis cache expiry TTL values in seconds and when you purge the redis database number = 0.
+
+```
+./redis-keys.sh
+
+Usage:
+
+./redis-keys.sh get {redis_db_number}
+./redis-keys.sh purge {redis_db_number}
+```
+
+```
+./redis-keys.sh get 0
+---
+redis key: nginx-cache:httpsGETyourdomain.com/
+redis expiry ttl: (integer) 3588
+---
+redis key: nginx-cache:httpsGETyourdomain.com/1/hello-world/
+redis expiry ttl: (integer) 3598
+---
+redis key: nginx-cache:httpsGETyourdomain.com/category/news/
+redis expiry ttl: (integer) 3593
+---
+redis key: nginx-cache:httpsGETyourdomain.com/5/first-post/
+redis expiry ttl: (integer) 3589
+```
+
+```
+./redis-keys.sh purge 0
+Purging redis database 0: OK
+
+./redis-keys.sh get 0
+---
+redis key: 
+redis expiry ttl: (integer) -2
+```
