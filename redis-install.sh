@@ -6,7 +6,7 @@
 # variables
 #############
 DT=$(date +"%d%m%y-%H%M%S")
-REDIS_SOURCEVER='6.2.0'
+REDIS_SOURCEVER='6.2.6'
 REDIS_THREADIO='n'
 
 OSARCH=$(uname -m)
@@ -15,7 +15,10 @@ SRCDIR=/svr-setup
 DEVTOOLSETFOUR='n'
 DEVTOOLSETSIX='n'
 DEVTOOLSETSEVEN='n'
-DEVTOOLSETEIGHT='y'
+DEVTOOLSETEIGHT='n'
+DEVTOOLSETNINE='n'
+DEVTOOLSETTEN='y'
+DEVTOOLSETELEVEN='n'
 GOLDLINKER='n'
 FLTO='n'
 DWARF='n'
@@ -83,7 +86,7 @@ redisinstall() {
   else
     yum -y install redis --enablerepo=remi
   fi
-  sed -i 's|LimitNOFILE=.*|LimitNOFILE=262144|' /etc/systemd/system/redis.service.d/limit.conf
+  sed -i 's|LimitNOFILE=.*|LimitNOFILE=524288|' /etc/systemd/system/redis.service.d/limit.conf
   # echo -e "[Service]\nExecStartPre=/usr/sbin/sysctl vm.overcommit_memory=1" > /etc/systemd/system/redis.service.d/vm.conf
   # mkdir -p /redis/tools
   # echo '#!/bin/bash' > /redis/tools/disable_thp.sh
@@ -179,6 +182,33 @@ redisinstall_source() {
       EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
     fi
   fi
+  if [[ "$DEVTOOLSETNINE" = [yY] ]]; then
+    if [[ -f /opt/rh/devtoolset-9/root/usr/bin/gcc && -f /opt/rh/devtoolset-9/root/usr/bin/g++ ]]; then
+      source /opt/rh/devtoolset-9/enable
+      if [[ "$HOIST" = [yY] ]]; then
+        HOIST_OPT=' -fcode-hoisting'
+      fi
+      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
+    fi
+  fi
+  if [[ "$DEVTOOLSETTEN" = [yY] ]]; then
+    if [[ -f /opt/rh/devtoolset-10/root/usr/bin/gcc && -f /opt/rh/devtoolset-10/root/usr/bin/g++ ]]; then
+      source /opt/rh/devtoolset-10/enable
+      if [[ "$HOIST" = [yY] ]]; then
+        HOIST_OPT=' -fcode-hoisting'
+      fi
+      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
+    fi
+  fi
+  if [[ "$DEVTOOLSETELEVEN" = [yY] ]]; then
+    if [[ -f /opt/rh/devtoolset-11/root/usr/bin/gcc && -f /opt/rh/devtoolset-11/root/usr/bin/g++ ]]; then
+      source /opt/rh/devtoolset-11/enable
+      if [[ "$HOIST" = [yY] ]]; then
+        HOIST_OPT=' -fcode-hoisting'
+      fi
+      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
+    fi
+  fi
   if [[ "$FLTO" = [yY] ]]; then
     FLTO_OPT=' -flto -ffat-lto-objects'
   fi
@@ -194,8 +224,9 @@ redisinstall_source() {
   cd "$SRCDIR"
   rm -rf redis-${REDIS_SOURCEVER}*
   rm -rf redis-${REDIS_SOURCEVER}-threaded*
+  REDIS_THREADIO='n'
   if [[ "$REDIS_THREADIO" = [yY] ]]; then
-    git clone -b threaded-io --depth=1 https://github.com/antirez/redis redis-${REDIS_SOURCEVER}-threaded
+    git clone -b threaded-io --depth=1 https://github.com/redis/redis redis-${REDIS_SOURCEVER}-threaded
     cd redis-${REDIS_SOURCEVER}-threaded
   else
     wget http://download.redis.io/releases/redis-${REDIS_SOURCEVER}.tar.gz
