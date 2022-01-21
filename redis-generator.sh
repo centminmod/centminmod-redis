@@ -6,7 +6,7 @@
 ######################################################
 # variables
 #############
-VER=2.2
+VER=2.3
 DT=$(date +"%d%m%y-%H%M%S")
 
 STARTPORT=6479
@@ -314,7 +314,7 @@ genredis() {
           echo "sed -i \"s|dir \/var\/lib\/redis\/|dir \/var\/lib\/redis${REDISPORT}|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           #echo "sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i \"s|cluster-config-file nodes-6379.conf|cluster-config-file nodes-${REDISPORT}.conf|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
-          echo "sed -i \"s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis${REDISPORT}\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
+          echo "sed -i \"s|unixsocket \/run\/redis.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i \"s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis${REDISPORT}\/redis_${REDISPORT}.pid|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i \"s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis${REDISPORT}.log|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
           echo "sed -i \"s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|\" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf""
@@ -515,7 +515,7 @@ esac
           sed -i "s|dir \/var\/lib\/redis\/|dir \/var\/lib\/redis${REDISPORT}|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           #sed -i 's|^daemonize no|daemonize yes|' "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i "s|cluster-config-file nodes-6379.conf|cluster-config-file nodes-${REDISPORT}.conf|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
-          sed -i "s|unixsocket \/tmp\/redis.sock|unixsocket \/var\/run\/redis${REDISPORT}\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
+          sed -i "s|unixsocket \/run\/redis.sock|unixsocket \/var\/run\/redis\/redis${REDISPORT}.sock|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i "s|pidfile \/var\/run\/redis_6379.pid|pidfile \/var\/run\/redis${REDISPORT}\/redis_${REDISPORT}.pid|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i "s|\/var\/log\/redis\/redis.log|\/var\/log\/redis\/redis${REDISPORT}.log|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
           sed -i "s|dbfilename dump.rdb|dbfilename dump${REDISPORT}.rdb|" "/etc/redis${REDISPORT}/redis${REDISPORT}.conf"
@@ -561,7 +561,11 @@ esac
           systemctl restart redis${REDISPORT}
           systemctl enable redis${REDISPORT}
           chkconfig redis${REDISPORT} on
-          echo "## Redis TCP $REDISPORT Info ##"
+          if [[ "$UNIXSOCKET" = [Yy] ]]; then
+            echo "## Redis unixsocket /var/run/redis/redis${REDISPORT}.sock Info ##"
+          else
+            echo "## Redis TCP $REDISPORT Info ##"
+          fi
           if [[ "$UNIXSOCKET" = [Yy] ]]; then
             redis-cli -s /var/run/redis/redis${REDISPORT}.sock INFO SERVER| egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'
           else
