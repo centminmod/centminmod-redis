@@ -37,6 +37,55 @@ if [ "$OSARCH" != 'x86_64' ]; then
   exit
 fi
 
+CENTOSVER=$(awk '{ print $3 }' /etc/redhat-release)
+
+if [ "$CENTOSVER" == 'release' ]; then
+    CENTOSVER=$(awk '{ print $4 }' /etc/redhat-release | cut -d . -f1,2)
+    if [[ "$(cat /etc/redhat-release | awk '{ print $4 }' | cut -d . -f1)" = '7' ]]; then
+        CENTOS_SEVEN='7'
+    elif [[ "$(cat /etc/redhat-release | awk '{ print $4 }' | cut -d . -f1)" = '8' ]]; then
+        CENTOS_EIGHT='8'
+    fi
+fi
+
+if [[ "$(cat /etc/redhat-release | awk '{ print $3 }' | cut -d . -f1)" = '6' ]]; then
+    CENTOS_SIX='6'
+fi
+
+# Check for Redhat Enterprise Linux 7.x
+if [ "$CENTOSVER" == 'Enterprise' ]; then
+    CENTOSVER=$(awk '{ print $7 }' /etc/redhat-release)
+    if [[ "$(awk '{ print $1,$2 }' /etc/redhat-release)" = 'Red Hat' && "$(awk '{ print $7 }' /etc/redhat-release | cut -d . -f1)" = '7' ]]; then
+        CENTOS_SEVEN='7'
+        REDHAT_SEVEN='y'
+    fi
+fi
+
+if [[ -f /etc/system-release && "$(awk '{print $1,$2,$3}' /etc/system-release)" = 'Amazon Linux AMI' ]]; then
+    CENTOS_SIX='6'
+fi
+
+if [ -f /etc/almalinux-release ]; then
+  CENTOSVER=$(awk '{ print $3 }' /etc/almalinux-release)
+  if [[ "$(echo $CENTOSVER | cut -d . -f1)" -eq '8' ]]; then
+    CENTOS_EIGHT='8'
+    ALMALINUX_EIGHT='8'
+  elif [[ "$(echo $CENTOSVER | cut -d . -f1)" -eq '9' ]]; then
+    CENTOS_NINE='9'
+    ALMALINUX_NINE='9'
+  fi
+fi
+if [ -f /etc/rocky-release ]; then
+  CENTOSVER=$(awk '{ print $4 }' /etc/rocky-release)
+  if [[ "$(echo $CENTOSVER | cut -d . -f1)" -eq '8' ]]; then
+    CENTOS_EIGHT='8'
+    ROCKYLINUX_EIGHT='8'
+  elif [[ "$(echo $CENTOSVER | cut -d . -f1)" -eq '9' ]]; then
+    CENTOS_NINE='9'
+    ROCKYLINUX_NINE='9'
+  fi
+fi
+
 if [ ! -d /etc/systemd/system ]; then
   echo
   echo "systemd not detected aborting..."
@@ -81,7 +130,7 @@ fi
 
 redisinstall() {
   echo "install redis server..."
-  if [[ -f /etc/yum/pluginconf.d/priorities.conf && "$(grep 'enabled = 1' /etc/yum/pluginconf.d/priorities.conf)" ]]; then
+  if [[ "$CENTOS_SEVEN" -eq 7 && -f /etc/yum/pluginconf.d/priorities.conf && "$(grep 'enabled = 1' /etc/yum/pluginconf.d/priorities.conf)" ]]; then
     yum -y install redis --enablerepo=remi --disableplugin=priorities
   else
     yum -y install redis --enablerepo=remi
@@ -145,17 +194,17 @@ fi
 
 redisinstall_source() {
   echo "source install redis server..."
-  if [[ "$DEVTOOLSETFOUR" = [yY] ]]; then
+  if [[ "$CENTOS_SEVEN" -eq 7 && "$DEVTOOLSETFOUR" = [yY] ]]; then
     if [[ -f /opt/rh/devtoolset-4/root/usr/bin/gcc && -f /opt/rh/devtoolset-4/root/usr/bin/g++ ]]; then
       source /opt/rh/devtoolset-4/enable
     fi
   fi
-  if [[ "$DEVTOOLSETSIX" = [yY] ]]; then
+  if [[ "$CENTOS_SEVEN" -eq 7 && "$DEVTOOLSETSIX" = [yY] ]]; then
     if [[ -f /opt/rh/devtoolset-6/root/usr/bin/gcc && -f /opt/rh/devtoolset-6/root/usr/bin/g++ ]]; then
       source /opt/rh/devtoolset-6/enable
     fi
   fi
-  if [[ "$DEVTOOLSETSEVEN" = [yY] ]]; then
+  if [[ "$CENTOS_SEVEN" -eq 7 && "$DEVTOOLSETSEVEN" = [yY] ]]; then
     if [[ -f /opt/rh/devtoolset-7/root/usr/bin/gcc && -f /opt/rh/devtoolset-7/root/usr/bin/g++ ]]; then
       source /opt/rh/devtoolset-7/enable
       if [[ "$HOIST" = [yY] ]]; then
@@ -164,7 +213,7 @@ redisinstall_source() {
       EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
     fi
   fi
-  if [[ "$DEVTOOLSETEIGHT" = [yY] ]]; then
+  if [[ "$CENTOS_SEVEN" -eq 7 && "$DEVTOOLSETEIGHT" = [yY] ]]; then
     if [[ -f /opt/rh/devtoolset-8/root/usr/bin/gcc && -f /opt/rh/devtoolset-8/root/usr/bin/g++ ]]; then
       source /opt/rh/devtoolset-8/enable
       if [[ "$HOIST" = [yY] ]]; then
@@ -173,7 +222,7 @@ redisinstall_source() {
       EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
     fi
   fi
-  if [[ "$DEVTOOLSETEIGHT" = [yY] ]]; then
+  if [[ "$CENTOS_SEVEN" -eq 7 && "$DEVTOOLSETEIGHT" = [yY] ]]; then
     if [[ -f /opt/gcc8/bin/gcc && -f /opt/gcc8/bin/g++ ]]; then
       source /opt/gcc8/enable
       if [[ "$HOIST" = [yY] ]]; then
@@ -182,7 +231,7 @@ redisinstall_source() {
       EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
     fi
   fi
-  if [[ "$DEVTOOLSETNINE" = [yY] ]]; then
+  if [[ "$CENTOS_SEVEN" -eq 7 && "$DEVTOOLSETNINE" = [yY] ]]; then
     if [[ -f /opt/rh/devtoolset-9/root/usr/bin/gcc && -f /opt/rh/devtoolset-9/root/usr/bin/g++ ]]; then
       source /opt/rh/devtoolset-9/enable
       if [[ "$HOIST" = [yY] ]]; then
@@ -191,7 +240,7 @@ redisinstall_source() {
       EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
     fi
   fi
-  if [[ "$DEVTOOLSETTEN" = [yY] ]]; then
+  if [[ "$CENTOS_SEVEN" -eq 7 && "$DEVTOOLSETTEN" = [yY] ]]; then
     if [[ -f /opt/rh/devtoolset-10/root/usr/bin/gcc && -f /opt/rh/devtoolset-10/root/usr/bin/g++ ]]; then
       source /opt/rh/devtoolset-10/enable
       if [[ "$HOIST" = [yY] ]]; then
@@ -200,9 +249,27 @@ redisinstall_source() {
       EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
     fi
   fi
-  if [[ "$DEVTOOLSETELEVEN" = [yY] ]]; then
+  if [[ "$CENTOS_SEVEN" -eq 7 && "$DEVTOOLSETELEVEN" = [yY] ]]; then
     if [[ -f /opt/rh/devtoolset-11/root/usr/bin/gcc && -f /opt/rh/devtoolset-11/root/usr/bin/g++ ]]; then
       source /opt/rh/devtoolset-11/enable
+      if [[ "$HOIST" = [yY] ]]; then
+        HOIST_OPT=' -fcode-hoisting'
+      fi
+      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
+    fi
+  fi
+  if [[ "$CENTOS_EIGHT" -eq 8 && "$DEVTOOLSETNINE" = [yY] ]]; then
+    if [[ -f /opt/rh/gcc-toolset-9/root/usr/bin/gcc && -f /opt/rh/gcc-toolset-9/root/usr/bin/g++ ]]; then
+      source /opt/rh/gcc-toolset-9/enable
+      if [[ "$HOIST" = [yY] ]]; then
+        HOIST_OPT=' -fcode-hoisting'
+      fi
+      EXTRA_CFLAGS=" -Wimplicit-fallthrough=0${HOIST_OPT} -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-lto-type-mismatch -Wno-misleading-indentation -Wno-format-truncation"
+    fi
+  fi
+  if [[ "$CENTOS_EIGHT" -eq 8 && "$DEVTOOLSETTEN" = [yY] ]]; then
+    if [[ -f /opt/rh/gcc-toolset-10/root/usr/bin/gcc && -f /opt/rh/gcc-toolset-10/root/usr/bin/g++ ]]; then
+      source /opt/rh/gcc-toolset-10/enable
       if [[ "$HOIST" = [yY] ]]; then
         HOIST_OPT=' -fcode-hoisting'
       fi
